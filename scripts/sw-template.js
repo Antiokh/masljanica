@@ -1,7 +1,9 @@
 const META='masljanica-meta-v2', RUNTIME='masljanica-runtime-v2-'+BUILD;
 const PREFIX='masljanica-pack-v2-', MARKER='/__offline_active__';
 const CONTROL=new Set(['/sw.js','/offline-version.json','/offline-manifest.json']);
-let activePromise, task, progress=null, degradedUntil=0;
+let activePromise, runtimePromise, task, progress=null, degradedUntil=0;
+const currentRevision = path => Object.hasOwn(CURRENT_REVISIONS,path) ? CURRENT_REVISIONS[path] : null;
+const runtimeCache = () => runtimePromise ||= caches.open(RUNTIME);
 const absolute=path=>new URL(path,self.location.origin).href;
 const json=value=>new Response(JSON.stringify(value),{headers:{'Content-Type':'application/json'}});
 const key=path=>absolute(path.endsWith('/index.html')?path.slice(0,-10):path);
@@ -14,8 +16,10 @@ async function active(){
     const info=await marker.json();
     if(typeof info.cache!=='string'||!info.cache.startsWith(PREFIX)||!(await caches.has(info.cache)))return null;
     const cache=await caches.open(info.cache);
-    if(!(await cache.match(absolute('/')))||!(await cache.match(absolute('/__offline_manifest__'))))return null;
-    return {...info,cache};
+    const manifest=await cache.match(absolute('/__offline_manifest__'));
+    if(!(await cache.match(absolute('/')))||!manifest)return null;
+    const entries=(await manifest.json()).entries;
+    return {...info,cache,revisions:new Map(entries.map(entry=>[entry.url,entry.revision]))};
   })().catch(()=>null);
   return activePromise;
 }
@@ -37,37 +41,41 @@ async function legacyMatch(path){
     const hit=await (await caches.open(name)).match(key(path));if(hit)return hit;
   }
 }
-async function putRuntime(cache,request,response){
+function saveRuntime(event,cache,request,response){
   if(!response.ok||response.status!==200||response.redirected||response.type==='opaque')return;
-  await cache.put(request,response);
-  const keys=await cache.keys();
-  if(keys.length>200)await Promise.all(keys.slice(0,keys.length-200).map(x=>cache.delete(x)));
+  // The response is already available. Do not put storage I/O on the navigation path.
+  event.waitUntil(cache.put(request,response.clone()).catch(()=>{}));
 }
 async function serve(event){
-  const req=event.request,url=new URL(req.url),path=canonical(url.pathname);
-  const a=await active(), packHit=await a?.cache.match(key(path));
+  const req=event.request,url=new URL(req.url),path=canonical(url.pathname),cacheKey=key(path);
+  const revision=currentRevision(path), audio=path.startsWith('/media/audio/');
+  const offline=self.navigator.onLine===false;
+  const a=await active();
+  // An older transactional pack remains useful for byte-identical resources.
+  const exact=!!(a&&(a.version===BUILD||(revision&&a.revisions.get(path)===revision)));
+  const packHit=exact?await a.cache.match(cacheKey):null;
   if(req.headers.has('range')){
-    if(!url.pathname.startsWith('/media/audio/'))return fetch(req);
+    if(!audio)return fetch(req);
     if(packHit)return rangeResponse(req,packHit);
-    const old=await legacyMatch(path);
-    if(old&&Date.now()<degradedUntil)return rangeResponse(req,old);
-    try{return await timedFetch(req,{},5000);}catch{return old?rangeResponse(req,old):unavailable();}
+    const fallback=async()=>await a?.cache.match(cacheKey)||await legacyMatch(path);
+    if(offline||Date.now()<degradedUntil){const hit=await fallback();if(hit)return rangeResponse(req,hit);if(offline)return unavailable();}
+    try{return await timedFetch(req,{},5000);}catch{const hit=await fallback();return hit?rangeResponse(req,hit):unavailable();}
   }
-  // A verified pack from this build is authoritative. No network round trip.
-  if(packHit&&a.version===BUILD)return packHit;
-  const runtime=await caches.open(RUNTIME);
-  const cached=await runtime.match(key(path));
-  if(cached)return cached;
-  const fallback=packHit||await legacyMatch(path);
-  if(fallback&&Date.now()<degradedUntil)return fallback;
+  if(packHit)return packHit;
+  // Only current build entries enter the runtime cache: bounded by the manifest,
+  // without a cache.keys() scan or eviction work for every response.
+  const runtime=revision&&!audio?await runtimeCache():null;
+  if(runtime){const cached=await runtime.match(cacheKey);if(cached)return cached;}
+  const fallback=await a?.cache.match(cacheKey);
+  if(offline)return fallback||await legacyMatch(path)||unavailable();
+  if(Date.now()<degradedUntil){const hit=fallback||await legacyMatch(path);if(hit)return hit;}
   try{
     const response=await timedFetch(req,{},fallback?2500:8000);
-    if(response.status>=500&&fallback){degradedUntil=Date.now()+10000;return fallback;}
-    degradedUntil=0;
-    // Media is only downloaded in the explicit pack; never fill runtime with MP3s.
-    if(!url.pathname.startsWith('/media/audio/'))await putRuntime(runtime,key(path),response.clone()).catch(()=>{});
+    if(response.status>=500){const hit=fallback||await legacyMatch(path);if(hit){degradedUntil=Date.now()+10000;return hit;}}
+    if(response.ok)degradedUntil=0;
+    if(runtime)saveRuntime(event,runtime,cacheKey,response);
     return response;
-  }catch{degradedUntil=Date.now()+10000;return fallback||unavailable();}
+  }catch{degradedUntil=Date.now()+10000;return fallback||await legacyMatch(path)||unavailable();}
 }
 async function rangeResponse(request,full){
   const bytes=await full.arrayBuffer(),size=bytes.byteLength;

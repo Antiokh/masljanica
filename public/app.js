@@ -7,6 +7,28 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  installSongList();
  installExternalEmbeds();
  const sw=navigator.serviceWorker;
+ // Warm the small, frequently used section documents once per controller,
+ // without holding up the first paint or triggering media downloads.
+ let warmedController=null;
+ function warmNavigation(){
+   const controller=sw?.controller;
+   if(!controller||controller===warmedController||!navigator.onLine||navigator.connection?.saveData||/^(slow-2g|2g)$/.test(navigator.connection?.effectiveType||''))return;
+   warmedController=controller;
+   const run=async()=>{
+     const routes=['/','/songs/','/games/','/scenario/','/characters/','/workshops/','/offline/'];
+     for(const path of routes){
+       if(!navigator.onLine||sw.controller!==controller)return;
+       if(location.pathname===path)continue;
+       try{const response=await fetch(path,{priority:'low',signal:AbortSignal.timeout(5000),headers:{Accept:'text/html'}});if(response.ok)await response.arrayBuffer();}catch{}
+     }
+   };
+   if('requestIdleCallback' in window)window.requestIdleCallback(()=>{void run();},{timeout:3000});
+   else setTimeout(()=>{void run();},800);
+ }
+ // Local diagnostic only. Inspect Performance entries in DevTools.
+ document.addEventListener('astro:before-preparation',()=>performance.mark('masljanica-nav-start'));
+ document.addEventListener('astro:after-swap',()=>{if(performance.getEntriesByName('masljanica-nav-start').length){performance.measure('masljanica-nav-swap','masljanica-nav-start');performance.clearMarks('masljanica-nav-start');if(performance.getEntriesByName('masljanica-nav-swap').length>100)performance.clearMeasures('masljanica-nav-swap');}});
+
  let state={ready:false,progress:null},latest=null,error='',checking=false,registrationFailed=false;
  let verified=false,installPrompt=null,lastCheck=0,offer=null,autoAttempt=null;
  const PREF='masljanica-pwa-offline-preference-v1';
@@ -108,7 +130,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  });
  function pageLoad(){
    syncTheme();refreshCatalog();render();
-   noteStandalone();send('OFFLINE_STATUS');checkVersion();resolveOffer();render();
+   noteStandalone();send('OFFLINE_STATUS');checkVersion();resolveOffer();render();warmNavigation();
  }
  document.addEventListener('astro:page-load',pageLoad);
  document.addEventListener('change',e=>{
@@ -116,10 +138,10 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
      set(PREF,e.target.checked?'enabled':'disabled');autoAttempt=null;error='';resolveOffer();checkVersion(true);render();
    }
  });
- window.addEventListener('online',()=>{autoAttempt=null;error='';render();checkVersion(true);});
+ window.addEventListener('online',()=>{autoAttempt=null;error='';render();checkVersion(true);warmNavigation();});
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){send('OFFLINE_STATUS');checkVersion();}});
  window.addEventListener('offline',render);
- sw?.addEventListener('controllerchange',()=>{verified=false;send('OFFLINE_STATUS');checkVersion(true);render();});
+ sw?.addEventListener('controllerchange',()=>{verified=false;send('OFFLINE_STATUS');checkVersion(true);render();warmNavigation();});
  if(sw&&(location.protocol==='https:'||location.hostname==='localhost')){
    sw.register('/sw.js').then(()=>{send('OFFLINE_STATUS');render();}).catch(()=>{registrationFailed=true;render();});
  }

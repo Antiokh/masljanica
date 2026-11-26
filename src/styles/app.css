@@ -299,3 +299,6 @@ html[data-network="offline"] [data-online-only] { display:none!important; }
   .theme-switch, .theme-switch * { transition:none!important; }
 }
 }
+
+/* Navigation uses an immediate DOM swap; no CSS transition time on either snapshot. */
+::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation-duration: 0s !important; animation-delay: 0s !important; }

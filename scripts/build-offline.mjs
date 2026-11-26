@@ -14,5 +14,5 @@ const version=createHash('sha256').update(JSON.stringify(entries)).digest('hex')
 const summary={schema:1,version,bytes:entries.reduce((n,x)=>n+x.bytes,0),count:entries.length};
 writeFileSync(join(root,'offline-manifest.json'),JSON.stringify({...summary,entries}));
 writeFileSync(join(root,'offline-version.json'),JSON.stringify(summary));
-writeFileSync(join(root,'sw.js'),'const BUILD='+JSON.stringify(version)+';\n'+readFileSync('scripts/sw-template.js','utf8'));
+writeFileSync(join(root,'sw.js'),'const BUILD='+JSON.stringify(version)+';\nconst CURRENT_REVISIONS='+JSON.stringify(Object.fromEntries(entries.map(e=>[e.url,e.revision])))+';\n'+readFileSync('scripts/sw-template.js','utf8'));
 console.log('Offline pack '+version+': '+summary.count+' entries, '+summary.bytes+' bytes');

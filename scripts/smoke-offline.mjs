@@ -37,6 +37,8 @@ try {
   await page.waitForURL('**/songs/');
   await page.locator('#catalog-search').waitFor();
   assert.equal(await page.evaluate(()=>window.__navigationTest),'persisted','SPA navigation must keep the same window');
+  await page.waitForFunction(()=>performance.getEntriesByName('masljanica-nav-swap').length>0);
+  console.log('Navigation timing (first SPA swap):',await page.evaluate(()=>Math.round(performance.getEntriesByName('masljanica-nav-swap').at(-1).duration)),'ms');
   const search=page.locator('#catalog-search');
   await search.fill('несуществующаяпесня');
   await page.locator('#catalog-empty').waitFor({state:'visible'});
