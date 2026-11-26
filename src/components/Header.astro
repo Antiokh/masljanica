@@ -15,6 +15,7 @@ const moreActive = more.some(link=>active(link.href));
 ---
 <div class="app-header">
   <PwaStatus />
+  <div class="header-navigation">
   <nav class="app-nav" aria-label="Основная навигация">
     {links.map(link=>(
       <a data-astro-prefetch="hover" href={link.href} aria-current={active(link.href)?'page':undefined}>
@@ -30,7 +31,9 @@ const moreActive = more.some(link=>active(link.href));
       <div class="more-links"><div class="pwa-mobile-status"><button type="button" data-pwa-menu-trigger popovertarget="festival-pwa-menu" aria-controls="festival-pwa-menu" aria-expanded="false"><span data-pwa-value="compact">Офлайн-копия</span><span aria-hidden="true">⋮</span></button><progress max="100" value="0" data-pwa-bar data-pwa-progress hidden aria-label="Прогресс офлайн-загрузки"></progress></div>{more.map(link=><a data-astro-prefetch="hover" href={link.href} aria-current={active(link.href)?'page':undefined}>{link.title}</a>)}</div>
     </details>
   </nav>
-  <div class="header-actions"><Search /><div class="desktop-theme-control"><ThemeSwitch /></div><div class="mobile-theme-control"><ThemeSelect /></div></div>
+  <div class="header-search"><Search /></div>
+  </div>
+  <div class="header-actions"><div class="desktop-theme-control"><ThemeSwitch /></div><div class="mobile-theme-control"><ThemeSelect /></div></div>
   <div class="pwa-nav-progress" data-pwa-nav-progress hidden><progress max="100" value="0" data-pwa-bar aria-label="Прогресс офлайн-загрузки"></progress></div>
 </div>
 

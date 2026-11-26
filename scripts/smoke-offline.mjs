@@ -19,6 +19,14 @@ try {
   await page.setViewportSize({width:1440,height:900});
   const themeSwitch=page.locator('[data-theme-switch]');
   await themeSwitch.waitFor({state:'visible'});
+  const headerSearch=page.locator('.header-search');
+  assert.equal(await headerSearch.count(),1,'Single responsive search component');
+  const navBounds=await page.locator('.app-nav').boundingBox();
+  const searchBounds=await headerSearch.boundingBox();
+  const themeBounds=await themeSwitch.boundingBox();
+  assert.ok(navBounds&&searchBounds&&themeBounds,'Desktop header controls must be visible');
+  assert.ok(searchBounds.x>=navBounds.x+navBounds.width-1 && searchBounds.x-(navBounds.x+navBounds.width)<=16,'Desktop search must sit next to the central navigation');
+  assert.ok(searchBounds.x+searchBounds.width<=themeBounds.x+1,'Search must not overlap theme switch');
   await themeSwitch.focus();
   await themeSwitch.press('Home');
   await page.waitForFunction(()=>document.documentElement.dataset.theme==='light' && localStorage.getItem('starlight-theme')==='light');
@@ -29,6 +37,14 @@ try {
   await page.setViewportSize({width:390,height:844});
   await themeSwitch.waitFor({state:'hidden'});
   await page.locator('.mobile-theme-control').waitFor({state:'visible'});
+  const mobileSearch=await headerSearch.boundingBox();
+  const mobileTheme=await page.locator('.mobile-theme-control').boundingBox();
+  assert.ok(mobileSearch&&mobileTheme,'Mobile header controls must be visible');
+  assert.ok(mobileTheme.x-(mobileSearch.x+mobileSearch.width)>=4,'Mobile search and theme must have a separate gap');
+  assert.ok(await headerSearch.evaluate(el=>parseFloat(getComputedStyle(el).paddingInlineEnd)>=6),'Mobile search needs its own inline padding');
+  const navItems=await page.locator('.app-nav > a,.app-nav > details').evaluateAll(els=>els.map(el=>el.getBoundingClientRect().width));
+  assert.equal(navItems.length,4);
+  assert.ok(Math.max(...navItems)-Math.min(...navItems)<=1,'Mobile navigation must retain four equal columns');
 
   await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
   await page.locator('#pwa-storage-accept').click();
