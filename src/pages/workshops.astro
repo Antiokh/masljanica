@@ -1,0 +1,50 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import workshops from '../data/workshops.json';
+import details from '../data/workshop-details.json';
+import GameIcon from '../components/GameIcon.astro';
+import MarkdownIt from 'markdown-it';
+const md=new MarkdownIt({html:false,breaks:true});
+type Meta={art:string;category:string;audience:string[];age_min?:number;age_max?:number;limit?:number;subtitle?:string;result?:string};
+const meta=details as Record<string,Meta>;
+const categories=[{id:'',title:'Все направления'},{id:'craft',title:'Рукоделие'},{id:'art',title:'Арт-практики'},{id:'movement',title:'Голос и движение'}];
+const audiences=[{id:'',title:'Все'},{id:'children',title:'Детские'},{id:'adults',title:'Для взрослых'}];
+const items=workshops.map(x=>({...x,meta:meta[x.slug]}));
+const age=(m:Meta)=>m.age_min?(m.age_max?m.age_min+'–'+m.age_max:m.age_min+'+')+' лет':'';
+const clean=(x:typeof items[number])=>x.description.replace(/(?:^|\n)\s*🌿\s*Ведущая:[^\n]*/gu,'').replace(/(?:^|\n)\s*👥\s*Количество мест:[^\n]*/gu,'').trim();
+---
+<StarlightPage frontmatter={{title:'Мастер-классы',template:'splash',description:'Народные мастерские Масляницы: рукоделие, творчество и занятия для детей и взрослых.'}}>
+ <div class="workshop-catalog" data-workshop-catalog>
+  <div class="catalog-tools"><input id="workshop-search" type="search" placeholder="Найти мастер-класс…" aria-label="Поиск по мастер-классам"/></div>
+  <div class="workshop-filters" aria-label="Фильтры мастер-классов">
+   <div class="workshop-filter-row" role="group" aria-label="Аудитория">{audiences.map(a=><button type="button" data-workshop-filter="audience" data-value={a.id} aria-pressed={a.id===''?'true':'false'}>{a.title}</button>)}</div>
+   <div class="workshop-filter-row" role="group" aria-label="Направление">{categories.map(a=><button type="button" data-workshop-filter="category" data-value={a.id} aria-pressed={a.id===''?'true':'false'}>{a.title}</button>)}</div>
+  </div>
+  <p id="workshop-empty" hidden>Ничего не найдено.</p>
+  <section class="workshop-active" aria-label="Мастерские">
+   <div class="workshop-grid" data-workshop-grid>
+    {items.filter(x=>x.enabled).map(x=><article class="workshop-tile" data-workshop-tile data-workshop-id={x.slug} data-category={x.meta.category} data-audience={x.meta.audience.join(' ')} data-search={[x.title,x.host,x.description,x.meta.subtitle].join(' ')}>
+      <button type="button" class="workshop-toggle" data-workshop-open={x.slug} aria-expanded="false" aria-controls={'workshop-panel-'+x.slug}>
+       <picture><source srcset={'/media/workshops/'+x.meta.art+'.webp'} type="image/webp"/><img src={'/media/workshops/'+x.meta.art+'.svg'} width="640" height="480" alt="" loading="lazy" decoding="async"/></picture>
+       <span class="workshop-tile-info"><strong>{x.title}</strong><small>{[x.host,age(x.meta)||categories.find(c=>c.id===x.meta.category)?.title].filter(Boolean).join(' · ')}</small><span class="workshop-tile-footer"><span>{x.meta.limit?'До '+x.meta.limit+' участников':'Подробнее'}</span><GameIcon name="chevron"/></span></span>
+      </button>
+     </article>)}
+    {items.filter(x=>x.enabled).map(x=><section class="workshop-panel" id={'workshop-panel-'+x.slug} data-workshop-panel={x.slug} aria-labelledby={'workshop-title-'+x.slug} hidden>
+      <div class="workshop-panel-heading"><h2 id={'workshop-title-'+x.slug}>{x.title}</h2><button type="button" class="workshop-close" data-workshop-close={x.slug} aria-label="Свернуть описание"><GameIcon name="chevron"/></button></div>
+      <div class="workshop-panel-body">
+       <picture class="workshop-detail-art"><source srcset={'/media/workshops/'+x.meta.art+'.webp'} type="image/webp"/><img src={'/media/workshops/'+x.meta.art+'.svg'} width="640" height="480" alt="" loading="lazy" decoding="async"/></picture>
+       <div class="workshop-content">
+        <dl class="workshop-facts"><div><dt>Ведущая</dt><dd>{x.host}</dd></div>{age(x.meta)&&<div><dt>Возраст</dt><dd>{age(x.meta)}</dd></div>}{x.meta.limit&&<div><dt>Участники</dt><dd>До {x.meta.limit}</dd></div>}</dl>
+        <div class="workshop-description" set:html={md.render(clean(x))}/>
+        {x.meta.result&&<div class="workshop-result"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h18v4H3zM5 12v9h14v-9M12 8v13M12 8C5 8 5 2 9 3c2 0 3 5 3 5s1-5 3-5c4-1 4 5-3 5z"/></svg><div><strong>{x.meta.category==='craft'?'Что заберём с собой':'Что будем делать'}</strong><p>{x.meta.result}</p></div></div>}
+       </div>
+      </div>
+     </section>)}
+   </div>
+  </section>
+  <section class="workshop-pending" data-workshop-pending>
+   <h2>Готовим для вас</h2>
+   <div class="workshop-pending-list">{items.filter(x=>!x.enabled).map(x=><article data-workshop-tile data-workshop-id={x.slug} data-category={x.meta.category} data-audience={x.meta.audience.join(' ')} data-search={[x.title,x.host].join(' ')} class="workshop-pending-item"><picture><source srcset={'/media/workshops/'+x.meta.art+'.webp'} type="image/webp"/><img src={'/media/workshops/'+x.meta.art+'.svg'} width="640" height="480" alt="" loading="lazy" decoding="async"/></picture><div><strong>{x.title}</strong><small>{x.host} · Уточняется</small></div></article>)}</div>
+  </section>
+ </div>
+</StarlightPage>

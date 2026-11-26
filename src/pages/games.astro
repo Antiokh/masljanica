@@ -45,7 +45,7 @@ const sorted=[...games].sort((a,b)=>a.title.localeCompare(b.title,'ru'));
       return <article class="game-card" id={game.slug} data-entry data-category={category} data-audience={a.id} data-search={[game.title,a.title,game.description,d.equipment||''].join(' ')}>
        <details class="game-details">
         <summary>
-         <span class="game-pictogram"><GameIcon name={d.formation==='lines'?'lines':d.formation==='gates'||d.formation==='chain'?'chain':a.icon}/></span>
+         <span class="game-pictogram"><GameIcon name={(d.formation==='lines'||d.formation==='shuttle')?'lines':d.formation==='gates'||d.formation==='chain'?'chain':a.icon}/></span>
          <span class="game-heading"><strong>{game.title}</strong><small>{a.title}{age?' · '+age:''}</small></span>
          <span class="game-media-icons">{tracks.length>0&&<span title="Аудио"><GameIcon name="music"/></span>}{video&&<span title="Видео" data-online-only hidden><GameIcon name="video"/></span>}</span>
          <GameIcon name="chevron" class="game-chevron"/>

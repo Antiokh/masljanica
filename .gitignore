@@ -5,3 +5,6 @@ src/content/docs/generated/
 .env*
 legacy/
 *.csv
+
+# Rendered from tracked workshop SVG sources
+/public/media/workshops/*.webp

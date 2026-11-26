@@ -1,3 +1,4 @@
+import { installWorkshopGallery } from './workshop-gallery.mjs';
 import { installGameList } from './game-list.mjs';
 import { createRuntimeEnvironment } from './runtime-environment.mjs';
 import { installFestivalSearch } from './festival-search.mjs';
@@ -13,6 +14,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  const environment=createRuntimeEnvironment();
  installSongList();
  installGameList();
+ installWorkshopGallery();
  installExternalEmbeds();
  installHomeSeason();
  installCharacterDialogs();
