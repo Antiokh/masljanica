@@ -1,32 +1,162 @@
-self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(URLS)).then(()=>self.skipWaiting()));});
-self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('masljanica-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
+const META='masljanica-meta-v2', RUNTIME='masljanica-runtime-v2-'+BUILD;
+const PREFIX='masljanica-pack-v2-', MARKER='/__offline_active__';
+const CONTROL=new Set(['/sw.js','/offline-version.json','/offline-manifest.json']);
+let activePromise, task, progress=null, degradedUntil=0;
+const absolute=path=>new URL(path,self.location.origin).href;
+const json=value=>new Response(JSON.stringify(value),{headers:{'Content-Type':'application/json'}});
+const key=path=>absolute(path.endsWith('/index.html')?path.slice(0,-10):path);
+function htmlPath(path){return path.endsWith('/')||!path.split('/').pop().includes('.')||path.endsWith('/index.html');}
+function canonical(path){if(path.endsWith('/index.html'))return path.slice(0,-10);return htmlPath(path)&&!path.endsWith('/')?path+'/':path;}
+async function active(){
+  if(!activePromise)activePromise=(async()=>{
+    const marker=await (await caches.open(META)).match(absolute(MARKER));
+    if(!marker)return null;
+    const info=await marker.json();
+    if(typeof info.cache!=='string'||!info.cache.startsWith(PREFIX)||!(await caches.has(info.cache)))return null;
+    const cache=await caches.open(info.cache);
+    if(!(await cache.match(absolute('/')))||!(await cache.match(absolute('/__offline_manifest__'))))return null;
+    return {...info,cache};
+  })().catch(()=>null);
+  return activePromise;
+}
+async function notify(message){
+  for(const client of await self.clients.matchAll({type:'window',includeUncontrolled:true}))client.postMessage(message);
+}
+async function status(){
+  const a=await active();
+  return {type:'OFFLINE_STATUS',ready:!!a,version:a?.version||null,bytes:a?.bytes||0,count:a?.count||0,build:BUILD,progress};
+}
+async function timedFetch(input,options={},ms=8000){
+  const controller=new AbortController(), timer=setTimeout(()=>controller.abort(),ms);
+  try{return await fetch(input,{...options,signal:controller.signal});}finally{clearTimeout(timer);}
+}
+function unavailable(){return new Response('Страница недоступна офлайн.',{status:503,headers:{'Content-Type':'text/plain; charset=utf-8'}});}
+async function legacyMatch(path){
+  for(const name of await caches.keys()){
+    if(!/^masljanica-[a-f0-9]{16}$/.test(name))continue;
+    const hit=await (await caches.open(name)).match(key(path));if(hit)return hit;
+  }
+}
+async function putRuntime(cache,request,response){
+  if(!response.ok||response.status!==200||response.redirected||response.type==='opaque')return;
+  await cache.put(request,response);
+  const keys=await cache.keys();
+  if(keys.length>200)await Promise.all(keys.slice(0,keys.length-200).map(x=>cache.delete(x)));
+}
+async function serve(event){
+  const req=event.request,url=new URL(req.url),path=canonical(url.pathname);
+  const a=await active(), packHit=await a?.cache.match(key(path));
+  if(req.headers.has('range')){
+    if(!url.pathname.startsWith('/media/audio/'))return fetch(req);
+    if(packHit)return rangeResponse(req,packHit);
+    const old=await legacyMatch(path);
+    if(old&&Date.now()<degradedUntil)return rangeResponse(req,old);
+    try{return await timedFetch(req,{},5000);}catch{return old?rangeResponse(req,old):unavailable();}
+  }
+  // A verified pack from this build is authoritative. No network round trip.
+  if(packHit&&a.version===BUILD)return packHit;
+  const runtime=await caches.open(RUNTIME);
+  const cached=await runtime.match(key(path));
+  if(cached)return cached;
+  const fallback=packHit||await legacyMatch(path);
+  if(fallback&&Date.now()<degradedUntil)return fallback;
+  try{
+    const response=await timedFetch(req,{},fallback?2500:8000);
+    if(response.status>=500&&fallback){degradedUntil=Date.now()+10000;return fallback;}
+    degradedUntil=0;
+    // Media is only downloaded in the explicit pack; never fill runtime with MP3s.
+    if(!url.pathname.startsWith('/media/audio/'))await putRuntime(runtime,key(path),response.clone()).catch(()=>{});
+    return response;
+  }catch{degradedUntil=Date.now()+10000;return fallback||unavailable();}
+}
+async function rangeResponse(request,full){
+  const bytes=await full.arrayBuffer(),size=bytes.byteLength;
+  const match=/^bytes=(\d*)-(\d*)$/i.exec(request.headers.get('range')||'');
+  const headers=new Headers({'Accept-Ranges':'bytes','Content-Type':full.headers.get('Content-Type')||'audio/mpeg'});
+  const invalid=()=>{headers.set('Content-Range','bytes */'+size);return new Response(null,{status:416,headers});};
+  if(!match||(!match[1]&&!match[2])||!size)return invalid();
+  const start=match[1]?Number(match[1]):Math.max(0,size-Number(match[2]));
+  const end=match[1]&&match[2]?Math.min(size-1,Number(match[2])):size-1;
+  if(!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||start>=size||end<start)return invalid();
+  headers.set('Content-Range','bytes '+start+'-'+end+'/'+size);
+  headers.set('Content-Length',String(end-start+1));
+  return new Response(bytes.slice(start,end+1),{status:206,headers});
+}
+async function download(){
+  const response=await timedFetch('/offline-manifest.json',{cache:'no-store'});
+  if(!response.ok)throw Error('Не удалось получить список файлов.');
+  const manifest=await response.json();
+  if(manifest.schema!==1||!Array.isArray(manifest.entries)||!manifest.entries.length||!/^[a-f0-9]{20}$/.test(manifest.version)||manifest.count!==manifest.entries.length||new Set(manifest.entries.map(x=>x.url)).size!==manifest.count||manifest.entries.some(x=>typeof x.url!=='string'||!x.url.startsWith('/')||x.url.startsWith('//')||new URL(x.url,self.location.origin).origin!==self.location.origin||!/^[a-f0-9]{64}$/.test(x.revision)||!Number.isSafeInteger(x.bytes)||x.bytes<0))throw Error('Некорректный список файлов.');
+  const old=await active();
+  if(old?.version===manifest.version)return;
+  const previous=old?await old.cache.match(absolute('/__offline_manifest__')):null;
+  const revisions=new Map(previous?(await previous.json()).entries.map(x=>[x.url,x.revision]):[]);
+  const name=PREFIX+manifest.version+'-'+crypto.randomUUID(), stage=await caches.open(name);
+  let done=0,bytes=0,idx=0,failure;
+  progress={done,total:manifest.entries.length,bytes,totalBytes:manifest.bytes};
+  await notify({type:'OFFLINE_PROGRESS',progress});
+  async function worker(){
+    while(!failure&&idx<manifest.entries.length){
+      const entry=manifest.entries[idx++];
+      try{
+        let file=revisions.get(entry.url)===entry.revision?await old.cache.match(absolute(entry.url)):null;
+        if(!file){
+          let last;
+          for(let attempt=0;attempt<3;attempt++){
+            try{
+              file=await timedFetch(absolute(entry.url),{cache:'no-store'},30000);
+              if(file.status!==200||new URL(file.url).origin!==self.location.origin)throw Error('HTTP '+file.status);
+              const body=await file.clone().arrayBuffer();
+              const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',body)),x=>x.toString(16).padStart(2,'0')).join('');
+              if(body.byteLength!==entry.bytes||digest!==entry.revision)throw Error('Ревизия файла изменилась');
+              last=null;break;
+            }catch(e){last=e;file=null;if(attempt<2)await new Promise(resolve=>setTimeout(resolve,300*(attempt+1)));}
+          }
+          if(last||!file)throw last||Error('Файл недоступен');
+        }
+        await stage.put(absolute(entry.url),file);
+        done++;bytes+=entry.bytes;
+        progress={done,total:manifest.count,bytes,totalBytes:manifest.bytes};
+        if(done%5===0||done===manifest.count)await notify({type:'OFFLINE_PROGRESS',progress});
+      }catch(e){failure=Error(entry.url+': '+e.message);}
+    }
+  }
+  try{
+    await Promise.all(Array.from({length:4},worker));
+    if(failure)throw failure;
+    if(done!==manifest.count||bytes!==manifest.bytes)throw Error('Неполная офлайн-копия');
+    await stage.put(absolute('/__offline_manifest__'),json(manifest));
+    await (await caches.open(META)).put(absolute(MARKER),json({cache:name,version:manifest.version,bytes,count:done}));
+    activePromise=undefined;
+    // Do not delete the previous pack before the pointer is committed.
+    for(const cacheName of await caches.keys())if(cacheName!==name&&(cacheName.startsWith(PREFIX)||/^masljanica-[a-f0-9]{16}$/.test(cacheName)))await caches.delete(cacheName).catch(()=>{});
+  }catch(e){await caches.delete(name);throw e;}
+}
+self.addEventListener('install',event=>event.waitUntil(self.skipWaiting()));
+self.addEventListener('activate',event=>event.waitUntil((async()=>{
+  await self.clients.claim();
+  // Preserve the previous full pack during upgrades; only runtime caches are disposable.
+  for(const name of await caches.keys())if(name.startsWith('masljanica-runtime-v2-')&&name!==RUNTIME)await caches.delete(name);
+})()));
 self.addEventListener('fetch',event=>{
- const request=event.request,url=new URL(request.url);
- if(request.method!=='GET'||url.origin!==self.location.origin)return;
- if(request.headers.has('range')){
-  if(!url.pathname.startsWith('/media/audio/'))return;
-  event.respondWith((async()=>{
-    const cache=await caches.open(CACHE);
-    const full=await cache.match(url.pathname);
-    if(!full)return fetch(request);
-    const bytes=await full.arrayBuffer(),size=bytes.byteLength;
-    const match=/^bytes=(\d*)-(\d*)$/i.exec(request.headers.get('range')||'');
-    const headers=new Headers({'Accept-Ranges':'bytes','Content-Type':full.headers.get('Content-Type')||'audio/mpeg'});
-    const invalid=()=>{headers.set('Content-Range','bytes */'+size);return new Response(null,{status:416,headers});};
-    if(!match||(!match[1]&&!match[2])||!size)return invalid();
-    let start=match[1]?Number(match[1]):Math.max(0,size-Number(match[2]));
-    let end=match[1]&&match[2]?Math.min(size-1,Number(match[2])):size-1;
-    if(!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||start>=size||end<start)return invalid();
-    headers.set('Content-Range','bytes '+start+'-'+end+'/'+size);
-    headers.set('Content-Length',String(end-start+1));
-    return new Response(bytes.slice(start,end+1),{status:206,headers});
-  })());return;
- }
- if(request.mode==='navigate'){
-  event.respondWith(fetch(request).catch(async()=>{
-   const cache=await caches.open(CACHE);const pathname=url.pathname.endsWith('/')?url.pathname:url.pathname+'/';
-   return await cache.match(pathname)||await cache.match(url.pathname)||new Response('Страница недоступна офлайн.',{status:503,headers:{'Content-Type':'text/plain; charset=utf-8'}});
-  }));return;
- }
- event.respondWith(caches.open(CACHE).then(async cache=>await cache.match(request)||fetch(request)));
+  const req=event.request,url=new URL(req.url);
+  if(req.method!=='GET'||url.origin!==self.location.origin||CONTROL.has(url.pathname))return;
+  if(url.search&&!htmlPath(url.pathname))return;
+  event.respondWith(serve(event));
+});
+self.addEventListener('message',event=>{
+  const type=event.data?.type;
+  if(type==='OFFLINE_STATUS'){event.waitUntil(status().then(s=>event.source?.postMessage(s)));return;}
+  if(type==='OFFLINE_DOWNLOAD'){
+    if(!task){
+      progress={done:0,total:0,bytes:0,totalBytes:0};
+      task=download().then(()=>notify({type:'OFFLINE_COMPLETE'})).catch(e=>notify({type:'OFFLINE_ERROR',message:e.message})).finally(async()=>{progress=null;task=null;await notify(await status());});
+    }
+    event.waitUntil(task);
+  }
+  if(type==='OFFLINE_DELETE'&&!task)event.waitUntil((async()=>{
+    await (await caches.open(META)).delete(absolute(MARKER));activePromise=undefined;
+    for(const name of await caches.keys())if(name.startsWith(PREFIX)||/^masljanica-[a-f0-9]{16}$/.test(name))await caches.delete(name);
+    await notify(await status());
+  })());
 });

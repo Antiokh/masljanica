@@ -23,19 +23,6 @@ const groups=section==='games'?['Исторические','Развлекате
 <StarlightPage frontmatter={{title:titles[section],template:'splash'}}>
     <div class="catalog-tools"><input id="catalog-search" type="search" placeholder="Поиск…" aria-label="Поиск по разделу"/>{section==='games'&&<select id="catalog-filter" aria-label="Категория"><option value="">Все категории</option>{groups.map(g=><option value={g}>{g}</option>)}</select>}</div>
     <p id="catalog-empty" hidden>Ничего не найдено.</p>
-    {groups.map(group=><section class="catalog-group" data-group={group}>{group&&<h2>{group}</h2>}<div class="app-grid">{entries.filter(x=>!group||x.category===group).map(x=><a class="app-card" data-entry data-search={x.title+' '+(x.subtitle||'')} data-category={x.category||''} href={'/'+section+'/'+x.slug+'/'}>{x.image&&<img src={x.image} alt={x.title} loading="lazy"/>}<div><strong>{x.title}</strong>{x.subtitle&&<small>{x.subtitle}</small>}</div></a>)}</div></section>)}
+    {groups.map(group=><section class="catalog-group" data-group={group}>{group&&<h2>{group}</h2>}<div class="app-grid">{entries.filter(x=>!group||x.category===group).map(x=><a class="app-card" data-astro-prefetch="hover" data-entry data-search={x.title+' '+(x.subtitle||'')} data-category={x.category||''} href={'/'+section+'/'+x.slug+'/'}>{x.image&&<img src={x.image} alt={x.title} loading="lazy"/>}<div><strong>{x.title}</strong>{x.subtitle&&<small>{x.subtitle}</small>}</div></a>)}</div></section>)}
 </StarlightPage>
-<script>
-const search=document.querySelector<HTMLInputElement>('#catalog-search');
-const filter=document.querySelector<HTMLSelectElement>('#catalog-filter');
-function refresh(){
-  let count=0;
-  document.querySelectorAll<HTMLElement>('[data-entry]').forEach(el=>{
-    el.hidden=!(el.dataset.search||'').toLocaleLowerCase('ru').includes((search?.value||'').trim().toLocaleLowerCase('ru'))||!!(filter?.value&&el.dataset.category!==filter.value);
-    if(!el.hidden)count++;
-  });
-  document.querySelectorAll<HTMLElement>('.catalog-group').forEach(g=>{g.hidden=!g.querySelector('[data-entry]:not([hidden])');});
-  const empty=document.querySelector<HTMLElement>('#catalog-empty');if(empty)empty.hidden=count>0;
-}
-search?.addEventListener('input',refresh);filter?.addEventListener('change',refresh);
-</script>
+

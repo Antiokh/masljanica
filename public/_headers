@@ -2,3 +2,8 @@
   Cache-Control: no-cache
 /manifest.webmanifest
   Cache-Control: no-cache
+
+/offline-manifest.json
+  Cache-Control: no-cache
+/offline-version.json
+  Cache-Control: no-cache

@@ -16,7 +16,7 @@ const moreActive = more.some(link=>active(link.href));
   <SiteTitle />
   <nav class="app-nav" aria-label="Основная навигация">
     {links.map(link=>(
-      <a href={link.href} aria-current={active(link.href)?'page':undefined}>
+      <a data-astro-prefetch="hover" href={link.href} aria-current={active(link.href)?'page':undefined}>
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={link.icon}/></svg>
         <span>{link.title}</span>
       </a>
@@ -26,7 +26,7 @@ const moreActive = more.some(link=>active(link.href));
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
         <span>Ещё</span>
       </summary>
-      <div class="more-links">{more.map(link=><a href={link.href} aria-current={active(link.href)?'page':undefined}>{link.title}</a>)}</div>
+      <div class="more-links">{more.map(link=><a data-astro-prefetch="hover" href={link.href} aria-current={active(link.href)?'page':undefined}>{link.title}</a>)}</div>
     </details>
   </nav>
   <div class="header-actions"><Search /><ThemeSelect /></div>
