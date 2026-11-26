@@ -4,7 +4,7 @@ import Search from '@astrojs/starlight/components/Search.astro';
 import ThemeSelect from '@astrojs/starlight/components/ThemeSelect.astro';
 const path = decodeURI(Astro.url.pathname);
 const links = [{href:'/',title:'Избушка',icon:'⌂'},{href:'/songs/',title:'Песни',icon:'♫'},{href:'/games/',title:'Игры',icon:'⚄'}];
-const more = [{href:'/scenario/',title:'Сказ'},{href:'/characters/',title:'Персонажи'},{href:'/workshops/',title:'Мастера'},{href:'/ditties/',title:'Частушки'},{href:'/offline/',title:'Офлайн'}];
+const more = [{href:'/scenario/',title:'Сказ'},{href:'/characters/',title:'Персонажи'},{href:'/workshops/',title:'Мастера'},{href:'/offline/',title:'Офлайн'}];
 const active = (href:string) => href==='/'?path==='/':path.startsWith(href);
 ---
 <div class="app-header">

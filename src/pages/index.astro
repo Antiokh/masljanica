@@ -20,7 +20,6 @@ const time = (value: string) => { const m=value.match(/(\d+):(\d+):\d+\s*(AM|PM)
   <div class="app-grid">
     <a class="app-card" href="/songs/"><strong>Песни</strong><small>Тексты и записи</small></a>
     <a class="app-card" href="/games/"><strong>Игры</strong><small>Правила и видео</small></a>
-    <a class="app-card" href="/ditties/"><strong>Частушки</strong><small>Народные куплеты</small></a>
   </div>
   <h2>Персонажи</h2>
   <div class="app-grid">{characters.filter(x=>x.show).map(x=><a class="app-card" href={'/characters/'+x.slug+'/'}>{x.image&&<img src={x.image} alt={x.title} loading="lazy"/>}<div><strong>{x.title}</strong><small>{x.description.split('\n')[0]}</small></div></a>)}</div>
