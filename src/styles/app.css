@@ -731,3 +731,38 @@ html[data-runtime-environment="telegram"] .telegram-runtime-diagnostics { displa
   html[data-runtime-environment="telegram"] .festival-search-frame { padding-top:max(.75rem,env(safe-area-inset-top,0px),var(--telegram-content-top,0px)); padding-bottom:max(.75rem,var(--telegram-bottom)); }
   html[data-runtime-environment="telegram"] .song-row { scroll-margin-top:calc(var(--sl-nav-height) + 1rem); }
 }
+
+/* Telegram auto = actual client palette, not merely its light/dark classification.
+   Only enabled by the environment adapter with validated launch/SDK colors.
+   All ordinary and manual themes retain the original tokens. */
+html[data-telegram-palette="active"] {
+  --sl-color-bg: var(--masljanica-tg-bg-color);
+  --sl-color-black: var(--sl-color-bg);
+  --sl-color-text: var(--masljanica-tg-text-color,var(--sl-color-white));
+  --sl-color-white: var(--masljanica-tg-text-color,light-dark(#243344,#E2E8F0));
+  --sl-color-gray-1: var(--sl-color-text);
+  --sl-color-gray-2: var(--masljanica-tg-subtitle-text-color,var(--sl-color-text));
+  --sl-color-gray-3: var(--masljanica-tg-hint-color,var(--sl-color-gray-2));
+  --sl-color-gray-4: var(--sl-color-gray-3);
+  --sl-color-gray-5: var(--masljanica-tg-section-separator-color,color-mix(in srgb,var(--sl-color-text) 20%,var(--sl-color-bg)));
+  --sl-color-gray-6: var(--masljanica-tg-secondary-bg-color,var(--sl-color-bg));
+  --sl-color-bg-nav: var(--masljanica-tg-bottom-bar-bg-color,var(--sl-color-gray-6));
+  --sl-color-bg-sidebar: var(--sl-color-gray-6);
+  --sl-color-text-accent: var(--masljanica-tg-link-color,var(--masljanica-tg-accent-text-color,var(--sl-color-text)));
+  --sl-color-accent: var(--sl-color-text-accent);
+  --sl-color-accent-high: var(--masljanica-tg-accent-text-color,var(--sl-color-accent));
+  --sl-color-accent-low: color-mix(in srgb,var(--sl-color-accent) 15%,var(--sl-color-bg));
+  --sl-color-text-invert: var(--sl-color-bg);
+  --festival-surface: var(--masljanica-tg-section-bg-color,var(--sl-color-gray-6));
+  --festival-hero: var(--sl-color-gray-6);
+  --festival-action: var(--masljanica-tg-button-color,var(--sl-color-text));
+  --festival-on-action: var(--masljanica-tg-button-text-color,var(--sl-color-bg));
+  --festival-selected: var(--festival-action);
+  --festival-selected-text: var(--festival-on-action);
+  --festival-control-border: var(--sl-color-gray-5);
+  --festival-control-text: var(--sl-color-text);
+}
+html[data-telegram-palette="active"][data-theme="light"] { --sl-color-white:var(--masljanica-tg-text-color,#243344); }
+html[data-telegram-palette="active"]:not([data-theme="light"]) { --sl-color-white:var(--masljanica-tg-text-color,#E2E8F0); }
+html[data-telegram-palette="active"] .playlist-controls .playlist-play {color:var(--festival-selected-text);}
+html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {background:var(--festival-on-action);}

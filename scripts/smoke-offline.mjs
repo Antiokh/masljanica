@@ -344,7 +344,7 @@ try {
         contentSafeAreaInset:{top:0,bottom:0,left:0,right:0},safeAreaInset:{top:0,bottom:0,left:0,right:0},
         BackButton:{show(){window.__tgBackVisible=true;},hide(){window.__tgBackVisible=false;},onClick(fn){backHandler=fn;}},close(){window.__tgClosed++;},
         onEvent(name,fn){handlers.set(name,fn);},ready(){window.__tgReady++;},setHeaderColor(){},setBackgroundColor(){},setBottomBarColor(){},isVersionAtLeast(){return true;}}};
-      window.__tgTheme=theme=>{Telegram.WebApp.colorScheme=theme;Telegram.WebApp.themeParams={bg_color:theme==='dark'?'#17212b':'#ffffff'};handlers.get('themeChanged')?.();};
+      window.__tgTheme=(theme,colors={})=>{Telegram.WebApp.colorScheme=theme;Telegram.WebApp.themeParams={bg_color:theme==='dark'?'#17212b':'#ffffff',text_color:theme==='dark'?'#eeeeee':'#223344',button_color:'#228866',button_text_color:'#ffffff',secondary_bg_color:'#345678',bottom_bar_bg_color:'#334455',...colors};handlers.get('themeChanged')?.();};
     });
     const tg=await tgContext.newPage();
     await tg.goto(origin+'/#'+new URLSearchParams({tgWebAppPlatform:'android',tgWebAppVersion:'9.0',tgWebAppThemeParams:JSON.stringify({bg_color:'#101827'})}));
@@ -366,6 +366,10 @@ try {
     assert.equal(await tg.evaluate(()=>window.__tgClosed),0,'System Back closes overlay, not app');
     assert.equal(await tg.evaluate(()=>matchMedia('(prefers-color-scheme: light)').matches),true,'Telegram dark launch must override light OS and uninitialized bridge');
     await tg.evaluate(()=>window.__tgTheme('dark'));
+    await tg.waitForFunction(()=>getComputedStyle(document.documentElement).getPropertyValue('--sl-color-bg').trim()==='#17212b');
+    assert.equal(await tg.locator('.app-nav').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(51, 68, 85)');
+    await tg.evaluate(()=>window.__tgTheme('dark',{bg_color:'#28394a',button_color:'#eebb44'}));
+    await tg.waitForFunction(()=>getComputedStyle(document.documentElement).getPropertyValue('--sl-color-bg').trim()==='#28394a'&&getComputedStyle(document.documentElement).getPropertyValue('--festival-action').trim()==='#eebb44');
     assert.equal(await tg.locator('#festival-search-dialog').count(),1);
     assert.equal(await tg.locator('.app-nav > a,.app-nav > details').count(),4);
     await tg.locator('.more-menu > summary').click();
@@ -377,7 +381,8 @@ try {
     await tg.locator('#festival-search-dialog').waitFor({state:'hidden'});
     await tg.locator('.more-menu > summary').click();
     await tg.locator('[data-telegram-theme]').selectOption('light');
-    await tg.waitForFunction(()=>document.documentElement.dataset.theme==='light');
+    await tg.waitForFunction(()=>document.documentElement.dataset.theme==='light'&&!document.documentElement.dataset.telegramPalette);
+    assert.equal(await tg.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--festival-action').trim().toLowerCase()),'#c43d32');
     await tg.evaluate(()=>window.__tgTheme('dark'));
     assert.equal(await tg.evaluate(()=>document.documentElement.dataset.theme),'light');
     await tg.locator('[data-telegram-theme]').selectOption('auto');
@@ -396,6 +401,7 @@ try {
     assert.equal(await tg.locator('[data-runtime-value="telegramTheme"]').innerText(),'light');
     assert.equal(await tg.locator('[data-runtime-value="appliedTheme"]').innerText(),'light');
     assert.equal(await tg.locator('[data-runtime-value="themeSource"]').innerText(),'Telegram SDK');
+    assert.equal(await tg.locator('[data-runtime-value="palette"]').innerText(),'Цвета Telegram');
     assert.equal(await tg.evaluate(()=>window.__tgReady),1,'One bridge lifecycle across SPA');
     await tg.waitForFunction(()=>window.__tgBackVisible);
     await tg.evaluate(()=>window.__tgBack());

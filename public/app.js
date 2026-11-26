@@ -81,7 +81,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
 
  const fmt=n=>((n||0)/1e6).toFixed(1).replace('.',',')+' МБ';
  const send=type=>sw?.controller?.postMessage({type});
- const syncTheme=()=>{const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=document.documentElement.dataset.theme==='light'?'#FFFFFF':'#101827';};
+ const syncTheme=()=>{const root=document.documentElement,meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=root.dataset.telegramPalette==='active'?root.style.getPropertyValue('--masljanica-tg-bg-color'):(root.dataset.theme==='light'?'#FFFFFF':'#101827');};
  new MutationObserver(syncTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
  function refreshCatalog(){
    const search=document.querySelector('#catalog-search'),filter=document.querySelector('#catalog-filter');if(!search)return;

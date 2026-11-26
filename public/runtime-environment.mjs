@@ -1,3 +1,4 @@
+import { sanitizeTelegramPalette, applyTelegramPalette, telegramNativeColors } from './telegram-palette.mjs';
 import { setupTelegramBackNavigation } from './telegram-back.mjs';
 // One environment adapter. Launch hints affect UI only, never authentication.
 const SESSION='masljanica-telegram-context-v1', COPY='masljanica-telegram-last-copy-v1', THEME='starlight-theme';
@@ -22,16 +23,16 @@ export function parseTelegramLaunch(input){
   for(const raw of [url.hash.slice(1),url.search.slice(1)]){
     const p=new URLSearchParams(raw),platform=p.get('tgWebAppPlatform'),version=p.get('tgWebAppVersion'),theme=p.get('tgWebAppThemeParams');
     if(!platformOK(platform)||!versionOK(version)||(!p.has('tgWebAppData')&&!theme))continue;
-    let color=null;
-    try{color=themeFromParams(JSON.parse(theme||'{}'));}catch{}
-    return {platform,version,theme:color};
+    let colors={};
+    try{colors=sanitizeTelegramPalette(JSON.parse(theme||'{}'));}catch{}
+    return {platform,version,theme:themeFromParams(colors),colors};
   }
   return null;
 }
 export function detectTelegram({url,session,api}={}){
   const launch=parseTelegramLaunch(url);if(launch)return launch;
-  if(api?.initData&&platformOK(api.platform)&&versionOK(api.version))return {platform:api.platform,version:api.version,theme:scheme(api.colorScheme)};
-  if(session&&platformOK(session.platform)&&versionOK(session.version))return {platform:session.platform,version:session.version,theme:scheme(session.theme)};
+  if(api?.initData&&platformOK(api.platform)&&versionOK(api.version))return {platform:api.platform,version:api.version,theme:scheme(api.colorScheme),colors:sanitizeTelegramPalette(api.themeParams)};
+  if(session&&platformOK(session.platform)&&versionOK(session.version))return {platform:session.platform,version:session.version,theme:scheme(session.theme),colors:sanitizeTelegramPalette(session.colors)};
   return null;
 }
 export const copyRetention=(previous,verified,ready)=>!verified?'checking':!previous?'unknown':ready?'retained':'missing';
@@ -50,24 +51,27 @@ export function createRuntimeEnvironment(win=window){
   if(isTelegram&&!cacheStorage)sw=undefined;
   const previous=isTelegram?get('localStorage',COPY):null;
   let retention='checking',observed=false,telegramTheme=context?.theme||null,bridge=null,bridgeStatus='connecting',bridgeLoading=false;
-  let backNavigation=null;
+  let backNavigation=null,telegramColors=sanitizeTelegramPalette(context?.colors);
   let volatileMode=null,themeSource=context?.theme?'launch':'system',lastNativeTheme=null;
   const call=(obj,name,...args)=>{try{if(typeof obj?.[name]==='function')return obj[name](...args);}catch{}};
   const mode=()=>volatileMode||themeMode(get('localStorage',THEME));
   const system=()=>win.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
-  function save(){if(isTelegram)set('sessionStorage',SESSION,JSON.stringify({platform:context.platform,version:context.version,theme:telegramTheme}));}
+  function save(){if(isTelegram)set('sessionStorage',SESSION,JSON.stringify({platform:context.platform,version:context.version,theme:telegramTheme,colors:telegramColors}));}
   function syncTheme(){
     if(!isTelegram)return;
     const selected=mode(),display=resolveTheme(selected,system(),telegramTheme);
     if(root().dataset.runtimeEnvironment!=='telegram')root().dataset.runtimeEnvironment='telegram';
     if(telegramTheme)root().dataset.telegramTheme=telegramTheme;
     if(root().dataset.theme!==display)root().dataset.theme=display;
+    applyTelegramPalette(root(),selected,telegramColors);
+    const nativeColors=telegramNativeColors(selected,display,telegramColors);
+    const meta=doc.querySelector('meta[name="theme-color"]');if(meta&&meta.content!==nativeColors.background)meta.content=nativeColors.background;
     doc.querySelectorAll('[data-telegram-theme]').forEach(el=>{el.value=selected;});
-    if(bridge&&lastNativeTheme!==display){
-      lastNativeTheme=display;
-      const bg=display==='light'?'#FFFFFF':'#101827',nav=display==='light'?'#FFFFFF':'#1D2B40';
-      call(bridge,'setHeaderColor',nav);call(bridge,'setBackgroundColor',bg);
-      if(call(bridge,'isVersionAtLeast','7.10'))call(bridge,'setBottomBarColor',nav);
+    const nativeKey=JSON.stringify(nativeColors);
+    if(bridge&&lastNativeTheme!==nativeKey){
+      lastNativeTheme=nativeKey;
+      call(bridge,'setHeaderColor',nativeColors.header);call(bridge,'setBackgroundColor',nativeColors.background);
+      if(call(bridge,'isVersionAtLeast','7.10'))call(bridge,'setBottomBarColor',nativeColors.bottom);
     }
   }
   function syncInsets(){
@@ -78,7 +82,7 @@ export function createRuntimeEnvironment(win=window){
   }
   function diagnostics(){
     if(!isTelegram)return;
-    const values={themeMode:mode(),telegramTheme:telegramTheme||'Не получена',themeSource:mode()!=='auto'?'Ручной выбор':themeSource==='bridge'?'Telegram SDK':themeSource==='launch'?'Параметры Telegram':'Системная (резерв)',appliedTheme:root().dataset.theme,environment:'Telegram Mini App · '+context.platform,bridge:bridgeStatus==='ready'?'Подключён':bridgeStatus==='unavailable'?'Недоступен · резервный режим':'Подключение…',sw:sw?'API доступен':'Недоступен',cache:cacheStorage?'API доступен':'Недоступен',retention:retention==='retained'?'Предыдущая копия обнаружена':retention==='missing'?'Предыдущая копия не обнаружена':retention==='checking'?'Проверяем…':'Нет данных о предыдущем запуске'};
+    const values={palette:root().dataset.telegramPalette==='active'?'Цвета Telegram':'Фирменная палитра',background:root().dataset.telegramPalette==='active'?telegramColors.bg_color:'—',themeMode:mode(),telegramTheme:telegramTheme||'Не получена',themeSource:mode()!=='auto'?'Ручной выбор':themeSource==='bridge'?'Telegram SDK':themeSource==='launch'?'Параметры Telegram':'Системная (резерв)',appliedTheme:root().dataset.theme,environment:'Telegram Mini App · '+context.platform,bridge:bridgeStatus==='ready'?'Подключён':bridgeStatus==='unavailable'?'Недоступен · резервный режим':'Подключение…',sw:sw?'API доступен':'Недоступен',cache:cacheStorage?'API доступен':'Недоступен',retention:retention==='retained'?'Предыдущая копия обнаружена':retention==='missing'?'Предыдущая копия не обнаружена':retention==='checking'?'Проверяем…':'Нет данных о предыдущем запуске'};
     for(const [key,value] of Object.entries(values))doc.querySelectorAll('[data-runtime-value="'+key+'"]').forEach(el=>{el.textContent=value;});
   }
   function sync(){if(isTelegram){syncTheme();syncInsets();diagnostics();}}
@@ -87,11 +91,14 @@ export function createRuntimeEnvironment(win=window){
     if(bridge===candidate)return true;
     bridge=candidate;bridgeStatus='ready';
     const update=(confirmed=false)=>{
+      const colors=sanitizeTelegramPalette(bridge.themeParams);
+      if(colors.bg_color)telegramColors=colors;
       const next=readBridgeTheme(bridge,telegramTheme,confirmed);
       if(next&&(confirmed||themeFromParams(bridge.themeParams))){telegramTheme=next;themeSource='bridge';}
       save();syncTheme();diagnostics();
     };
     call(bridge,'onEvent','themeChanged',()=>update(true));
+    call(bridge,'onEvent','activated',()=>{update(false);requestTheme();});
     update(false);
     requestTheme();
     for(const event of ['safeAreaChanged','contentSafeAreaChanged','viewportChanged','fullscreenChanged'])call(bridge,'onEvent',event,syncInsets);
@@ -117,7 +124,7 @@ export function createRuntimeEnvironment(win=window){
   if(isTelegram){
     save();sync();
     doc.addEventListener('astro:after-swap',sync);doc.addEventListener('astro:page-load',sync);
-    const resume=()=>{if(!bridge)loadBridge();else{const next=readBridgeTheme(bridge,telegramTheme);if(next&&themeFromParams(bridge.themeParams)){telegramTheme=next;themeSource='bridge';save();}requestTheme();}sync();};
+    const resume=()=>{if(!bridge)loadBridge();else{const colors=sanitizeTelegramPalette(bridge.themeParams);if(colors.bg_color)telegramColors=colors;const next=readBridgeTheme(bridge,telegramTheme);if(next&&themeFromParams(bridge.themeParams)){telegramTheme=next;themeSource='bridge';save();}requestTheme();}sync();};
     win.addEventListener('pageshow',resume);win.addEventListener('online',resume);
     doc.addEventListener('visibilitychange',()=>{if(doc.visibilityState==='visible')resume();});
     win.addEventListener('focus',resume);
