@@ -17,6 +17,8 @@ try {
   await context.route('https://www.youtube-nocookie.com/**',route=>{providerRequests++;return route.fulfill({contentType:'text/html',body:'<html><body>Video fixture</body></html>'});});
   const page=await context.newPage();
   await page.goto(origin);
+  assert.equal(await page.evaluate(()=>document.documentElement.dataset.runtimeEnvironment),undefined,'Browser must not be treated as Telegram');
+  assert.equal(await page.locator('.telegram-menu-tools').isVisible(),false,'Telegram menu is hidden outside Mini App');
   async function assertGlobalSearch(){
     assert.equal(await page.locator('#festival-search-dialog').count(),1);
     await page.locator('[data-search-open]').click();
@@ -314,6 +316,45 @@ try {
     return {status:response.status,bytes:(await response.arrayBuffer()).byteLength,range:response.headers.get('content-range')};
   },audio);
   assert.equal(range.status,206);assert.equal(range.bytes,128);assert.match(range.range,/^bytes 0-127\//);
+  const tgContext=await browser.newContext({viewport:{width:390,height:844}});
+  try{
+    await tgContext.addInitScript(()=>{
+      const handlers=new Map();window.__tgReady=0;
+      window.Telegram={WebApp:{platform:'android',version:'9.0',initData:'fixture',colorScheme:'dark',
+        contentSafeAreaInset:{top:0,bottom:0,left:0,right:0},safeAreaInset:{top:0,bottom:0,left:0,right:0},
+        onEvent(name,fn){handlers.set(name,fn);},ready(){window.__tgReady++;},setHeaderColor(){},setBackgroundColor(){},setBottomBarColor(){},isVersionAtLeast(){return true;}}};
+      window.__tgTheme=theme=>{Telegram.WebApp.colorScheme=theme;handlers.get('themeChanged')?.();};
+    });
+    const tg=await tgContext.newPage();
+    await tg.goto(origin+'/#'+new URLSearchParams({tgWebAppPlatform:'android',tgWebAppVersion:'9.0',tgWebAppThemeParams:JSON.stringify({bg_color:'#101827'})}));
+    await tg.waitForFunction(()=>document.documentElement.dataset.runtimeEnvironment==='telegram'&&document.documentElement.dataset.theme==='dark');
+    await tg.locator('.festival-brand-label').waitFor({state:'hidden'});
+    assert.equal(await tg.locator('#festival-search-dialog').count(),1);
+    assert.equal(await tg.locator('.app-nav > a,.app-nav > details').count(),4);
+    await tg.locator('.more-menu > summary').click();
+    await tg.locator('.telegram-menu-tools [data-search-open]').click();
+    await tg.locator('#festival-search-input').fill('Квашня');
+    await tg.locator('#festival-search-results a[href*="/songs/"]').first().waitFor({state:'visible'});
+    await tg.keyboard.press('Escape');
+    await tg.locator('.more-menu > summary').click();
+    await tg.locator('[data-telegram-theme]').selectOption('light');
+    await tg.waitForFunction(()=>document.documentElement.dataset.theme==='light');
+    await tg.evaluate(()=>window.__tgTheme('dark'));
+    assert.equal(await tg.evaluate(()=>document.documentElement.dataset.theme),'light');
+    await tg.locator('[data-telegram-theme]').selectOption('auto');
+    await tg.waitForFunction(()=>document.documentElement.dataset.theme==='dark');
+    await tg.evaluate(()=>window.__tgTheme('light'));
+    await tg.waitForFunction(()=>document.documentElement.dataset.theme==='light');
+    await tg.locator('.app-nav a[href="/songs/"]').click();
+    await tg.waitForURL('**/songs/');
+    await tg.waitForFunction(()=>document.documentElement.dataset.runtimeEnvironment==='telegram'&&document.documentElement.dataset.theme==='light');
+    await tg.locator('.more-menu > summary').click();
+    await tg.locator('.more-links a[href="/offline/"]').click();
+    await tg.waitForURL('**/offline/');
+    await tg.locator('.telegram-runtime-diagnostics').waitFor({state:'visible'});
+    assert.match(await tg.locator('[data-runtime-value="environment"]').innerText(),/Telegram Mini App/);
+    assert.equal(await tg.evaluate(()=>window.__tgReady),1,'One bridge lifecycle across SPA');
+  }finally{await tgContext.close();}
   await context.close();
   console.log('SPA, search and complete offline audio smoke test passed.');
 } finally {

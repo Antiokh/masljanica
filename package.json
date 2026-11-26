@@ -12,7 +12,7 @@
     "prebuild": "node scripts/generate-content.mjs",
     "build": "astro build && node scripts/build-offline.mjs",
     "preview": "astro preview",
-    "test": "node scripts/validate-data.mjs && node scripts/test-pwa-daily.mjs && node scripts/test-navigation-cache.mjs && node scripts/test-offline-transaction.mjs && node scripts/test-home-season.mjs"
+    "test": "node scripts/validate-data.mjs && node scripts/test-pwa-daily.mjs && node scripts/test-navigation-cache.mjs && node scripts/test-offline-transaction.mjs && node scripts/test-home-season.mjs && node scripts/test-runtime-environment.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.35.0",

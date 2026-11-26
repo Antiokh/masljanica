@@ -92,6 +92,10 @@ SSR содержит data-embed-src, но не внешний iframe src. Root d
 
 Сохраняем сгенерированный Pagefind index и API, а не только фильтр названий. Build проверяет наличие pagefind.js и pagefind-entry.json в манифесте. Pagefind добавляет cache-busting query к pagefind-entry.json; SW обслуживает этот конкретный URL по canonical path и ревизии сборки. Исключение не распространяется на произвольные JSON или API. Готовая копия должна поддерживать первый холодный поиск без сети. Runtime не зависит от DOMContentLoaded: SSR поле ввода + единый делегированный контроллер. Проверять реальный результат на desktop/mobile до и после SPA, отсутствие результатов, Escape и cold offline после reload. См. [layout](LAYOUT.md).
 
+## Telegram Mini App
+
+Среда определяется одним runtime adapter; SDK не владеет Cache Storage или PWA state machine. Telegram не получает install offer и не записывает lastStandaloneDate. При доступных Service Worker и Cache Storage применяется тот же протокол capability:2, manifest, staging, Range, consent и auto update. Факт доступности API не считается доказательством сохранённой копии: readiness сообщает только действующий SW. На /offline/ есть диагностика Telegram, SDK, API и наличия копии после предыдущего документного запуска; сравнение опирается на ранее сохранённую отметку готовности и подтверждённый SW status, при отсутствии отметки выводится «Нет данных». Кэш не обещает запуск без сети: Telegram контролирует создание WebView, а клиенты могут очищать данные. SDK и WebView не заменяют обычную PWA. Не переносить initData в localStorage, не добавлять отдельное хранилище настроек без согласованной миграции.
+
 ## Проверки и границы подтверждения
 
 Node 22.12+. Выполнять:

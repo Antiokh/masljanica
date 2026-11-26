@@ -1,3 +1,4 @@
+import { createRuntimeEnvironment } from './runtime-environment.mjs';
 import { installFestivalSearch } from './festival-search.mjs';
 import { installCharacterDialogs } from './character-dialogs.mjs';
 import { installHomeSeason } from './home-season.mjs';
@@ -8,12 +9,13 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
 // One global runtime. Astro swaps page DOM, not the document listeners.
 (() => {
  if(window.__masljanicaRuntime)return;window.__masljanicaRuntime=true;
+ const environment=createRuntimeEnvironment();
  installSongList();
  installExternalEmbeds();
  installHomeSeason();
  installCharacterDialogs();
  installFestivalSearch();
- const sw=navigator.serviceWorker;
+ const sw=environment.serviceWorker;
  // Warm the small, frequently used section documents once per controller,
  // without holding up the first paint or triggering media downloads.
  let warmedController=null;
@@ -43,7 +45,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  const set=(k,v)=>{try{localStorage.setItem(k,v);return true;}catch{return false;}};
  const accepted=()=>get(KEYS.storageNoticeAck)==='1';
  const automatic=()=>get(PREF)==='enabled';
- const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+ const standalone=environment.isStandalone;
  const noteStandalone=()=>{if(standalone())set(KEYS.lastStandaloneDate,localDayKey());};
  const presentation=installPwaPresentation({onOpen:()=>{send('OFFLINE_STATUS');checkVersion();render();}});
  const startDownload=()=>{
@@ -55,8 +57,8 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
    if(!accepted()||!verified||!sw?.controller||state.progress||state.deleting||!navigator.onLine||error)return;
    const stale=!!(state.ready&&latest&&latest.version!==state.version);
    const result=resolvePwaDailyState({
-     storageAccepted:true,isStandalone:standalone(),lastStandaloneDate:get(KEYS.lastStandaloneDate),
-     dailyOffer:get(KEYS.dailyOffer),installPromptAvailable:!!installPrompt,
+     storageAccepted:true,isStandalone:standalone()||environment.isTelegram,lastStandaloneDate:get(KEYS.lastStandaloneDate),
+     dailyOffer:get(KEYS.dailyOffer),installPromptAvailable:environment.canOfferInstall()&&!!installPrompt,
      offlinePackCapabilityAvailable:verified,offlineCopyAvailable:state.ready,
      offlineCopyStale:stale,offlineAutoUpdateEnabled:automatic()&&!!latest
    });
@@ -72,7 +74,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
      if(document.querySelector('#pwa-offer')&&set(KEYS.dailyOffer,serializeDailyOffer(result.state)))offer=result.state;
    }
  }
- window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;resolveOffer();render();});
+ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();if(!environment.canOfferInstall())return;installPrompt=e;resolveOffer();render();});
  window.addEventListener('appinstalled',()=>{installPrompt=null;offer=null;render();});
 
  const fmt=n=>((n||0)/1e6).toFixed(1).replace('.',',')+' МБ';
@@ -101,8 +103,9 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
    if(prompt)prompt.hidden=!accepted()||!offer||busy||deleting;
    if(message&&offer)message.textContent=offer==='install'?'Установите Масляницу на устройство.':(offer==='offline-download'?'Скачайте материалы праздника':'Доступна новая версия материалов')+(latest?' · '+fmt(latest.bytes):'')+'.';
    if(action&&offer)action.textContent=offer==='install'?'Установить':offer==='offline-download'?'Скачать':'Обновить';
-   presentation.render({online:navigator.onLine,standalone:standalone(),readiness,ready:state.ready,stale:!!stale,busy,deleting,checking,progress:state.progress,automatic:automatic(),canChange:accepted()&&verified&&!deleting,canDelete:verified&&!busy&&!deleting&&(state.ready||state.staging),canDownload:accepted()&&verified&&!busy&&!deleting&&!checking&&navigator.onLine,error});
+   presentation.render({online:navigator.onLine,standalone:standalone(),launchLabel:environment.launchLabel(),readiness,ready:state.ready,stale:!!stale,busy,deleting,checking,progress:state.progress,automatic:automatic(),canChange:accepted()&&verified&&!deleting,canDelete:verified&&!busy&&!deleting&&(state.ready||state.staging),canDownload:accepted()&&verified&&!busy&&!deleting&&!checking&&navigator.onLine,error});
 
+   environment.observeCopy({verified,ready:state.ready,version:state.version});
    document.documentElement.dataset.offlineReady=String(state.ready);
    document.documentElement.dataset.offlineReadiness=readiness;
    if(label)label.textContent=error||(!sw?'Офлайн-режим не поддерживается.':registrationFailed?'Не удалось запустить Service Worker.':!sw.controller?'Подключение Service Worker…':busy?'Загрузка: '+state.progress.done+' из '+(state.progress.total||'…')+' файлов':state.ready?(stale?'Доступно обновление. Старая копия сохранена.':'Офлайн-копия готова.'):'Полная копия ещё не скачана.');
@@ -126,7 +129,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
    if(target?.closest('#pwa-offer-dismiss')){offer=null;render();}
    if(target?.closest('#pwa-offer-action')){
      const current=offer;offer=null;render();
-     if(current==='install'&&installPrompt){const p=installPrompt;installPrompt=null;p.prompt().catch(()=>{});}
+     if(current==='install'&&environment.canOfferInstall()&&installPrompt){const p=installPrompt;installPrompt=null;p.prompt().catch(()=>{});}
      if(current==='offline-download'){set(PREF,'enabled');startDownload();}else if(current==='offline-update')startDownload();
    }
  });
@@ -140,7 +143,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
    render();
  });
  function pageLoad(){
-   syncTheme();refreshCatalog();render();
+   environment.sync();syncTheme();refreshCatalog();render();
    noteStandalone();if(!verified)send('OFFLINE_STATUS');resolveOffer();render();warmNavigation();
  }
  document.addEventListener('astro:page-load',pageLoad);

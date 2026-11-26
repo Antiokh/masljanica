@@ -18,12 +18,13 @@ export function installFestivalSearch(){
   function close(restore=true){
     const d=current();if(!d)return;
     invalidate();d.close();
-    if(restore&&opener?.isConnected)opener.focus({preventScroll:true});
+    if(restore&&opener?.isConnected){const target=opener.closest('details:not([open])')?.querySelector('summary')||opener;target.focus({preventScroll:true});}
     opener=null;
   }
   function open(trigger){
     const d=dialog();if(!d||d.open)return;
-    reset(d);opener=trigger||document.querySelector('[data-search-open]');
+    reset(d);opener=trigger||[...document.querySelectorAll('[data-search-open]')].find(el=>el.getClientRects().length)||document.querySelector('.more-menu > summary');
+    const menu=opener?.closest('.more-menu');if(menu)menu.open=false;
     d.showModal();document.documentElement.classList.add('festival-search-open');
     d.querySelector('input').focus({preventScroll:true});
     // Warm on intent, not during navigation. Failure is reported on an actual query.

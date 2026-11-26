@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import { parseTelegramLaunch, detectTelegram, resolveTheme, themeMode, copyRetention, createRuntimeEnvironment } from '../public/runtime-environment.mjs';
+const origin='https://example.com/';
+const make=(platform='android',bg='#101827')=>origin+'#'+new URLSearchParams({tgWebAppPlatform:platform,tgWebAppVersion:'9.0',tgWebAppThemeParams:JSON.stringify({bg_color:bg})});
+assert.deepEqual(parseTelegramLaunch(make()),{platform:'android',version:'9.0',theme:'dark'});
+assert.equal(parseTelegramLaunch(make('ios','#FFFFFF')).theme,'light');
+assert.equal(parseTelegramLaunch(origin+'#song-title'),null);
+assert.equal(parseTelegramLaunch(origin+'?tgWebAppPlatform=android'),null);
+assert.equal(parseTelegramLaunch(make('unknown')),null);
+assert.equal(detectTelegram({url:origin,api:{platform:'android',version:'9.0',colorScheme:'dark',initData:''}}),null);
+assert.equal(detectTelegram({url:origin,session:{platform:'ios',version:'9.0',theme:'dark'}}).platform,'ios');
+for(const system of ['light','dark'])for(const telegram of ['light','dark',null]){
+  assert.equal(resolveTheme('auto',system,telegram),telegram||system);
+  for(const explicit of ['light','dark'])assert.equal(resolveTheme(explicit,system,telegram),explicit);
+}
+assert.equal(themeMode(''),'auto');assert.equal(themeMode('bad'),'auto');
+assert.equal(copyRetention('v1',false,false),'checking');
+assert.equal(copyRetention(null,true,true),'unknown');
+assert.equal(copyRetention('v1',true,true),'retained');
+assert.equal(copyRetention('v1',true,false),'missing');
+const sw={};const win={location:{href:origin},document:{},navigator:{serviceWorker:sw},matchMedia:()=>({matches:false}),sessionStorage:{getItem:()=>null},localStorage:{getItem:()=>null}};
+const env=createRuntimeEnvironment(win);
+assert.equal(env.isTelegram,false);assert.equal(env.serviceWorker,sw);assert.equal(env.canOfferInstall(),true);assert.equal(env.launchLabel(),'Браузер');
+console.log('Runtime environment isolation, launch detection, theme priority and retention checks passed.');
