@@ -1,10 +1,10 @@
 // One attached audio element, independent of accordion visibility.
 // Queue order is the catalog order, then the archived variants of each song.
 export function installSongList(){
-  let audio=null,queue=[],index=-1,attempt=0;
+  let audio=null,queue=[],index=-1,attempt=0,pendingSeek=null;
   const selectedBySong=new Map();
   const fmt=seconds=>Math.floor(Math.max(0,seconds)/60)+':'+String(Math.floor(Math.max(0,seconds)%60)).padStart(2,'0');
-  const progress=()=>Number.isFinite(audio?.duration)&&audio.duration>0?Math.min(100,Math.max(0,audio.currentTime/audio.duration*100)):0;
+  const progress=()=>pendingSeek!==null?pendingSeek*100:Number.isFinite(audio?.duration)&&audio.duration>0?Math.min(100,Math.max(0,audio.currentTime/audio.duration*100)):0;
   const rows=()=>[...document.querySelectorAll('.song-row')];
   const active=()=>queue[index];
   function showError(message=''){
@@ -24,11 +24,22 @@ export function installSongList(){
         const n=Number(variant.dataset.variant),isSelected=n===selected,isCurrent=current&&track.variant===n;
         variant.dataset.selected=String(isSelected);
         variant.dataset.playing=String(isCurrent&&playing);
-        variant.setAttribute('aria-pressed',String(isSelected));
-        variant.setAttribute('aria-label',((isCurrent&&playing)?'Пауза: ':'Воспроизвести: ')+'запись '+(n+1)+' — '+row.dataset.song);
+        const toggle=variant.querySelector('.song-variant-toggle');
+        toggle?.setAttribute('aria-pressed',String(isSelected));
+        toggle?.setAttribute('aria-label',((isCurrent&&playing)?'Пауза: ':'Воспроизвести: ')+'запись '+(n+1)+' — '+row.dataset.song);
+        const info=variant.querySelector('.song-variant-info');if(info)info.inert=!isSelected;
         variant.style.setProperty('--song-progress',isCurrent?String(progress()):'0');
         const time=variant.querySelector('.song-variant-time');
-        if(time){const total=Number(time.dataset.duration)||0;time.textContent=isCurrent?fmt(audio.currentTime)+' / '+fmt(Number.isFinite(audio.duration)?audio.duration:total):fmt(total);}
+        const total=isCurrent&&Number.isFinite(audio.duration)?audio.duration:Number(time?.dataset.duration)||0;
+        const position=isCurrent?(pendingSeek!==null?pendingSeek*total:audio.currentTime):0;
+        if(time)time.textContent=isCurrent?fmt(position)+' / '+fmt(total):fmt(total);
+        const seek=variant.querySelector('.song-seek');
+        if(seek){
+          const percent=isCurrent?progress():0;
+          seek.value=String(Math.round(percent*10));
+          seek.style.setProperty('--seek-progress',percent+'%');
+          seek.setAttribute('aria-valuetext',fmt(position)+' / '+fmt(total));
+        }
       }
     }
   }
@@ -36,7 +47,7 @@ export function installSongList(){
     const next=document.getElementById('song-player-audio');
     if(next===audio)return;
     if(audio){attempt++;audio.pause();}
-    audio=next;index=-1;queue=[];selectedBySong.clear();
+    audio=next;index=-1;queue=[];pendingSeek=null;selectedBySong.clear();
     if(!audio)return;
     for(const row of rows()){
       let tracks;try{tracks=JSON.parse(row.dataset.tracks||'[]');}catch{continue;}
@@ -61,7 +72,7 @@ export function installSongList(){
   }
   function select(next,autoplay=true){
     if(!audio||next<0||next>=queue.length)return;
-    attempt++;
+    attempt++;pendingSeek=null;
     audio.pause();index=next;selectedBySong.set(queue[index].song,queue[index].variant);
     // Assign only same-origin archived MP3 URLs. No old hosting fallback.
     audio.src=queue[index].src;
@@ -71,11 +82,11 @@ export function installSongList(){
   }
   document.addEventListener('click',e=>{
     const target=e.target instanceof Element?e.target:null;
-    const button=target?.closest('.song-play,.song-variant');
+    const button=target?.closest('.song-play,.song-variant-toggle');
     if(!button)return;
     bind();if(!audio)return;
     const row=button.closest('.song-row');
-    const variant=button.matches('.song-variant')?Number(button.dataset.variant):(selectedBySong.get(row.id)??0);
+    const variant=button.matches('.song-variant-toggle')?Number(button.closest('.song-variant').dataset.variant):(selectedBySong.get(row.id)??0);
     const next=queue.findIndex(t=>t.song===row.id&&t.variant===variant);
     if(next<0)return;
     if(index===next){
@@ -83,8 +94,27 @@ export function installSongList(){
       else{attempt++;audio.pause();sync();}
     }else select(next);
   });
+  function applySeek(){
+    if(pendingSeek===null||!audio||!Number.isFinite(audio.duration)||audio.duration<=0)return;
+    const fraction=pendingSeek;
+    try{audio.currentTime=Math.min(audio.duration*fraction,Math.max(0,audio.duration-.01));pendingSeek=null;}catch{}
+  }
+  document.addEventListener('input',e=>{
+    const slider=e.target;
+    if(!(slider instanceof HTMLInputElement)||!slider.matches('.song-seek'))return;
+    const fraction=Math.min(1,Math.max(0,Number(slider.value)/1000));
+    const variant=slider.closest('.song-variant'),row=slider.closest('.song-row');
+    if(variant?.dataset.selected!=='true'||!row)return;
+    bind();
+    const next=queue.findIndex(t=>t.song===row.id&&t.variant===Number(variant.dataset.variant));
+    if(next<0)return;
+    // Scrubbing a previously idle recording prepares it without autoplay.
+    if(index!==next)select(next,false);
+    pendingSeek=fraction;applySeek();sync();
+  });
   for(const event of ['play','playing','pause','ended','emptied','error','timeupdate','loadedmetadata','durationchange'])document.addEventListener(event,e=>{
     if(e.target!==audio)return;
+    if(event==='loadedmetadata'||event==='durationchange')applySeek();
     if(event==='ended'&&index+1<queue.length){select(index+1);return;}
     if(event==='error'&&active())showError('Локальная запись недоступна. Проверьте подключение или офлайн-копию.');
     sync();
