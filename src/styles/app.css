@@ -18,7 +18,7 @@
   --sl-color-accent-low: #3B2634;
   --sl-color-accent: #F18A76;
   --sl-color-accent-high: #FFD4C8;
-  --festival-action: #AD343D;
+  --festival-action: #C32935;
   --festival-gold: #EBC47B;
   --festival-surface: #1D2B40;
   --festival-hero: #172840;
@@ -410,4 +410,68 @@ html[data-network="offline"] [data-online-only] { display:none!important; }
  .song-list .song-variant-meta { gap:.15rem; }
  .song-list .song-variant-title { font-size:.68rem; }
  .song-list .song-variant-time { font-size:.65rem; }
+}
+
+/* Strong, shared action palette. Reserve low accents for hover and secondary surfaces. */
+:root {
+  --festival-selected: #B5232C;
+  --festival-selected-text: #FFFFFF;
+  --festival-control-border: #546780;
+  --festival-control-text: #E2E8F0;
+}
+:root[data-theme='light'] {
+  --festival-selected: #B5232C;
+  --festival-selected-text: #FFFFFF;
+  --festival-control-border: #B6C4D1;
+  --festival-control-text: #243344;
+}
+.app-nav > a[aria-current], .app-nav > .more-menu[data-active] > summary {
+  background:var(--festival-selected);
+  color:var(--festival-selected-text);
+}
+.song-list .song-play:not(:disabled) {
+  background:var(--festival-selected);
+  color:var(--festival-selected-text);
+}
+.song-list .song-variant {
+  color:var(--festival-control-text);
+  box-shadow:inset 0 0 0 1px var(--festival-control-border);
+}
+.song-list .song-variant[data-selected=true] {
+  background:var(--festival-selected);
+  color:var(--festival-selected-text);
+  box-shadow:none;
+}
+.song-list .song-variant[data-playing=true], .song-list .song-play[data-playing=true] {
+  background:var(--festival-action);
+  color:var(--festival-on-action);
+}
+.song-list .song-variant-toggle { color:inherit; }
+.song-list .song-variant-info {
+  display:grid;
+  container-type:inline-size;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  justify-content:stretch;
+  gap:.6rem;
+}
+.song-list .song-variant-meta { display:contents; }
+.song-list .song-variant-title { grid-column:1; grid-row:1; color:inherit; }
+.song-list .song-seek { grid-column:2; grid-row:1; align-self:center; color:inherit; }
+.song-list .song-variant-time { grid-column:3; grid-row:1; color:inherit; }
+.song-list .song-seek::-webkit-slider-runnable-track { height:.24rem; }
+.song-list .song-seek::-webkit-slider-thumb { width:.7rem; height:.7rem; margin-top:-.23rem; }
+.song-list .song-seek::-moz-range-track,.song-list .song-seek::-moz-range-progress { height:.24rem; }
+.song-list .song-seek::-moz-range-thumb { width:.7rem; height:.7rem; }
+.song-list .song-ring-track { opacity:.35; }
+@container (max-width: 190px) {
+  .song-list .song-variant-title { grid-column:1 / -1; grid-row:1; font-size:.7rem; line-height:1; }
+  .song-list .song-seek { grid-column:1 / -1; grid-row:2; height:1rem; }
+  .song-list .song-variant-time { grid-column:1 / -1; grid-row:3; font-size:.65rem; line-height:1; }
+}
+/* Keep the scrubber on the vertical centre even in the five-variant mobile layout. */
+.song-list .song-variant-info { row-gap:0; }
+@media(max-width:420px) {
+  .song-list .song-variant { flex-basis:2.5rem; height:2.5rem; }
+  .song-list .song-variant-toggle { flex-basis:2.5rem; width:2.5rem; height:2.5rem; }
 }
