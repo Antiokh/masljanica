@@ -9,5 +9,11 @@ for(const name of ['songs','games','characters','scenario','parts','ditties','sc
 }
 const actors=read('characters'),songs=read('songs'),parts=read('parts');
 for(const row of read('scenario')) {assert(actors.some(x=>x.id===row.actor),'Actor '+row.order);assert(parts.some(x=>x.number===row.part),'Part '+row.order);if(row.song)assert(songs.some(x=>x.id===row.song),'Song '+row.order);}
-assert(/^\d{4}-\d{2}-\d{2}$/.test(read('event').date),'Invalid event date');
+const event=read('event');
+assert(typeof event.address==='string'&&event.address.trim(),'Event address');
+assert(typeof event.coords==='string'&&/^-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?$/.test(event.coords),'Event coordinates');
+for(const item of read('schedule')){
+  assert(/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(item.start),'Invalid start time '+item.slug);
+  assert(/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(item.end)&&item.end>item.start,'Invalid end time '+item.slug);
+}
 console.log('Public content validation passed.');

@@ -1,3 +1,4 @@
+import { installHomeSeason } from './home-season.mjs';
 import { installPwaPresentation } from './pwa-presentation.mjs';
 import { installExternalEmbeds } from './external-embeds.mjs';
 import { installSongList } from './song-list.mjs';
@@ -7,6 +8,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  if(window.__masljanicaRuntime)return;window.__masljanicaRuntime=true;
  installSongList();
  installExternalEmbeds();
+ installHomeSeason();
  const sw=navigator.serviceWorker;
  // Warm the small, frequently used section documents once per controller,
  // without holding up the first paint or triggering media downloads.

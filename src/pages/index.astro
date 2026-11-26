@@ -1,27 +1,76 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { frontmatter } from '../data/home.md';
 import event from '../data/event.json';
 import schedule from '../data/schedule.json';
 import characters from '../data/characters.json';
-const time = (value: string) => { const m=value.match(/(\d+):(\d+):\d+\s*(AM|PM)/); return m ? String((Number(m[1])%12)+(m[3]==='PM'?12:0)).padStart(2,'0')+':'+m[2] : value; };
+import songs from '../data/songs.json';
+import games from '../data/games.json';
+import { validEventDate, calendarDay } from '../../public/home-season.mjs';
+
+const config = frontmatter.event;
+if (!config || typeof config.enabled !== 'boolean' || typeof config.schedule !== 'boolean' || !validEventDate(config.date) || typeof config.timezone !== 'string') throw new Error('Invalid event frontmatter in src/data/home.md');
+calendarDay(new Date(), config.timezone); // Validate timezone at build time.
+const dateLabel = new Intl.DateTimeFormat('ru-RU', { day:'numeric', month:'long', timeZone:'UTC' }).format(new Date(config.date+'T00:00:00Z'));
+const year = config.date.slice(0,4);
+const items = [...schedule].sort((a,b)=>a.start.localeCompare(b.start));
+const timeLabel = items.length ? items[0].start+'–'+items.reduce((last,x)=>x.end>last?x.end:last,'') : '';
+const sections = [
+  {href:'/songs/',title:'Песни',description:songs.length+' народных песен',icon:'M9 18V5l12-2v13M9 18a3 3 0 1 1-3-3h3m12 1a3 3 0 1 1-3-3h3'},
+  {href:'/games/',title:'Игры',description:games.length+' народная игра',icon:'M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4z M7.5 7.5h.01M16.5 7.5h.01M12 12h.01M7.5 16.5h.01M16.5 16.5h.01'},
+  {href:'/scenario/',title:'Сказ',description:'Сценарий праздника',icon:'M12 7C9 4 5 4 2 5v15c4-1 7-1 10 2 3-3 6-3 10-2V5c-3-1-7-1-10 2zm0 0v15'},
+  {href:'/workshops/',title:'Мастера',description:'Мастер-классы',icon:'M12 3a9 9 0 1 0 0 18h1.5a1.5 1.5 0 0 0 0-3 1.5 1.5 0 0 1 0-3H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8zM7 11h.01M10 7h.01M15 7h.01M18 10h.01'}
+];
+const people = characters.filter(x=>x.show);
 ---
-<StarlightPage frontmatter={{title:'Избушка',template:'splash',description:'Масляница в Белграде: программа, песни, игры и народные традиции.'}}>
-  <section class="event-hero">
-    <h2>Масляница 2027 · Белград</h2>
-    <p>14 марта 2027 года · 11:30–16:00</p>
-    <p>{event.address}</p>
-    <a class="app-button" href={'https://www.google.com/maps?q='+encodeURIComponent(event.coords)} target="_blank" rel="noopener">Место проведения</a>
-  </section>
-  <h2>Программа праздника</h2>
-  {schedule.map(item => <div class="schedule-row"><div><strong>{item.title}</strong>{item.classes && <div><a href="/workshops/">Мастер-классы →</a></div>}</div><small>{time(item.start)}–{time(item.end)}</small></div>)}
-  <h2>Наша масляница</h2>
-  <p>Скоморох, Баба Яга, Весна, Зима и Масляница встречают гостей на театрализованном народном празднике.</p>
-  <p><a href="/scenario/">Читать сценарий →</a></p>
-  <div class="app-grid">
-    <a class="app-card" href="/songs/"><strong>Песни</strong><small>Тексты и записи</small></a>
-    <a class="app-card" href="/games/"><strong>Игры</strong><small>Правила и видео</small></a>
+<StarlightPage frontmatter={{title:frontmatter.title,template:'splash',description:'Масляница в Белграде: программа, песни, игры и народные традиции.'}}>
+  <div class="home-dashboard" data-home-dashboard data-event-enabled={String(config.enabled)} data-event-date={config.date} data-event-timezone={config.timezone} data-schedule-enabled={String(config.schedule)}>
+    <section class="home-hero" aria-labelledby="home-title">
+      <div class="home-hero-copy">
+        <p class="home-kicker">Народный праздник в Белграде</p>
+        <h2 id="home-title">Масляница<span data-home-season="event" data-pagefind-ignore hidden> {year}</span></h2>
+        <p class="home-intro" data-home-timeless>Песни, игры, сказ и народные традиции.</p>
+        <div class="home-event-meta" data-home-season="event" data-pagefind-ignore hidden>
+          <p class="home-event-date"><time datetime={config.date}>{dateLabel}</time>{timeLabel && <span> · {timeLabel}</span>}</p>
+          <p class="home-event-address">{event.address}</p>
+          <a class="home-location" data-online-only hidden href={'https://www.google.com/maps?q='+encodeURIComponent(event.coords)} target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg> Место проведения
+          </a>
+        </div>
+      </div>
+      <div class="home-hero-art" aria-hidden="true"><img src="/icon.svg" alt="" width="112" height="112"/></div>
+    </section>
+    <div class="home-main">
+      <section class="home-sections" aria-label="Материалы праздника">
+        <div class="home-section-heading"><h2>В нашей избушке</h2></div>
+        <div class="home-section-grid">
+          {sections.map(item=><a class="home-section-card" href={item.href} data-astro-prefetch="hover">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={item.icon}/></svg>
+            <div><strong>{item.title}</strong><small>{item.description}</small></div>
+          </a>)}
+        </div>
+      </section>
+      {items.length>0 && <section class="home-program" aria-labelledby="home-program-title" data-home-season="schedule" data-pagefind-ignore hidden>
+        <div class="home-section-heading"><h2 id="home-program-title">Программа праздника</h2><span>{dateLabel}</span></div>
+        <ol class="home-timeline">
+          {items.map(item=><li><time>{item.start}</time><div><strong>{item.title}</strong>{item.classes && <a href="/workshops/">Мастер-классы</a>}</div></li>)}
+        </ol>
+      </section>}
+    </div>
+    <section class="home-characters" aria-labelledby="home-characters-title">
+      <div class="home-section-heading"><h2 id="home-characters-title">Герои нашего сказа</h2><a href="/characters/">Все персонажи →</a></div>
+      <div class="home-character-grid">
+        {people.map(x=><a class="home-character-card" href={'/characters/'+x.slug+'/'} data-astro-prefetch="hover">
+          <span class="home-portrait"><span aria-hidden="true">{x.title.slice(0,1)}</span>{x.image && <img data-home-character-src={x.image} alt="" loading="lazy" hidden/>}</span>
+          <strong>{x.title}</strong>
+        </a>)}
+      </div>
+    </section>
+    <section class="home-traditions">
+      <h2>Наша масляница</h2>
+      <p>Провожаем зиму, встречаем весну, поём народные песни, играем и рассказываем сказ. Скоморох, Баба Яга, Весна, Зима и Масляница встречают гостей на театрализованном народном празднике.</p>
+      <a href="/scenario/">Читать наш сказ →</a>
+    </section>
+    <footer class="home-credit">Разработано Anton Nazarov</footer>
   </div>
-  <h2>Персонажи</h2>
-  <div class="app-grid">{characters.filter(x=>x.show).map(x=><a class="app-card" href={'/characters/'+x.slug+'/'}>{x.image&&<img src={x.image} alt={x.title} loading="lazy"/>}<div><strong>{x.title}</strong><small>{x.description.split('\n')[0]}</small></div></a>)}</div>
-  <p class="muted">Разработано Anton Nazarov</p>
 </StarlightPage>

@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {seasonState,validEventDate,calendarDay} from '../public/home-season.mjs';
+const c={enabled:true,date:'2027-03-14',timezone:'Europe/Belgrade',schedule:true};
+const state=(s,now)=>seasonState(s,new Date(now));
+assert.deepEqual(state(c,'2027-03-13T22:59:59Z'),{event:true,schedule:true});
+assert.deepEqual(state(c,'2027-03-14T22:59:59Z'),{event:true,schedule:true});
+assert.deepEqual(state(c,'2027-03-14T23:00:00Z'),{event:false,schedule:false});
+assert.deepEqual(state({...c,schedule:false},'2027-03-13T00:00:00Z'),{event:true,schedule:false});
+assert.deepEqual(state({...c,enabled:false},'2027-03-13T00:00:00Z'),{event:false,schedule:false});
+assert.deepEqual(state({...c,date:'2027-02-30'},'2027-02-01T00:00:00Z'),{event:false,schedule:false});
+assert.deepEqual(state({...c,timezone:'Invalid'},'2027-03-13T00:00:00Z'),{event:false,schedule:false});
+assert.equal(validEventDate('2028-02-29'),true);
+assert.equal(calendarDay(new Date('2027-07-01T22:00:00Z'),'Europe/Belgrade'),'2027-07-02');
+console.log('Home seasonal date and switches passed.');
