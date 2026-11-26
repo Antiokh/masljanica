@@ -629,3 +629,10 @@ body:has(.home-dashboard) #_top { position:absolute; width:1px; height:1px; over
   .home-character-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
   .home-dashboard { gap:1rem; }
 }
+
+/* Keep the two dashboard columns on shared header and body tracks on wide screens. */
+@media(min-width:60.001rem){
+  .home-main:has(.home-program:not([hidden])) { grid-template-rows:auto 1fr; row-gap:.65rem; }
+  .home-main:has(.home-program:not([hidden])) > :is(.home-sections,.home-program) { grid-row:span 2; grid-template-rows:subgrid; row-gap:inherit; }
+  .home-main:has(.home-program:not([hidden])) > :is(.home-sections,.home-program) > .home-section-heading { margin:0; }
+}

@@ -6,13 +6,13 @@ type Archived={path:string; width:number; height:number};
 const files=archive.files as Record<string,Archived>;
 const people=characters.filter(x=>x.show).map(x=>{
   const file=files[x.image];
-  const src=file?.path && /^\/media\/characters\/[a-f0-9]+\.webp$/.test(file.path) && existsSync(new URL('../../public'+file.path,import.meta.url)) ? file.path : '';
+  const src=file?.path && /^\/media\/characters\/[a-f0-9]+\.webp$/.test(file.path) && existsSync(process.cwd()+'/public'+file.path) ? file.path : '';
   return {...x,src};
 });
 ---
 <div class="home-character-grid" data-character-gallery>
   {people.map(x=><button type="button" class="home-character-card" data-character-open={x.slug} aria-haspopup="dialog" aria-controls={'character-'+x.slug}>
-    <span class="home-character-art" aria-hidden="true">{x.src?<img src={x.src} alt="" width="640" height="640" decoding="async"/>:<span>{x.title.slice(0,1)}</span>}</span>
+    <span class="home-character-art" aria-hidden="true">{x.src?<img src={x.src} alt="" width={files[x.image]?.width||640} height={files[x.image]?.height||640} decoding="async"/>:<span>{x.title.slice(0,1)}</span>}</span>
     <strong>{x.title}</strong>
   </button>)}
   {people.map(x=><dialog class="character-dialog" id={'character-'+x.slug} aria-labelledby={'character-title-'+x.slug} data-character-dialog>

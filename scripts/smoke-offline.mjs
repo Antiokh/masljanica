@@ -43,6 +43,13 @@ try {
   assert.equal(page.url(),urlBefore,'Opening a character must not navigate');
   await page.keyboard.press('Escape');
   await page.locator('dialog[data-character-dialog][open]').waitFor({state:'hidden'});
+  assert.equal(await page.locator('[data-character-open]').first().evaluate(el=>document.activeElement===el),true,'Dialog restores focus');
+  const localPortraits=page.locator('.home-character-art img');
+  for(const img of await localPortraits.all()){
+    assert.match(await img.getAttribute('src'),/^\/media\/characters\/[a-f0-9]+\.webp$/);
+    await img.evaluate(el=>el.decode());
+  }
+
   await page.reload();
   await page.setViewportSize({width:1440,height:900});
   const themeSwitch=page.locator('[data-theme-switch]');
