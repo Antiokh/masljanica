@@ -26,17 +26,9 @@ export function installHomeSeason(){
     const state=seasonState(config);
     root.querySelectorAll('[data-home-season]').forEach(el=>{el.hidden=!state[el.dataset.homeSeason];});
     root.querySelectorAll('[data-home-timeless]').forEach(el=>{el.hidden=state.event;});
-    const online=navigator.onLine;
-    root.querySelectorAll('img[data-home-character-src]').forEach(img=>{
-      if(!online){img.hidden=true;img.removeAttribute('src');}
-      else if(!img.hasAttribute('src')){img.hidden=true;img.src=img.dataset.homeCharacterSrc;}
-      else if(img.complete&&img.naturalWidth>0)img.hidden=false;
-    });
     // An open offline page also expires after midnight without navigation.
     timer=setTimeout(refresh,30000);
   }
-  document.addEventListener('load',e=>{if(e.target instanceof HTMLImageElement&&e.target.matches('[data-home-character-src]')&&navigator.onLine&&e.target.naturalWidth>0)e.target.hidden=false;},true);
-  document.addEventListener('error',e=>{if(e.target instanceof HTMLImageElement&&e.target.matches('[data-home-character-src]'))e.target.hidden=true;},true);
   document.addEventListener('astro:before-swap',()=>clearTimeout(timer));
   document.addEventListener('astro:page-load',refresh);
   window.addEventListener('pageshow',refresh);

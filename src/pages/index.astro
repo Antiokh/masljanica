@@ -3,7 +3,7 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { frontmatter } from '../data/home.md';
 import event from '../data/event.json';
 import schedule from '../data/schedule.json';
-import characters from '../data/characters.json';
+import CharacterGallery from '../components/CharacterGallery.astro';
 import songs from '../data/songs.json';
 import games from '../data/games.json';
 import { validEventDate, calendarDay } from '../../public/home-season.mjs';
@@ -21,7 +21,6 @@ const sections = [
   {href:'/scenario/',title:'Сказ',description:'Сценарий праздника',icon:'M12 7C9 4 5 4 2 5v15c4-1 7-1 10 2 3-3 6-3 10-2V5c-3-1-7-1-10 2zm0 0v15'},
   {href:'/workshops/',title:'Мастера',description:'Мастер-классы',icon:'M12 3a9 9 0 1 0 0 18h1.5a1.5 1.5 0 0 0 0-3 1.5 1.5 0 0 1 0-3H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8zM7 11h.01M10 7h.01M15 7h.01M18 10h.01'}
 ];
-const people = characters.filter(x=>x.show);
 ---
 <StarlightPage frontmatter={{title:frontmatter.title,template:'splash',description:'Масляница в Белграде: программа, песни, игры и народные традиции.'}}>
   <div class="home-dashboard" data-home-dashboard data-event-enabled={String(config.enabled)} data-event-date={config.date} data-event-timezone={config.timezone} data-schedule-enabled={String(config.schedule)}>
@@ -52,24 +51,26 @@ const people = characters.filter(x=>x.show);
       </section>
       {items.length>0 && <section class="home-program" aria-labelledby="home-program-title" data-home-season="schedule" data-pagefind-ignore hidden>
         <div class="home-section-heading"><h2 id="home-program-title">Программа праздника</h2><span>{dateLabel}</span></div>
-        <ol class="home-timeline">
+        <div class="home-program-body"><ol class="home-timeline">
           {items.map(item=><li><time>{item.start}</time><div><strong>{item.title}</strong>{item.classes && <a href="/workshops/">Мастер-классы</a>}</div></li>)}
-        </ol>
+        </ol></div>
       </section>}
     </div>
+    <section class="home-traditions" aria-labelledby="home-story-title">
+  <h2 id="home-story-title">Наша масляница</h2>
+  <p>Сюжет нашей масляницы театрализованный, адаптированный к публике, мало знакомой с традицией.</p>
+  <details class="home-story-details">
+    <summary>Краткая суть сюжета</summary>
+    <p>Во время празднования Масленицы весёлый Скоморох устраивает шумное представление, чем тревожит Бабу Ягу. Разгневанная Яга угрожает проклятиями, если гости не знают традиций праздника. Скоморох вместе со зрителями разгадывает её загадку, заслуживая благосклонность колдуньи. Однако за свою дерзость он получает наказание – развлекать народ песнями и играми.</p>
+    <p>Веселье продолжается, но Масленица так и не появляется. Скоморох обращается за ответом к Бабе Яге, и та вызывает духов Масляницы, Зимы и Весны. Выясняется, что Зима заточила Масляницу, ведь только она может привести Весну.</p>
+    <p>Освободить её можно лишь сожжением чучела, а из его пепла Весна должна испечь блины, чтобы окончательно сменить Зиму.</p>
+    <p>Скоморох собирает дружину, получая помощь от Бабы Яги, лесных духов, а также от Весны, которая приводит птиц и зверей. Зима старается помешать, устраивая испытания – игры на ловкость и силу. Победители получают ленты, дающие силу против Зимы.</p>
+    <a href="/scenario/">Читать полный сказ →</a>
+  </details>
+</section>
     <section class="home-characters" aria-labelledby="home-characters-title">
-      <div class="home-section-heading"><h2 id="home-characters-title">Герои нашего сказа</h2><a href="/characters/">Все персонажи →</a></div>
-      <div class="home-character-grid">
-        {people.map(x=><a class="home-character-card" href={'/characters/'+x.slug+'/'} data-astro-prefetch="hover">
-          <span class="home-portrait"><span aria-hidden="true">{x.title.slice(0,1)}</span>{x.image && <img data-home-character-src={x.image} alt="" loading="lazy" hidden/>}</span>
-          <strong>{x.title}</strong>
-        </a>)}
-      </div>
-    </section>
-    <section class="home-traditions">
-      <h2>Наша масляница</h2>
-      <p>Провожаем зиму, встречаем весну, поём народные песни, играем и рассказываем сказ. Скоморох, Баба Яга, Весна, Зима и Масляница встречают гостей на театрализованном народном празднике.</p>
-      <a href="/scenario/">Читать наш сказ →</a>
+      <div class="home-section-heading"><h2 id="home-characters-title">Герои нашего сказа</h2></div>
+      <CharacterGallery />
     </section>
     <footer class="home-credit">Разработано Anton Nazarov</footer>
   </div>

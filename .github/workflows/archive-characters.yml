@@ -1,0 +1,50 @@
+name: Archive character portraits
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/archive-characters.yml'
+      - 'scripts/archive-characters.py'
+      - 'src/data/characters.json'
+permissions:
+  contents: write
+concurrency:
+  group: archive-characters-main
+  cancel-in-progress: false
+jobs:
+  archive:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install Pillow==11.3.0
+      - run: python scripts/archive-characters.py
+      - name: Commit archive and report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/character-archive.json
+          if [ -n "$(find public/media/characters -name '*.webp' -print -quit)" ]; then
+            git add public/media/characters
+          fi
+          if ! git diff --cached --quiet; then
+            git commit -m "Archive character portraits as local WebP"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      - name: Verify completeness
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          r=json.load(open('src/data/character-archive.json'))
+          print(f"Archived **{r['archived']}/{r['total']}** portraits, {r['bytes']:,} bytes.")
+          for url,e in r['errors'].items(): print(f"- {url}: {e}")
+          if r['errors']: raise SystemExit(1)
+          PY

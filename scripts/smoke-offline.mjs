@@ -30,6 +30,19 @@ try {
   await page.locator('.home-program').waitFor({state:'hidden'});
   await home.evaluate(el=>{el.dataset.scheduleEnabled='true';window.dispatchEvent(new Event('pageshow'));});
   await page.locator('.home-program').waitFor({state:'visible'});
+  await page.setViewportSize({width:1440,height:900});
+  const geometry=await page.evaluate(()=>{
+    const box=s=>document.querySelector(s).getBoundingClientRect();
+    return {heads:box('.home-sections .home-section-heading').top-box('.home-program .home-section-heading').top,top:box('.home-section-grid').top-box('.home-program-body').top,bottom:box('.home-section-grid').bottom-box('.home-program-body').bottom};
+  });
+  assert.ok(Object.values(geometry).every(v=>Math.abs(v)<=1),'Home headings and content edges must align');
+  const character=page.locator('[data-character-open]').first();
+  const urlBefore=page.url();
+  await character.click();
+  await page.locator('dialog[data-character-dialog][open]').waitFor({state:'visible'});
+  assert.equal(page.url(),urlBefore,'Opening a character must not navigate');
+  await page.keyboard.press('Escape');
+  await page.locator('dialog[data-character-dialog][open]').waitFor({state:'hidden'});
   await page.reload();
   await page.setViewportSize({width:1440,height:900});
   const themeSwitch=page.locator('[data-theme-switch]');

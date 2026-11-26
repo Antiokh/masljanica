@@ -26,7 +26,6 @@ function page(section,slug,title,body){
 const songs=read('songs'),games=read('games'),actors=read('characters');
 for(const x of songs)page('songs',x.slug,x.title,media(x)+'<div class="song-lyrics">'+escape(x.lyrics)+'</div>');
 for(const x of games)page('games',x.slug,x.title,escape(x.audience)+'\n\n'+media(x)+x.description);
-for(const x of actors.filter(x=>x.show))page('characters',x.slug,x.title,(url(x.image)?'![Иллюстрация]('+url(x.image)+')\n\n':'')+'<div class="scenario-text">'+escape(x.description)+'</div>');
 for(const x of read('workshops'))page('workshops',x.slug,x.title,(x.host?'Ведущий: '+escape(x.host)+'\n\n':'')+'<div class="scenario-text">'+escape(x.description)+'</div>');
 for(const p of read('parts')) {
  const body=read('scenario').filter(x=>x.part===p.number).map(x=>{
