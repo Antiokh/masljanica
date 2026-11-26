@@ -2,8 +2,16 @@
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import songs from '../data/songs.json';
 import archive from '../data/audio-archive.json';
+import { existsSync } from 'node:fs';
 const files = archive.files as Record<string,{path:string;duration:number}>;
 const ordered = [...songs].sort((a,b)=>a.title.localeCompare(b.title,'ru'));
+function localTrack(url:string) {
+  const track=files[url];
+  if(!track || !/^\/media\/audio\/[a-z0-9_-]+\.mp3$/.test(track.path) || !existsSync(process.cwd()+'/public'+track.path)) {
+    throw new Error('Song audio missing from the local archive: '+url);
+  }
+  return {src:track.path,duration:track.duration};
+}
 function videoURL(value:string) {
   try {
     const u=new URL(value);
@@ -18,12 +26,21 @@ const duration=(seconds:number)=>Math.floor(seconds/60)+':'+String(Math.floor(se
 <StarlightPage frontmatter={{title:'Песни',template:'splash',description:'Песенник Масляницы: слушайте записи и раскрывайте тексты прямо в списке.'}}>
   <div class="catalog-tools"><input id="catalog-search" type="search" placeholder="Найти песню…" aria-label="Поиск по песням"/></div>
   <p id="catalog-empty" hidden>Ничего не найдено.</p>
+  <section id="song-player" class="song-player" aria-label="Плейлист" hidden>
+    <div class="song-player-heading"><strong id="song-player-title"></strong><small id="song-player-position"></small></div>
+    <div class="song-player-controls">
+      <button type="button" data-song-player="previous" aria-label="Предыдущая запись" title="Предыдущая запись"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h2v14H6zm12 0L9 12l9 7z"/></svg></button>
+      <audio id="song-player-audio" controls preload="none" aria-label="Воспроизведение плейлиста"></audio>
+      <button type="button" data-song-player="next" aria-label="Следующая запись" title="Следующая запись"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 5h2v14h-2zM6 5l9 7-9 7z"/></svg></button>
+    </div>
+    <p id="song-player-error" role="status" hidden></p>
+  </section>
   <section class="catalog-group song-list" aria-label="Песенник">
     {ordered.map(song=>{
-      const tracks=song.audio.map(url=>({src:files[url]?.path||url,duration:files[url]?.duration}));
+      const tracks=song.audio.map(localTrack);
       const video=videoURL(song.video);
       return (
-        <article id={song.slug} class="song-row" data-entry data-search={song.title+' '+song.lyrics} data-song={song.title}>
+        <article id={song.slug} class="song-row" data-entry data-search={song.title+' '+song.lyrics} data-song={song.title} data-tracks={JSON.stringify(tracks)}>
           <button type="button" class="song-play" aria-label={'Воспроизвести: '+song.title} data-playing="false" disabled={tracks.length===0}>
             <svg class="song-play-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
             <svg class="song-pause-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="7" y="5.5" width="4" height="13" rx="1"/><rect x="13" y="5.5" width="4" height="13" rx="1"/></svg>
@@ -44,9 +61,7 @@ const duration=(seconds:number)=>Math.floor(seconds/60)+':'+String(Math.floor(se
                       {tracks.map((track,i)=><option value={track.src}>Запись {i+1}{track.duration?' · '+duration(track.duration):''}</option>)}
                     </select>
                   </label>}
-                  <audio class="song-audio" controls preload="none" src={tracks[0].src}></audio>
-                  <p class="song-error" role="status" hidden></p>
-                  <noscript>{tracks.slice(1).map((track,i)=><p><a href={track.src}>Запись {i+2}</a></p>)}</noscript>
+                  <noscript>{tracks.map((track,i)=><p><a href={track.src}>Запись {i+1}</a></p>)}</noscript>
                 </div>
               )}
               {song.lyrics && <div class="song-lyrics">{song.lyrics}</div>}
