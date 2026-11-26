@@ -1,0 +1,194 @@
+{
+  "files": {
+    "https://nsportal.ru/sites/default/files/audio/2020/12/russkaya-narodnaya-igra-dudar.-ispolnyaet-yulya-zagorskaya.mp3.mp3": {
+      "path": "/media/audio/russkaya-narodnaya-igra-dudar--ispolnyaet-yulya-zagorskaya-5f1e2401d5.mp3",
+      "bytes": 1805458,
+      "sha256": "cbcd7d58b578775ced1b636498ef97f3e2039d4dbbc90e131786972f1bb74bb1",
+      "duration": 117.739
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/A_mi_maslenizu_01.mp3": {
+      "path": "/media/audio/a_mi_maslenizu_01-122ac531ef.mp3",
+      "bytes": 988111,
+      "sha256": "fbc084a7bd7701eacaddf655740f3383a8435e899df48aff725f7d27dd553182",
+      "duration": 137.448
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/A_mi_maslenizu_02.mp3": {
+      "path": "/media/audio/a_mi_maslenizu_02-6649b75aca.mp3",
+      "bytes": 1207056,
+      "sha256": "f90ec23e238f7d06cdab65d6d7d2a617d157e884bba5785600f0174f8f1312df",
+      "duration": 179.591
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/A_mi_maslenizu_03.mp3": {
+      "path": "/media/audio/a_mi_maslenizu_03-6a40cc3ca8.mp3",
+      "bytes": 963801,
+      "sha256": "2e23321575db351507677d1efc5f0ee1ce7c1e4a63bb9f40ab6cb2be5c49a81c",
+      "duration": 146.723
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/A_my_Masljanicu_provozhali.mp3": {
+      "path": "/media/audio/a_my_masljanicu_provozhali-bff8305bef.mp3",
+      "bytes": 982496,
+      "sha256": "eb4eccf8fbcddf59edf387fd3a958e8445b7c8c5e305d9f82fb0b7709ffca78f",
+      "duration": 81.875
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Agu_vesna_01.mp3": {
+      "path": "/media/audio/agu_vesna_01-effdbe2f80.mp3",
+      "bytes": 218716,
+      "sha256": "3372941f628cabb26db239b32d28fa7e19aae1ff8ee58bdf0870c80b08860af1",
+      "duration": 35.171
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Agu_vesna_02.mp3": {
+      "path": "/media/audio/agu_vesna_02-a775ba4baf.mp3",
+      "bytes": 193079,
+      "sha256": "32055caeee0140ce101d0566dabade7ef8a85a1102bebfa2bc2093de340e43a9",
+      "duration": 30.005
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Agu_vesna_03.mp3": {
+      "path": "/media/audio/agu_vesna_03-ae84ae927c.mp3",
+      "bytes": 388064,
+      "sha256": "3fe061693cb21264d863b56b42505db6a8d1870774c842276f2e33505a281799",
+      "duration": 32.339
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Bela_riba.mp3": {
+      "path": "/media/audio/bela_riba-95fa42f3b1.mp3",
+      "bytes": 9693610,
+      "sha256": "0d51a11c2e51633efe9a78b20b852e3a1de222fddc291a0dffb8722efb207740",
+      "duration": 403.9
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Blaaslavi_mati_vjasnu_zaklikati.mp3": {
+      "path": "/media/audio/blaaslavi_mati_vjasnu_zaklikati-201e3e3fcb.mp3",
+      "bytes": 483104,
+      "sha256": "d7ae20412a66f5a98f68794640583468cd3b2336fb18685760d1ba14332d2e11",
+      "duration": 40.259
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Chelnok.mp3": {
+      "path": "/media/audio/chelnok-74bb302f76.mp3",
+      "bytes": 431940,
+      "sha256": "a900a876563d1a346f797c02df4ddd92e85bca8d86d0db10b8819e6eb8b7c079",
+      "duration": 17.997
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Chidgik.mp3": {
+      "path": "/media/audio/chidgik-70ba6949bb.mp3",
+      "bytes": 1390346,
+      "sha256": "b665bf70e1ea3d4760b587105a4888959c806ed7be9ea0b66b043587b06596e5",
+      "duration": 57.931
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Chidgik2.mp3": {
+      "path": "/media/audio/chidgik2-d155e7a65f.mp3",
+      "bytes": 1372192,
+      "sha256": "49f594910d5fabbe50e04529066e1fcbe70e7f4563586bd37807987b0260d179",
+      "duration": 57.175
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Eh_shirokaya_ti_masl.mp3": {
+      "path": "/media/audio/eh_shirokaya_ti_masl-61b2bb1cef.mp3",
+      "bytes": 458150,
+      "sha256": "d6abe3222ec768f3bbfe71d9ed47dffa2fb52d76cfb46a5c88acc00d1e18946c",
+      "duration": 69.098
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Javor.mp3": {
+      "path": "/media/audio/javor-8d0d490160.mp3",
+      "bytes": 2292320,
+      "sha256": "2189ad5a518a5f2d35dd4d230a2fb125b1c8549b5ef0d9fd8f86535472e52e42",
+      "duration": 191.027
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Kak_na_maslyanoy_nedele_01.mp3": {
+      "path": "/media/audio/kak_na_maslyanoy_nedele_01-d0e52b9578.mp3",
+      "bytes": 1081453,
+      "sha256": "143141d004ccd90972623fe01387ade8bb9030b16f3961e810f36d9187ddab89",
+      "duration": 169.444
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Kak_na_maslyanoy_nedele_02.mp3": {
+      "path": "/media/audio/kak_na_maslyanoy_nedele_02-d177fbcf63.mp3",
+      "bytes": 1161173,
+      "sha256": "6975f3653926e3df868e435b1f9b9c099bfcec7878f7bf081fb26cc1033c1115",
+      "duration": 179.965
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Korshun.mp3": {
+      "path": "/media/audio/korshun-67d8acebbd.mp3",
+      "bytes": 1226334,
+      "sha256": "2e39abd02cf495852debb00c4dd283ca9a8a12e0f9c15538cdbf40b5944144bd",
+      "duration": 51.097
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Masleniza_ya_gulyau.mp3": {
+      "path": "/media/audio/masleniza_ya_gulyau-23b8ff71d0.mp3",
+      "bytes": 796966,
+      "sha256": "103ba3079c0709e33295ad94fbc25d892cb19fa2655c337bd0491b2c46399234",
+      "duration": 127.862
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Podaj_Bozhe_kljuchik.mp3": {
+      "path": "/media/audio/podaj_bozhe_kljuchik-4d5255582c.mp3",
+      "bytes": 1053344,
+      "sha256": "ef3cafb8ebe799245470f71324948b0fd2ad4a0413f1ac6670f1381c517dd5ed",
+      "duration": 87.779
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Proshay_Masleniza.mp3": {
+      "path": "/media/audio/proshay_masleniza-02f6a27b02.mp3",
+      "bytes": 153203,
+      "sha256": "e261b55913ea0a4b7f2ea4b960782c26cdd6c6bbcfa3ccfe6a3321085c11aea6",
+      "duration": 23.282
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Proshay_Masleniza_Izmai.mp3": {
+      "path": "/media/audio/proshay_masleniza_izmai-8cd96e843a.mp3",
+      "bytes": 717967,
+      "sha256": "2984e062def9a62cdda9dd78788aeac2f2608f32803fc4352db0754c2828e33d",
+      "duration": 44.601
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Trifona.mp3": {
+      "path": "/media/audio/trifona-ebdd899349.mp3",
+      "bytes": 476386,
+      "sha256": "8ae51aa90d2110b922643fce6403e3645f5196ae95079304e797e12339d43007",
+      "duration": 19.849
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/U_menya_kvashnya.mp3": {
+      "path": "/media/audio/u_menya_kvashnya-0764514d1f.mp3",
+      "bytes": 756303,
+      "sha256": "99b7b0c0860bd9b462f02d9c424999c88dc5c53328d8783ddb6f6e6fe1d6dec5",
+      "duration": 110.183
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Vi_blini_moi_blini.mp3": {
+      "path": "/media/audio/vi_blini_moi_blini-acbe93b6e4.mp3",
+      "bytes": 973301,
+      "sha256": "7503473eab805b428fa869191dfaa9209b5859cde8315098041b7740c0d4e95b",
+      "duration": 137.075
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Vstrecha_Maslenicy_1.mp3": {
+      "path": "/media/audio/vstrecha_maslenicy_1-4d35508c75.mp3",
+      "bytes": 1246880,
+      "sha256": "76d1635097060d672ae624082d2f96ae2ea3214a1a6e8b3f982441faf7bd708e",
+      "duration": 103.907
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/Vstrecha_Maslenicy_2.mp3": {
+      "path": "/media/audio/vstrecha_maslenicy_2-bbedc6d3a5.mp3",
+      "bytes": 234272,
+      "sha256": "0a762cbee67f89671d12f0d26c11316d1c7ebedb415c55c6a5d318239b384beb",
+      "duration": 19.523
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/selezen.mp3": {
+      "path": "/media/audio/selezen-011f08e198.mp3",
+      "bytes": 657300,
+      "sha256": "ca8d1488e125e71ca0c115b359f8fd1e095724446a4895a04876340e5c3eda4e",
+      "duration": 27.387
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/shla_utitsa.mp3": {
+      "path": "/media/audio/shla_utitsa-7dc1825e44.mp3",
+      "bytes": 1380330,
+      "sha256": "47cc05fa58a1de20f3dad8d8f24ce51a9ace31a4e3e7ae53cdd1dc7bb5590352",
+      "duration": 57.514
+    },
+    "https://rozhdestvenka.ru/horovod/maslohorovod_wav/zaria_zarianitsa.mp3": {
+      "path": "/media/audio/zaria_zarianitsa-a0f2f0dd7a.mp3",
+      "bytes": 715518,
+      "sha256": "5601ddf6c811a35a97a15edfe62177200d28bc43c95403c8599457c8ef64802a",
+      "duration": 29.813
+    },
+    "https://rslive.ru/kvashnya.mp3": {
+      "path": "/media/audio/kvashnya-f197be11d2.mp3",
+      "bytes": 788844,
+      "sha256": "6a7c3defd7760600e976e1dc6d9c83e8c5bcb46a0009232051a8c5b93ef29314",
+      "duration": 151.603
+    }
+  },
+  "errors": {},
+  "total": 31,
+  "archived": 31,
+  "bytes": 36288017
+}
