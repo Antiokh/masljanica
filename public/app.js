@@ -8,3 +8,9 @@ document.addEventListener('click', event => {
   const menu=document.querySelector('.more-menu');
   if(menu?.open&&!menu.contains(event.target))menu.open=false;
 });
+
+// Match the browser chrome to Starlight's actual selected theme.
+const themeMeta = document.querySelector('meta[name="theme-color"]');
+const syncThemeColor = () => { if(themeMeta) themeMeta.content = document.documentElement.dataset.theme === 'light' ? '#FFFFFF' : '#101827'; };
+syncThemeColor();
+new MutationObserver(syncThemeColor).observe(document.documentElement, {attributes:true,attributeFilter:['data-theme']});

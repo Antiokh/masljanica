@@ -11,7 +11,7 @@ export default defineConfig({
     components: { Header: './src/components/Header.astro' },
     head: [
       { tag: 'link', attrs: { rel: 'manifest', href: '/manifest.webmanifest' } },
-      { tag: 'meta', attrs: { name: 'theme-color', content: '#d99b00' } },
+      { tag: 'meta', attrs: { name: 'theme-color', content: '#FFFFFF' } },
       { tag: 'script', attrs: { src: '/app.js', defer: true } }
     ],
     pagination: false,
