@@ -86,6 +86,14 @@ try {
   await search.fill('');
   await page.locator('#catalog-empty').waitFor({state:'hidden'});
   assert.equal(await page.locator('.song-row').count(),15);
+  await page.locator('#song-player').waitFor({state:'visible'});
+  await page.locator('[data-playlist-action="toggle"]').click();
+  await page.waitForFunction(()=>{const a=document.querySelector('#song-player-audio');return a&&!a.paused&&a.currentTime>.25;});
+  const firstTrack=await page.locator('#song-player-audio').getAttribute('src');
+  await page.locator('[data-playlist-action="next"]').click();
+  await page.waitForFunction(src=>document.querySelector('#song-player-audio')?.getAttribute('src')!==src,firstTrack);
+  await page.locator('[data-playlist-action="toggle"]').click();
+  await page.waitForFunction(()=>document.querySelector('#song-player-audio')?.paused);
   const row=page.locator('.song-row').filter({hasText:'Квашня'});
   await row.locator('summary').click();
   await row.locator('.song-lyrics').waitFor({state:'visible'});
@@ -118,6 +126,11 @@ try {
   await seek.evaluate(el=>{el.value='500';el.dispatchEvent(new Event('input',{bubbles:true}));});
   await page.waitForFunction(()=>{const a=document.querySelector('#song-player-audio');return a&&!a.paused&&Math.abs(a.currentTime/a.duration-.5)<.05;});
   assert.equal(await second.getAttribute('data-playing'),'true','Seeking must not pause playback');
+  assert.match(await page.locator('#playlist-title').textContent(),/Квашня/);
+  await page.waitForFunction(()=>Math.abs(Number(document.querySelector('#playlist-seek').value)-500)<50);
+  assert.equal(await page.locator('[data-playlist-action="toggle"]').getAttribute('data-playing'),'true');
+  const surfaces=await row.evaluate(el=>[getComputedStyle(el).backgroundColor,getComputedStyle(el.querySelector('.song-body')).backgroundColor]);
+  assert.equal(surfaces[1],'rgba(0, 0, 0, 0)','Expanded body inherits the same card surface');
   assert.equal(await row.locator('.song-variant').first().locator('.song-variant-info').getAttribute('inert'),'');
   await row.locator('summary').click();
   await row.locator('.song-lyrics').waitFor({state:'hidden'});

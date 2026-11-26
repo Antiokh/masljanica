@@ -475,3 +475,52 @@ html[data-network="offline"] [data-online-only] { display:none!important; }
   .song-list .song-variant { flex-basis:2.5rem; height:2.5rem; }
   .song-list .song-variant-toggle { flex-basis:2.5rem; width:2.5rem; height:2.5rem; }
 }
+
+/* Each accordion owns its header and contents; no detached content surface. */
+.song-list.catalog-group { display:flex; gap:.5rem; border:0; border-radius:0; overflow:visible; }
+.song-list .song-row { border:1px solid var(--sl-color-gray-5); border-radius:.85rem; overflow:hidden; background:var(--sl-color-bg); }
+.song-list .song-row + .song-row { border-top:1px solid var(--sl-color-gray-5); }
+.song-list .song-row:has(.song-details[open]) { background:var(--festival-surface); border-color:var(--festival-control-border); }
+.song-list .song-row.is-playing { border-color:var(--festival-selected); }
+.song-list .song-details { background:transparent; border:0; }
+.song-list .song-details > summary { background:transparent; margin:0!important; padding-block:.8rem; min-height:4.25rem; }
+.song-list .song-details > summary:hover { background:transparent; }
+.song-list .song-body { background:transparent; border:0; padding:.1rem 1rem 1.15rem; }
+.song-list .song-body > .song-lyrics { margin-top:1.1rem; }
+.song-list .song-row .song-play { top:.8rem; }
+/* Shared playlist transport, always present and synced with the expanded variants. */
+.playlist-panel { position:sticky; top:calc(var(--sl-nav-height,3.5rem) + .5rem); z-index:4; margin-block:.6rem 1rem; padding:.65rem .85rem .8rem; border:1px solid var(--festival-control-border); border-radius:.85rem; background:var(--sl-color-bg); box-shadow:0 3px 12px #0001; }
+.playlist-heading { display:flex; justify-content:space-between; align-items:center; gap:.5rem; font-size:.75rem; color:var(--sl-color-gray-3); margin-bottom:.4rem; }
+.playlist-caption { font-weight:600; }
+.playlist-controls { display:grid; grid-template-columns:2rem 2.65rem minmax(0,1fr) 2rem; align-items:center; gap:.55rem; margin:0!important; }
+.playlist-controls button { display:grid; place-items:center; margin:0!important; padding:0; border:0; cursor:pointer; color:var(--sl-color-text); background:transparent; border-radius:50%; }
+.playlist-controls button:disabled { opacity:.35; cursor:default; }
+.playlist-controls .playlist-step { width:2rem; height:2rem; }
+.playlist-step svg { width:1.25rem; height:1.25rem; }
+.playlist-controls .playlist-play { width:2.65rem; height:2.65rem; background:var(--festival-selected); color:#fff; }
+.playlist-controls .playlist-play[data-playing=true] { background:var(--festival-action); }
+.playlist-panel .song-disc { display:grid; place-items:center; width:2.5rem; height:2.5rem; position:relative; margin:0!important; }
+.playlist-panel .song-disc > svg { grid-area:1/1; margin:0!important; align-self:center; justify-self:center; width:1.35rem; height:1.35rem; }
+.playlist-panel .song-disc > .song-ring { position:absolute; inset:0; width:100%; height:100%; fill:none; stroke-width:2.5; transform:rotate(-90deg); }
+.playlist-play[data-playing=true] .song-play-icon,.playlist-play[data-playing=false] .song-pause-icon { display:none!important; }
+.playlist-track { min-width:0; display:grid; gap:.12rem; margin:0!important; }
+.playlist-track > * { margin:0!important; }
+#playlist-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.3; font-size:.9rem; }
+#playlist-variant { font-size:.72rem; line-height:1.2; color:var(--sl-color-gray-3); }
+.playlist-seek-row { display:flex; align-items:center; gap:.6rem; }
+#playlist-time { font-size:.72rem; font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--sl-color-gray-2); }
+#playlist-seek { appearance:none; -webkit-appearance:none; width:100%; min-width:0; height:1.15rem; padding:0; margin:0!important; border:0; color:var(--festival-selected); background:transparent; cursor:pointer; touch-action:pan-y; }
+#playlist-seek::-webkit-slider-runnable-track { height:.24rem; border-radius:999px; background:linear-gradient(to right,currentColor var(--seek-progress,0%),var(--sl-color-gray-5) var(--seek-progress,0%)); }
+#playlist-seek::-webkit-slider-thumb { appearance:none; -webkit-appearance:none; width:.7rem; height:.7rem; margin-top:-.23rem; border:0; border-radius:50%; background:currentColor; }
+#playlist-seek::-moz-range-track { height:.24rem; border-radius:999px; background:var(--sl-color-gray-5); }
+#playlist-seek::-moz-range-progress { height:.24rem; background:currentColor; border-radius:999px; }
+#playlist-seek::-moz-range-thumb { width:.7rem; height:.7rem; border:0; border-radius:50%; background:currentColor; }
+.playlist-panel :is(button,input):focus-visible { outline:2px solid var(--sl-color-text-accent); outline-offset:2px; }
+@media(max-width:420px) {
+ .playlist-panel { padding:.5rem .55rem .65rem; }
+ .playlist-controls { gap:.3rem; grid-template-columns:1.65rem 2.5rem minmax(0,1fr) 1.65rem; }
+ .playlist-controls .playlist-step { width:1.65rem; height:1.65rem; }
+ .playlist-controls .playlist-play { width:2.5rem; height:2.5rem; }
+ .playlist-seek-row { gap:.3rem; }
+ #playlist-time { font-size:.65rem; }
+}

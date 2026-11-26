@@ -14,6 +14,27 @@ export function installSongList(){
   function sync(){
     if(!audio||!audio.isConnected)return;
     const track=active(),playing=!!track&&!audio.paused&&!audio.ended&&!audio.error;
+    const panel=document.getElementById('song-player');
+    if(panel){
+      const display=track||queue[0];
+      const toggle=panel.querySelector('[data-playlist-action="toggle"]');
+      const prev=panel.querySelector('[data-playlist-action="previous"]'),next=panel.querySelector('[data-playlist-action="next"]');
+      toggle.disabled=!display;toggle.dataset.playing=String(playing);
+      toggle.setAttribute('aria-label',playing?'Пауза':'Воспроизвести плейлист');
+      toggle.style.setProperty('--song-progress',String(track?progress():0));
+      prev.disabled=index<=0;next.disabled=!display||Math.max(0,index)>=queue.length-1;
+      if(display){
+        panel.querySelector('#playlist-title').textContent=display.title;
+        panel.querySelector('#playlist-variant').textContent='Запись '+(display.variant+1)+' из '+display.count;
+        panel.querySelector('#playlist-position').textContent=(Math.max(0,index)+1)+' / '+queue.length;
+        const total=track&&Number.isFinite(audio.duration)?audio.duration:display.duration||0;
+        const position=track?(pendingSeek!==null?pendingSeek*total:audio.currentTime):0;
+        panel.querySelector('#playlist-time').textContent=fmt(position)+' / '+fmt(total);
+        const seek=panel.querySelector('#playlist-seek'),percent=track?progress():0;
+        seek.value=String(Math.round(percent*10));seek.style.setProperty('--seek-progress',percent+'%');
+        seek.setAttribute('aria-valuetext',fmt(position)+' / '+fmt(total));
+      }
+    }
     for(const row of rows()){
       const button=row.querySelector('.song-play'),current=track?.song===row.id;
       const on=current&&playing;
@@ -53,7 +74,7 @@ export function installSongList(){
       let tracks;try{tracks=JSON.parse(row.dataset.tracks||'[]');}catch{continue;}
       for(const [variant,track] of tracks.entries()){
         if(!/^\/media\/audio\/[a-z0-9_-]+\.mp3$/.test(track.src))continue;
-        queue.push({src:track.src,song:row.id,title:row.dataset.song,variant,count:tracks.length});
+        queue.push({src:track.src,song:row.id,title:row.dataset.song,variant,count:tracks.length,duration:track.duration});
       }
     }
     sync();
@@ -82,6 +103,16 @@ export function installSongList(){
   }
   document.addEventListener('click',e=>{
     const target=e.target instanceof Element?e.target:null;
+    const action=target?.closest('[data-playlist-action]')?.dataset.playlistAction;
+    if(action){
+      bind();if(!audio||!queue.length)return;
+      if(action==='previous'){select(index-1);return;}
+      if(action==='next'){select(Math.max(0,index)+1);return;}
+      if(index<0){select(0);return;}
+      if(audio.paused||audio.ended){if(audio.ended)audio.currentTime=0;play();}
+      else{attempt++;audio.pause();sync();}
+      return;
+    }
     const button=target?.closest('.song-play,.song-variant-toggle');
     if(!button)return;
     bind();if(!audio)return;
@@ -103,6 +134,11 @@ export function installSongList(){
     const slider=e.target;
     if(!(slider instanceof HTMLInputElement)||!slider.matches('.song-seek'))return;
     const fraction=Math.min(1,Math.max(0,Number(slider.value)/1000));
+    if(slider.id==='playlist-seek'){
+      bind();if(!audio||!queue.length)return;
+      if(index<0)select(0,false);
+      pendingSeek=fraction;applySeek();sync();return;
+    }
     const variant=slider.closest('.song-variant'),row=slider.closest('.song-row');
     if(variant?.dataset.selected!=='true'||!row)return;
     bind();
