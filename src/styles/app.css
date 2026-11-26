@@ -671,3 +671,32 @@ html {
 :where(a,button,summary,[role="button"]):focus:not(:focus-visible) {
   outline:none;
 }
+
+/* Full-text search uses one SSR dialog, themed consistently with the native PWA and character panels. */
+.festival-search-trigger { display:flex; align-items:center; justify-content:center; gap:.45rem; min-height:2.5rem; padding:.35rem .65rem; border:1px solid var(--sl-color-gray-5); border-radius:.55rem; background:var(--festival-surface); color:var(--sl-color-text); font:inherit; font-size:.85rem; cursor:pointer; }
+.festival-search-trigger svg { width:1.25rem;height:1.25rem; flex:none; }
+.festival-search-dialog { position:fixed; inset:0; margin: min(8vh,4rem) auto auto; width:min(40rem,calc(100% - 2rem)); max-width:none; max-height:calc(100dvh - min(8vh,4rem) - 1rem); box-sizing:border-box; padding:0; border:1px solid var(--sl-color-gray-5); border-radius:.85rem; background:var(--sl-color-bg); color:var(--sl-color-text); overflow:auto; }
+.festival-search-dialog:not([open]) { display:none!important; }
+.festival-search-dialog::backdrop { background:#0009; }
+html.festival-search-open { overflow:hidden; }
+.festival-search-frame { display:grid; gap:.7rem; padding:1rem; }
+.festival-search-heading { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+.festival-search-heading h2 { font-size:1rem; font-weight:650; line-height:1.3; margin:0; }
+.festival-search-heading button { display:grid; place-items:center; width:2.5rem; height:2.5rem; padding:.55rem; border:0; border-radius:.45rem; color:var(--sl-color-text); background:transparent; cursor:pointer; }
+.festival-search-heading button svg { width:100%;height:100%; }
+#festival-search-input { width:100%; min-width:0; box-sizing:border-box; border:1px solid var(--sl-color-gray-5); border-radius:.55rem; padding:.7rem .8rem; font:inherit; font-size:1rem; color:var(--sl-color-text); background:var(--festival-surface); }
+#festival-search-status { font-size:.85rem; color:var(--sl-color-gray-3); margin:0; }
+#festival-search-results { display:grid; gap:.5rem; list-style:none; padding:0; margin:0; }
+#festival-search-results li { display:grid; gap:.35rem; padding:.75rem; border:1px solid var(--sl-color-gray-5); border-radius:.6rem; background:var(--festival-surface); min-width:0; }
+#festival-search-results a { color:var(--sl-color-text-accent); font-weight:600; text-decoration:none; overflow-wrap:anywhere; }
+#festival-search-results p { color:var(--sl-color-gray-2); font-size:.85rem; line-height:1.45; margin:0; overflow-wrap:anywhere; }
+#festival-search-results mark { background:var(--sl-color-accent-low); color:var(--sl-color-text-accent); }
+#festival-search-results .festival-search-subresult { font-size:.8rem; padding-inline-start:.7rem; border-inline-start:1px solid var(--sl-color-gray-5); }
+[data-search-more] { padding:.55rem; border:1px solid var(--sl-color-gray-5); border-radius:.5rem; color:var(--sl-color-text-accent); background:transparent; font:inherit; cursor:pointer; }
+[data-search-more][hidden] { display:none!important; }
+@media(max-width:60rem){
+  .festival-search-trigger { width:2.25rem; padding:0; border:0; background:transparent; }
+  .festival-search-trigger span { display:none; }
+  .festival-search-dialog { width:100%; max-width:100%; height:100dvh; max-height:100dvh; margin:0; border:0; border-radius:0; }
+  .festival-search-frame { padding:max(.75rem,env(safe-area-inset-top,0px)) max(.75rem,env(safe-area-inset-right,0px)) max(.75rem,env(safe-area-inset-bottom,0px)) max(.75rem,env(safe-area-inset-left,0px)); }
+}

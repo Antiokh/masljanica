@@ -1,3 +1,4 @@
+import { installFestivalSearch } from './festival-search.mjs';
 import { installCharacterDialogs } from './character-dialogs.mjs';
 import { installHomeSeason } from './home-season.mjs';
 import { installPwaPresentation } from './pwa-presentation.mjs';
@@ -11,6 +12,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  installExternalEmbeds();
  installHomeSeason();
  installCharacterDialogs();
+ installFestivalSearch();
  const sw=navigator.serviceWorker;
  // Warm the small, frequently used section documents once per controller,
  // without holding up the first paint or triggering media downloads.

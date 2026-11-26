@@ -172,7 +172,9 @@ self.addEventListener('activate',event=>event.waitUntil((async()=>{
 self.addEventListener('fetch',event=>{
   const req=event.request,url=new URL(req.url);
   if(req.method!=='GET'||url.origin!==self.location.origin||CONTROL.has(url.pathname))return;
-  if(url.search&&!htmlPath(url.pathname))return;
+  // Pagefind adds a cache-busting query to this static metadata file. Its
+  // revision is already controlled by the build manifest; do not bypass offline.
+  if(url.search&&!htmlPath(url.pathname)&&url.pathname!=='/pagefind/pagefind-entry.json')return;
   event.respondWith(serve(event));
 });
 self.addEventListener('message',event=>{

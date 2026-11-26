@@ -17,6 +17,22 @@ try {
   await context.route('https://www.youtube-nocookie.com/**',route=>{providerRequests++;return route.fulfill({contentType:'text/html',body:'<html><body>Video fixture</body></html>'});});
   const page=await context.newPage();
   await page.goto(origin);
+  async function assertGlobalSearch(){
+    assert.equal(await page.locator('#festival-search-dialog').count(),1);
+    await page.locator('[data-search-open]').click();
+    const dialog=page.locator('#festival-search-dialog');
+    const input=dialog.locator('input');
+    await input.waitFor({state:'visible'});
+    assert.ok(await input.evaluate(el=>document.activeElement===el),'Search input focused immediately');
+    await input.fill('Квашня');
+    await dialog.locator('#festival-search-results a[href*="/songs/"]').first().waitFor({state:'visible',timeout:20000});
+    await input.fill('несуществующийзапросфывапролдж');
+    await page.waitForFunction(()=>document.querySelector('#festival-search-status')?.textContent==='Ничего не найдено.');
+    await page.keyboard.press('Escape');
+    await dialog.waitFor({state:'hidden'});
+    assert.equal(await page.locator('[data-search-open]').evaluate(el=>document.activeElement===el),true,'Search restores focus');
+  }
+  await assertGlobalSearch();
   await page.locator('[data-home-dashboard]').waitFor();
   assert.equal(await page.locator('.festival-brand-title').innerText(),'Масляница');
   assert.match(await page.locator('.festival-brand-subtitle').innerText(),/^Белград/);
@@ -58,6 +74,7 @@ try {
   await page.setViewportSize({width:1440,height:900});
   const themeSwitch=page.locator('[data-theme-switch]');
   await themeSwitch.waitFor({state:'visible'});
+  await assertGlobalSearch();
   const headerSearch=page.locator('.header-search');
   assert.equal(await headerSearch.count(),1,'Single responsive search component');
   const navBounds=await page.locator('.app-nav').boundingBox();
@@ -177,6 +194,7 @@ try {
 
 
   await page.locator('#catalog-search').waitFor();
+  await assertGlobalSearch();
   assert.equal(await page.evaluate(()=>window.__navigationTest),'persisted','SPA navigation must keep the same window');
   await page.waitForFunction(()=>performance.getEntriesByName('masljanica-nav-swap').length>0);
   console.log('Navigation timing (first SPA swap):',await page.evaluate(()=>Math.round(performance.getEntriesByName('masljanica-nav-swap').at(-1).duration)),'ms');
@@ -267,6 +285,7 @@ try {
   await page.reload();
   await page.locator('#offline-status').waitFor();
   await page.waitForFunction(()=>document.documentElement.dataset.offlineReady==='true');
+  await assertGlobalSearch();
   await page.locator('.app-nav a[href="/songs/"]').click();
   await page.waitForURL('**/songs/');
   await page.locator('[data-entry]').first().waitFor();

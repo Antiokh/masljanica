@@ -10,6 +10,7 @@ const entries=walk(root).filter(p=>!excluded.has(relative(root,p))).sort().map(p
   if(url.endsWith('/index.html'))url=url.slice(0,-10);
   return {url,bytes:content.length,revision:createHash('sha256').update(content).digest('hex')};
 });
+if(!entries.some(e=>e.url==='/pagefind/pagefind.js')||!entries.some(e=>e.url==='/pagefind/pagefind-entry.json'))throw Error('Pagefind output missing from offline corpus');
 const version=createHash('sha256').update(JSON.stringify(entries)).digest('hex').slice(0,20);
 const summary={schema:1,version,bytes:entries.reduce((n,x)=>n+x.bytes,0),count:entries.length};
 writeFileSync(join(root,'offline-manifest.json'),JSON.stringify({...summary,entries}));
