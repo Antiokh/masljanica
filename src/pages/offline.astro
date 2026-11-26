@@ -1,0 +1,20 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+---
+<StarlightPage frontmatter={{title:'Офлайн',template:'splash'}}>
+  <p>При первом посещении приложение сохраняет страницы и ресурсы сайта на устройстве. После завершения загрузки песни (тексты), игры, расписание и сценарий доступны без сети.</p>
+  <p>Внешние аудиозаписи, иллюстрации и YouTube пока требуют подключения к интернету.</p>
+  <p id="offline-status" role="status">Проверка локального кэша…</p>
+  <button class="app-button" id="offline-update">Проверить обновления</button>
+</StarlightPage>
+<script>
+const status=document.querySelector('#offline-status');
+async function check(){
+  if(!status)return;
+  if(!('serviceWorker' in navigator)){status.textContent='Офлайн-режим не поддерживается браузером.';return;}
+  const registration=await navigator.serviceWorker.getRegistration();
+  status.textContent=registration?.active?'Кэш приложения установлен.':'Кэш ещё не установлен. Откройте production-сборку и дождитесь установки.';
+}
+check();navigator.serviceWorker?.addEventListener('controllerchange',check);
+document.querySelector('#offline-update')?.addEventListener('click',async()=>{try{const registration=await navigator.serviceWorker.getRegistration();await registration?.update();await check();}catch{if(status)status.textContent='Обновление недоступно без сети.';}});
+</script>

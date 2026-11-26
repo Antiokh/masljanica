@@ -1,0 +1,28 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import event from '../data/event.json';
+import schedule from '../data/schedule.json';
+import characters from '../data/characters.json';
+const time = (value: string) => { const m=value.match(/(\d+):(\d+):\d+\s*(AM|PM)/); return m ? String((Number(m[1])%12)+(m[3]==='PM'?12:0)).padStart(2,'0')+':'+m[2] : value; };
+---
+<StarlightPage frontmatter={{title:'Избушка',template:'splash',description:'Масляница в Белграде: программа, песни, игры и народные традиции.'}}>
+  <section class="event-hero">
+    <h2>Масляница 2027 · Белград</h2>
+    <p>14 марта 2027 года · 11:30–16:00</p>
+    <p>{event.address}</p>
+    <a class="app-button" href={'https://www.google.com/maps?q='+encodeURIComponent(event.coords)} target="_blank" rel="noopener">Место проведения</a>
+  </section>
+  <h2>Программа праздника</h2>
+  {schedule.map(item => <div class="schedule-row"><div><strong>{item.title}</strong>{item.classes && <div><a href="/workshops/">Мастер-классы →</a></div>}</div><small>{time(item.start)}–{time(item.end)}</small></div>)}
+  <h2>Наша масляница</h2>
+  <p>Скоморох, Баба Яга, Весна, Зима и Масляница встречают гостей на театрализованном народном празднике.</p>
+  <p><a href="/scenario/">Читать сценарий →</a></p>
+  <div class="app-grid">
+    <a class="app-card" href="/songs/"><strong>Песни</strong><small>Тексты и записи</small></a>
+    <a class="app-card" href="/games/"><strong>Игры</strong><small>Правила и видео</small></a>
+    <a class="app-card" href="/ditties/"><strong>Частушки</strong><small>Народные куплеты</small></a>
+  </div>
+  <h2>Персонажи</h2>
+  <div class="app-grid">{characters.filter(x=>x.show).map(x=><a class="app-card" href={'/characters/'+x.slug+'/'}>{x.image&&<img src={x.image} alt={x.title} loading="lazy"/>}<div><strong>{x.title}</strong><small>{x.description.split('\n')[0]}</small></div></a>)}</div>
+  <p class="muted">Разработано Anton Nazarov</p>
+</StarlightPage>

@@ -1,0 +1,17 @@
+---
+import SiteTitle from '@astrojs/starlight/components/SiteTitle.astro';
+import Search from '@astrojs/starlight/components/Search.astro';
+import ThemeSelect from '@astrojs/starlight/components/ThemeSelect.astro';
+const path = decodeURI(Astro.url.pathname);
+const links = [{href:'/',title:'Избушка',icon:'⌂'},{href:'/songs/',title:'Песни',icon:'♫'},{href:'/games/',title:'Игры',icon:'⚄'}];
+const more = [{href:'/scenario/',title:'Сказ'},{href:'/characters/',title:'Персонажи'},{href:'/workshops/',title:'Мастера'},{href:'/ditties/',title:'Частушки'},{href:'/offline/',title:'Офлайн'}];
+const active = (href:string) => href==='/'?path==='/':path.startsWith(href);
+---
+<div class="app-header">
+  <SiteTitle />
+  <nav class="app-nav" aria-label="Основная навигация">
+    {links.map(link=><a href={link.href} aria-current={active(link.href)?'page':undefined}><span aria-hidden="true">{link.icon}</span>{link.title}</a>)}
+    <details class="more-menu"><summary><span aria-hidden="true">☰</span>Ещё</summary><div class="more-links">{more.map(link=><a href={link.href} aria-current={active(link.href)?'page':undefined}>{link.title}</a>)}</div></details>
+  </nav>
+  <div class="header-actions"><Search /><ThemeSelect /></div>
+</div>
