@@ -1,0 +1,74 @@
+[
+  {
+    "id": "oHfhd0FwRV-xmiqC-NcAxA",
+    "slug": "баба-яга",
+    "title": "Баба Яга",
+    "description": "Колдунья из глухого леса, оставившая разум и молодость где-то далеко, но уже забыла, где.\n\nИзначально — испытание, начало пути, экзамен на зрелость, инициация. Позже — волшебный помощник. Хранитель правил игры. Образ зрелой мудрости.",
+    "image": "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/hnZCcb9jA3wHWnVpp1NE.png",
+    "show": true
+  },
+  {
+    "id": "8qimHVCYRCGEvioGfN5QVw",
+    "slug": "скоморох",
+    "title": "Скоморох",
+    "description": "Праздно шатающийся молодец призывного возраста, неспособный на серьёзность, поэтому имеющий много приключений.\n\nГлупый не со зла, а по простоте душевной. Выполняет функцию героя сказки, отлично справляется с задачей навалить кринжа и выбесить Бабу Ягу.",
+    "image": "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/nNbqlCwohfeh9k7OPrHv.png",
+    "show": true
+  },
+  {
+    "id": "YrBs3VyDTi-aWj5ONkJ0cg",
+    "slug": "весна",
+    "title": "Весна",
+    "description": "Дух весны, который стремится прийти в этот мир, но не может этого сделать без помощи Масляницы.\n\nОлицетворяет неотвратимость, молодость, непосредственность, чудаковатость и желание самовыражения. Образ юной дочери.",
+    "image": "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/Fl8OFuJYLIvOqyGts7np.png",
+    "show": true
+  },
+  {
+    "id": "7j5miBueRw6F-v6FDqBjUA",
+    "slug": "зима",
+    "title": "Зима",
+    "description": "Антагонист поневоле.\n\nЗлая не потому, что такая от природы, а потому что не выспалась, устала, боится будущего и не знает, что делать дальше.\n\nБудет бороться до последнего блина.",
+    "image": "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/GZQKqA1uqeYk1bQ7RBmN.png",
+    "show": true
+  },
+  {
+    "id": "Mb3ERqTOTteC0lrFEa1o4A",
+    "slug": "масляница",
+    "title": "Масляница",
+    "description": "Олицетворение ритуала встречи Весны. Зима держит её силу заточённой в волшебное чучело, блокируя способность призывать Весну. Разрушить колдовство можно, если ей помогут те, кто верит в неё и выполняет правила. Написание через “я” как в старых текстах, чтобы подчеркнуть, что это персонаж. Образ матери.",
+    "image": "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/8zz4qeDsHyaQDAtfZZsk.png",
+    "show": true
+  },
+  {
+    "id": "oQnvy1vyQpyS6.Pfa3ygvw",
+    "slug": "музыканты",
+    "title": "Музыканты",
+    "description": "Неугомонные любители музыки, неспособные долго находиться в тишине, не перебивая пение птиц своим душевным многоголосием.\n\nОт их пения расцветают цветы и иногда увядают уши, но сделать с этим что-либо совершенно невозможно.",
+    "image": "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/JQLXg3bswsgukjqlppfd.png",
+    "show": false
+  },
+  {
+    "id": "F5wWz9gqRV-vjxkhGghHbA",
+    "slug": "аудиозапись",
+    "title": "Аудиозапись",
+    "description": "В былые времена, когда музыканты уставали, люди звали специально обученного медведя, который исполнял классические хиты лесной опушки. Почему и как у него это получалось — знает только Баба Яга.\n\nС изобретением магнитофона ушёл на пенсию и занялся пчеловодством.",
+    "image": "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/qtWHk1dsZjKts1Pn8fHp.png",
+    "show": false
+  },
+  {
+    "id": "2DKPmYDMR9GFc1WYvV1sjw",
+    "slug": "толпа",
+    "title": "Толпа",
+    "description": "Дорогие гости, замёрзшие за зиму и согретые первыми лучами весеннего солнца.\n\nПытаются съесть все блины ещё до праздника и забывают все конкурсы и масляничные песни, за которые даются призы.",
+    "image": "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/gZmfqYLJlzLgauth69Ml.png",
+    "show": false
+  },
+  {
+    "id": "aUZFqlLbTAeoGnP8-4C8Lg",
+    "slug": "воевода",
+    "title": "Воевода",
+    "description": "Самый сильный из людей. Честно-честно. Единственный, кто может победить Зиму в честном бою.\n\nВыбирается из сильнейших участников конкурсов школьного возраста. В клубе весёлых и находчивых представляет сильных.",
+    "image": "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/vVf9dO56CqRoESLqidHz.png",
+    "show": false
+  }
+]
