@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
+import { assertSongLayout } from './assert-song-layout.mjs';
 const origin='http://localhost:4321';
 const server=spawn('npm',['run','preview','--','--host','localhost','--port','4321'],{stdio:'inherit'});
 let browser;
@@ -87,6 +88,7 @@ try {
   await page.locator('#catalog-empty').waitFor({state:'hidden'});
   assert.equal(await page.locator('.song-row').count(),15);
   await page.locator('#song-player').waitFor({state:'visible'});
+  await assertSongLayout(page);
   await page.locator('[data-playlist-action="toggle"]').click();
   await page.waitForFunction(()=>{const a=document.querySelector('#song-player-audio');return a&&!a.paused&&a.currentTime>.25;});
   const firstTrack=await page.locator('#song-player-audio').getAttribute('src');
