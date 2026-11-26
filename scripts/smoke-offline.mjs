@@ -16,6 +16,20 @@ try {
   await context.route('https://www.youtube-nocookie.com/**',route=>{providerRequests++;return route.fulfill({contentType:'text/html',body:'<html><body>Video fixture</body></html>'});});
   const page=await context.newPage();
   await page.goto(origin);
+  await page.setViewportSize({width:1440,height:900});
+  const themeSwitch=page.locator('[data-theme-switch]');
+  await themeSwitch.waitFor({state:'visible'});
+  await themeSwitch.focus();
+  await themeSwitch.press('Home');
+  await page.waitForFunction(()=>document.documentElement.dataset.theme==='light' && localStorage.getItem('starlight-theme')==='light');
+  await themeSwitch.press('End');
+  await page.waitForFunction(()=>document.documentElement.dataset.theme==='dark' && localStorage.getItem('starlight-theme')==='dark');
+  await themeSwitch.press('ArrowLeft');
+  await page.waitForFunction(()=>document.querySelector('[data-theme-switch]')?.getAttribute('data-theme-mode')==='auto');
+  await page.setViewportSize({width:390,height:844});
+  await themeSwitch.waitFor({state:'hidden'});
+  await page.locator('.mobile-theme-control').waitFor({state:'visible'});
+
   await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
   await page.locator('#pwa-storage-accept').click();
   await page.evaluate(()=>{window.__navigationTest='persisted';});

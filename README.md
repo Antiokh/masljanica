@@ -39,3 +39,5 @@ Node.js 22.12+. Cloudflare Pages: команда `npm run build`, каталог
 ### Внешние эмбеды
 
 По аналогии с [MapEmbed RSLive](https://github.com/Antiokh/rslive.ru/blob/main/astro/docs/components/map-embed.md) внешнему iframe не назначается src до решения о сети. Песенник, старые страницы песен и игры используют один runtime `public/external-embeds.mjs`. Холодный офлайн-старт не создаёт iframe; при потере сети на открытой странице блок скрывается и внешний плеер удаляется (для видео, в отличие от уже загруженной карты, буфер не гарантирует доступность). При восстановлении сети возвращаются элементы управления, на отдельных страницах — lazy iframe, в песеннике — кнопка. Тексты и локальное аудио не зависят от этого состояния. Проверки в Playwright используют локальный mock провайдера и online/offline transitions.
+
+На desktop (>60rem) переключатель темы перенесён из RSLive (`ThemeSwitch.astro`, light/auto/dark); на мобильных остаётся штатный ThemeSelect. Оба используют `starlight-theme`, с синхронизацией при SPA-переходах.

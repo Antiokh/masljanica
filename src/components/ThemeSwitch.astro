@@ -1,0 +1,144 @@
+---
+const themeCopy = { change: 'Цветовая тема', light: 'Светлая тема', auto: 'Системная тема', dark: 'Тёмная тема' };
+---
+
+<!--
+  MAINTENANCE CONTRACT — adapted from RSLive ThemeSwitch.
+  Keep this picker compatible with Starlight's `starlight-theme` storage key and
+  `window.StarlightThemeProvider`. `auto` is a stored mode but data-theme must remain the
+  resolved light/dark display theme. Explicit light/dark must not follow OS theme changes.
+-->
+<button
+  class="theme-switch"
+  type="button"
+  role="slider"
+  aria-valuemin="0"
+  aria-valuemax="2"
+  aria-valuenow="1"
+  aria-label={themeCopy.change}
+  title={themeCopy.change}
+  data-theme-switch
+  data-theme-label-light={themeCopy.light}
+  data-theme-label-auto={themeCopy.auto}
+  data-theme-label-dark={themeCopy.dark}
+>
+  <span class="theme-switch__track-icon theme-switch__track-icon--sun" aria-hidden="true"></span>
+  <span class="theme-switch__track-icon theme-switch__track-icon--auto" aria-hidden="true"></span>
+  <span class="theme-switch__track-icon theme-switch__track-icon--moon" aria-hidden="true"></span>
+  <span class="theme-switch__check">
+    <span class="theme-switch__icon">
+      <span class="theme-switch__sun" aria-hidden="true"></span>
+      <span class="theme-switch__auto" aria-hidden="true"></span>
+      <span class="theme-switch__moon" aria-hidden="true"></span>
+    </span>
+  </span>
+  <span class="sr-only" data-theme-switch-label>{themeCopy.change}</span>
+</button>
+
+<script>
+  type Theme = 'auto' | 'dark' | 'light';
+  type DisplayTheme = 'dark' | 'light';
+
+  const storageKey = 'starlight-theme';
+  const modes: Theme[] = ['light', 'auto', 'dark'];
+
+  function preferredTheme(): DisplayTheme {
+    return matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  }
+
+  function storedTheme(): Theme {
+    let stored: string | null = null;
+    try { stored = localStorage.getItem(storageKey); } catch {}
+    return stored === 'light' || stored === 'dark' ? stored : 'auto';
+  }
+
+  function displayTheme(): DisplayTheme {
+    return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+  }
+
+  function label(button: Element, theme: Theme): string {
+    if (theme === 'light') return button.getAttribute('data-theme-label-light') || 'Light theme';
+    if (theme === 'dark') return button.getAttribute('data-theme-label-dark') || 'Dark theme';
+    return button.getAttribute('data-theme-label-auto') || 'System theme';
+  }
+
+  function setTheme(theme: Theme): void {
+    document.documentElement.dataset.theme = theme === 'auto' ? preferredTheme() : theme;
+    try { localStorage.setItem(storageKey, theme === 'auto' ? '' : theme); } catch {}
+    document.querySelectorAll<HTMLSelectElement>('starlight-theme-select select').forEach(select => { select.value = theme; });
+    window.StarlightThemeProvider?.updatePickers?.(theme);
+    updateSwitches();
+  }
+
+  function updateSwitches(): void {
+    const mode = storedTheme();
+    const position = modes.indexOf(mode);
+    document.querySelectorAll('[data-theme-switch]').forEach((button) => {
+      const currentLabel = label(button, mode);
+      button.setAttribute('data-theme-mode', mode);
+      button.setAttribute('data-display-theme', displayTheme());
+      button.setAttribute('aria-valuenow', String(position));
+      button.setAttribute('aria-valuetext', currentLabel);
+      button.setAttribute('aria-label', currentLabel);
+      button.setAttribute('title', currentLabel);
+      button.querySelector('[data-theme-switch-label]')?.replaceChildren(currentLabel);
+    });
+  }
+
+  updateSwitches();
+  document.addEventListener('astro:page-load', updateSwitches);
+  document.addEventListener('change', (event) => {
+    if (event.target instanceof HTMLSelectElement && event.target.closest('starlight-theme-select')) queueMicrotask(updateSwitches);
+  });
+  window.addEventListener('storage', (event) => {
+    if (event.key === storageKey) {
+      const mode = storedTheme();
+      document.documentElement.dataset.theme = mode === 'auto' ? preferredTheme() : mode;
+      window.StarlightThemeProvider?.updatePickers?.(mode);
+      updateSwitches();
+    }
+  });
+  new MutationObserver(updateSwitches).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+    if (storedTheme() === 'auto') {
+      document.documentElement.dataset.theme = preferredTheme();
+      updateSwitches();
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    const button = event.target instanceof Element ? event.target.closest('[data-theme-switch]') : null;
+    if (!button) return;
+    if (event.detail === 0) {
+      setTheme(modes[(modes.indexOf(storedTheme()) + 1) % modes.length]);
+      return;
+    }
+    const rect = button.getBoundingClientRect();
+    const ratio = (event instanceof MouseEvent ? event.clientX - rect.left : rect.width / 2) / rect.width;
+    const index = Math.max(0, Math.min(2, Math.floor(ratio * 3)));
+    setTheme(modes[index]);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    const button = event.target instanceof Element ? event.target.closest('[data-theme-switch]') : null;
+    if (!button) return;
+    const current = modes.indexOf(storedTheme());
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      setTheme(modes[Math.max(0, current - 1)]);
+    }
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      setTheme(modes[Math.min(2, current + 1)]);
+    }
+    if (event.key === 'Home') {
+      event.preventDefault();
+      setTheme('light');
+    }
+    if (event.key === 'End') {
+      event.preventDefault();
+      setTheme('dark');
+    }
+  });
+</script>
