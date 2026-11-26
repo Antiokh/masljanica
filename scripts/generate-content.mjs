@@ -31,7 +31,7 @@ for(const x of read('workshops'))page('workshops',x.slug,x.title,(x.host?'Вед
 for(const p of read('parts')) {
  const body=read('scenario').filter(x=>x.part===p.number).map(x=>{
  const actor=actors.find(a=>a.id===x.actor),song=songs.find(s=>s.id===x.song);
- return '<p class="scenario-role">'+escape(actor?.title)+'</p>\n\n<div class="scenario-text">'+escape(x.text)+'</div>\n\n'+(song?'[♫ '+song.title+'](/songs/#'+song.slug+')'\n\n':'')+'---\n\n';
+ return '<p class="scenario-role">'+escape(actor?.title)+'</p>\n\n<div class="scenario-text">'+escape(x.text)+'</div>\n\n'+(song?'[♫ '+song.title+'](/songs/#'+song.slug+')\n\n':'')+'---\n\n';
  }).join('');
  page('scenario',String(p.number),p.title,body);
 }
