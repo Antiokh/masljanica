@@ -27,7 +27,7 @@ const moreActive = more.some(link=>active(link.href));
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
         <span>Ещё</span>
       </summary>
-      <div class="more-links"><div class="pwa-mobile-status"><button type="button" data-pwa-menu-trigger aria-controls="festival-pwa-menu" aria-expanded="false"><span data-pwa-value="compact">Офлайн-копия</span><span aria-hidden="true">⋮</span></button><progress max="100" value="0" data-pwa-bar data-pwa-progress hidden aria-label="Прогресс офлайн-загрузки"></progress></div>{more.map(link=><a data-astro-prefetch="hover" href={link.href} aria-current={active(link.href)?'page':undefined}>{link.title}</a>)}</div>
+      <div class="more-links"><div class="pwa-mobile-status"><button type="button" data-pwa-menu-trigger popovertarget="festival-pwa-menu" aria-controls="festival-pwa-menu" aria-expanded="false"><span data-pwa-value="compact">Офлайн-копия</span><span aria-hidden="true">⋮</span></button><progress max="100" value="0" data-pwa-bar data-pwa-progress hidden aria-label="Прогресс офлайн-загрузки"></progress></div>{more.map(link=><a data-astro-prefetch="hover" href={link.href} aria-current={active(link.href)?'page':undefined}>{link.title}</a>)}</div>
     </details>
   </nav>
   <div class="header-actions"><Search /><div class="desktop-theme-control"><ThemeSwitch /></div><div class="mobile-theme-control"><ThemeSelect /></div></div>

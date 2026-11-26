@@ -41,12 +41,12 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  const noteStandalone=()=>{if(standalone())set(KEYS.lastStandaloneDate,localDayKey());};
  const presentation=installPwaPresentation({onOpen:()=>{send('OFFLINE_STATUS');checkVersion();render();}});
  const startDownload=()=>{
-   if(!accepted()||!verified||!sw?.controller||state.progress||!navigator.onLine)return;
+   if(!accepted()||!verified||!sw?.controller||state.progress||state.deleting||!navigator.onLine)return;
    error='';state.progress={done:0,total:0,bytes:0,totalBytes:0};offer=null;render();send('OFFLINE_DOWNLOAD');
  };
  function resolveOffer(){
    noteStandalone();
-   if(!accepted()||!verified||!sw?.controller||state.progress||!navigator.onLine||error)return;
+   if(!accepted()||!verified||!sw?.controller||state.progress||state.deleting||!navigator.onLine||error)return;
    const stale=!!(state.ready&&latest&&latest.version!==state.version);
    const result=resolvePwaDailyState({
      storageAccepted:true,isStandalone:standalone(),lastStandaloneDate:get(KEYS.lastStandaloneDate),
@@ -88,21 +88,21 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  document.addEventListener('play',e=>{if(e.target instanceof HTMLAudioElement)document.querySelectorAll('audio').forEach(a=>{if(a!==e.target)a.pause();});},true);
  function render(){
    const label=document.querySelector('#offline-status'),size=document.querySelector('#offline-size'),button=document.querySelector('#offline-update'),remove=document.querySelector('#offline-delete'),bar=document.querySelector('#offline-progress');
-   const busy=!!state.progress,stale=state.ready&&latest&&latest.version!==state.version;
+   const busy=!!state.progress,deleting=!!state.deleting,stale=state.ready&&latest&&latest.version!==state.version;
    const notice=document.querySelector('#pwa-storage-notice'),prompt=document.querySelector('#pwa-offer'),message=document.querySelector('#pwa-offer-message'),action=document.querySelector('#pwa-offer-action'),auto=document.querySelector('#offline-auto'),indicator=document.querySelector('#offline-indicator');
    if(notice)notice.hidden=accepted()||!sw;
-   if(auto){auto.checked=automatic();auto.disabled=!accepted()||!verified;}
-   if(prompt)prompt.hidden=!accepted()||!offer||busy;
+   if(auto){auto.checked=automatic();auto.disabled=!accepted()||!verified||deleting;}
+   if(prompt)prompt.hidden=!accepted()||!offer||busy||deleting;
    if(message&&offer)message.textContent=offer==='install'?'Установите Масляницу на устройство.':(offer==='offline-download'?'Скачайте материалы праздника':'Доступна новая версия материалов')+(latest?' · '+fmt(latest.bytes):'')+'.';
    if(action&&offer)action.textContent=offer==='install'?'Установить':offer==='offline-download'?'Скачать':'Обновить';
-   presentation.render({online:navigator.onLine,standalone:standalone(),readiness,ready:state.ready,stale:!!stale,busy,checking,progress:state.progress,automatic:automatic(),canChange:accepted()&&verified,canDelete:verified&&!busy&&(state.ready||state.staging),canDownload:accepted()&&verified&&!busy&&!checking&&navigator.onLine,error});
+   presentation.render({online:navigator.onLine,standalone:standalone(),readiness,ready:state.ready,stale:!!stale,busy,deleting,checking,progress:state.progress,automatic:automatic(),canChange:accepted()&&verified&&!deleting,canDelete:verified&&!busy&&!deleting&&(state.ready||state.staging),canDownload:accepted()&&verified&&!busy&&!deleting&&!checking&&navigator.onLine,error});
 
    document.documentElement.dataset.offlineReady=String(state.ready);
    document.documentElement.dataset.offlineReadiness=readiness;
    if(label)label.textContent=error||(!sw?'Офлайн-режим не поддерживается.':registrationFailed?'Не удалось запустить Service Worker.':!sw.controller?'Подключение Service Worker…':busy?'Загрузка: '+state.progress.done+' из '+(state.progress.total||'…')+' файлов':state.ready?(stale?'Доступно обновление. Старая копия сохранена.':'Офлайн-копия готова.'):'Полная копия ещё не скачана.');
    if(size)size.textContent=latest?'Размер полной копии: '+fmt(latest.bytes):state.ready?'Сохранено: '+fmt(state.bytes):'';
-   if(button){button.disabled=!accepted()||!verified||!sw?.controller||busy||checking||!navigator.onLine;button.textContent=state.ready?(stale?'Обновить копию':'Проверить и обновить'):'Скачать для офлайна';}
-   if(remove){remove.disabled=busy||!(state.ready||state.staging)||!verified;}
+   if(button){button.disabled=!accepted()||!verified||!sw?.controller||busy||deleting||checking||!navigator.onLine;button.textContent=state.ready?(stale?'Обновить копию':'Проверить и обновить'):'Скачать для офлайна';}
+   if(remove){remove.disabled=busy||deleting||!(state.ready||state.staging)||!verified;}
    if(bar){bar.hidden=!busy;if(busy){bar.max=state.progress.total||1;bar.value=state.progress.done||0;}}
  }
  async function checkVersion(force=false){
@@ -112,10 +112,10 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  }
  document.addEventListener('click',e=>{
    const target=e.target instanceof Element?e.target:null;
-   const menu=document.querySelector('.more-menu');if(menu?.open&&target&&!menu.contains(target))menu.open=false;
+   const menu=document.querySelector('.more-menu');if(menu?.open&&target&&!menu.contains(target)&&!target.closest('#festival-pwa-menu'))menu.open=false;
    if(target?.closest('#offline-update,[data-pwa-download]')&&accepted())startDownload();
    if(target?.closest('[data-pwa-auto]')&&accepted()&&verified){set(PREF,automatic()?'disabled':'enabled');autoAttempt=null;error='';resolveOffer();checkVersion(true);render();}
-   if(target?.closest('#offline-delete,[data-pwa-delete]')&&verified&&!state.progress&&confirm('Удалить офлайн-данные?')){error='';set(PREF,'disabled');autoAttempt=null;send('OFFLINE_DELETE');render();}
+   if(target?.closest('#offline-delete,[data-pwa-delete]')&&verified&&!state.progress&&!state.deleting&&confirm('Удалить офлайн-данные?')){error='';set(PREF,'disabled');autoAttempt=null;state.deleting=true;send('OFFLINE_DELETE');render();}
    if(target?.closest('#pwa-storage-accept')){set(KEYS.storageNoticeAck,'1');resolveOffer();checkVersion(true);render();}
    if(target?.closest('#pwa-offer-dismiss')){offer=null;render();}
    if(target?.closest('#pwa-offer-action')){
@@ -126,15 +126,16 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  });
  sw?.addEventListener('message',e=>{
    const m=e.data;
-   if(m?.type==='OFFLINE_STATUS'){state=m;verified=m.capability===2;readiness=verified?(m.ready?'ready':'unavailable'):'unknown';if(verified)resolveOffer();}
+   if(m?.type==='OFFLINE_STATUS'){const wasDeleting=state.deleting;state=m;if(wasDeleting&&!m.deleting)presentation.refreshStorage();verified=m.capability===2;readiness=verified?(m.ready?'ready':'unavailable'):'unknown';if(verified)resolveOffer();}
    if(m?.type==='OFFLINE_PROGRESS')state.progress=m.progress;
    if(m?.type==='OFFLINE_COMPLETE'){error='';presentation.refreshStorage();checkVersion(true);}
    if(m?.type==='OFFLINE_ERROR')error='Загрузка не завершена: '+m.message;
+   if(m?.type==='OFFLINE_DELETE_ERROR')error='Не удалось удалить данные: '+m.message;
    render();
  });
  function pageLoad(){
    syncTheme();refreshCatalog();render();
-   noteStandalone();send('OFFLINE_STATUS');checkVersion();resolveOffer();render();warmNavigation();
+   noteStandalone();if(!verified)send('OFFLINE_STATUS');resolveOffer();render();warmNavigation();
  }
  document.addEventListener('astro:page-load',pageLoad);
  document.addEventListener('change',e=>{
@@ -147,7 +148,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  window.addEventListener('offline',render);
  sw?.addEventListener('controllerchange',()=>{verified=false;readiness='unknown';send('OFFLINE_STATUS');checkVersion(true);render();warmNavigation();});
  if(sw&&(location.protocol==='https:'||location.hostname==='localhost')){
-   sw.register('/sw.js').then(()=>{send('OFFLINE_STATUS');render();}).catch(()=>{registrationFailed=true;readiness='unavailable';render();});
+   sw.register('/sw.js').then(()=>{send('OFFLINE_STATUS');checkVersion();render();}).catch(()=>{registrationFailed=true;readiness='unavailable';render();});
  }
  pageLoad();
 })();

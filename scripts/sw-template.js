@@ -1,7 +1,7 @@
 const META='masljanica-meta-v2', RUNTIME='masljanica-runtime-v2-'+BUILD;
 const PREFIX='masljanica-pack-v2-', STAGING='masljanica-staging-v2-', MARKER='/__offline_active__';
 const CONTROL=new Set(['/sw.js','/offline-version.json','/offline-manifest.json']);
-let activePromise, runtimePromise, task, progress=null, degradedUntil=0;
+let activePromise, runtimePromise, task, deleting=false, progress=null, degradedUntil=0;
 const currentRevision = path => Object.hasOwn(CURRENT_REVISIONS,path) ? CURRENT_REVISIONS[path] : null;
 const runtimeCache = () => runtimePromise ||= caches.open(RUNTIME);
 const absolute=path=>new URL(path,self.location.origin).href;
@@ -28,7 +28,7 @@ async function notify(message){
 }
 async function status(){
   const a=await active();
-  return {type:'OFFLINE_STATUS',capability:2,staging:(await caches.keys()).some(name=>name.startsWith(STAGING)&&name!==a?.cacheName),ready:!!a,version:a?.version||null,bytes:a?.bytes||0,count:a?.count||0,build:BUILD,progress};
+  return {type:'OFFLINE_STATUS',capability:2,deleting,staging:(await caches.keys()).some(name=>name.startsWith(STAGING)&&name!==a?.cacheName),ready:!!a,version:a?.version||null,bytes:a?.bytes||0,count:a?.count||0,build:BUILD,progress};
 }
 async function timedFetch(input,options={},ms=8000){
   const controller=new AbortController(), timer=setTimeout(()=>controller.abort(),ms);
@@ -179,15 +179,23 @@ self.addEventListener('message',event=>{
   const type=event.data?.type;
   if(type==='OFFLINE_STATUS'){event.waitUntil(status().then(s=>event.source?.postMessage(s)));return;}
   if(type==='OFFLINE_DOWNLOAD'){
+    if(deleting){event.waitUntil(status().then(s=>event.source?.postMessage(s)));return;}
     if(!task){
       progress={done:0,total:0,bytes:0,totalBytes:0};
       task=download().then(()=>notify({type:'OFFLINE_COMPLETE'})).catch(e=>notify({type:'OFFLINE_ERROR',message:e.message})).finally(async()=>{progress=null;task=null;await notify(await status());});
     }
     event.waitUntil(task);
   }
-  if(type==='OFFLINE_DELETE'&&!task)event.waitUntil((async()=>{
-    await (await caches.open(META)).delete(absolute(MARKER));activePromise=undefined;
-    for(const name of await caches.keys())if(name.startsWith(PREFIX)||name.startsWith(STAGING)||/^masljanica-[a-f0-9]{16}$/.test(name))await caches.delete(name);
-    await notify(await status());
-  })());
+  if(type==='OFFLINE_DELETE'){
+    if(task||deleting){event.waitUntil(status().then(s=>event.source?.postMessage(s)));return;}
+    deleting=true;
+    event.waitUntil((async()=>{
+      try{
+        await notify(await status());
+        await (await caches.open(META)).delete(absolute(MARKER));activePromise=undefined;
+        for(const name of await caches.keys())if(name.startsWith(PREFIX)||name.startsWith(STAGING)||/^masljanica-[a-f0-9]{16}$/.test(name))await caches.delete(name);
+      }catch(e){await notify({type:'OFFLINE_DELETE_ERROR',message:e.message});}
+      finally{deleting=false;await notify(await status());}
+    })());
+  }
 });
