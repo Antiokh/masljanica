@@ -13,7 +13,7 @@ import MarkdownIt from 'markdown-it';
 import {existsSync} from 'node:fs';
 import historySource from '../data/maslyanica-history.md?raw';
 const md=new MarkdownIt({html:false});
-const history=historySource.replace(/<!--[\s\S]*?-->/g,'').trim();
+const history=historySource.trim();
 const portraits=characterArchive.files as Record<string,{path:string;width:number;height:number}>;
 const files=audioArchive.files as Record<string,{path:string;duration:number}>;
 const people=characters.map(x=>{const p=portraits[x.image];return {...x,src:p?.path&&/^\/media\/characters\/[a-f0-9]+\.webp$/.test(p.path)&&existsSync(process.cwd()+'/public'+p.path)?p.path:''};});
@@ -32,7 +32,7 @@ const prepared=ordered.map(row=>{const actor=actors.get(row.actor),song=row.song
 <StarlightPage frontmatter={{title:'Сказ',template:'splash',description:'История Масляницы и театральный сказ нашего праздника.'}}>
  <div class="story-book" data-character-gallery data-story-book>
   <section class="story-history" aria-labelledby="story-history-title">
-    <div class="story-history-art" aria-hidden="true"><svg viewBox="0 0 64 64"><g stroke="#B5232C" stroke-width="3" stroke-linecap="round">{Array.from({length:12},(_,i)=>i*Math.PI/6).map(a=><path d={`M${32+21*Math.sin(a)} ${32+21*Math.cos(a)} L${32+27*Math.sin(a)} ${32+27*Math.cos(a)}`}/>)}</g><circle cx="32" cy="32" r="16" fill="#E9B44C"/><path d="M24 32h.01M40 32h.01M27 39q5 4 10 0" stroke="#794831" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg></div>
+    <div class="story-history-art" aria-hidden="true"><img src="/media/story-sun.svg" width="64" height="64" alt=""/></div>
     <h2 id="story-history-title">Что такое Масляница?</h2>
     {history?<details class="story-history-details"><summary>История праздника и народные традиции <GameIcon name="chevron"/></summary><div class="story-history-content" set:html={md.render(history)}/></details>:<p class="story-history-placeholder">История праздника и народные традиции. Текст готовится.</p>}
   </section>
