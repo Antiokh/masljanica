@@ -13,7 +13,7 @@ export default defineConfig({
     head: [
       { tag: 'link', attrs: { rel: 'manifest', href: '/manifest.webmanifest' } },
       { tag: 'meta', attrs: { name: 'theme-color', content: '#FFFFFF' } },
-      { tag: 'script', attrs: { src: '/app.js', defer: true } }
+      { tag: 'script', attrs: { src: '/app.js', type: 'module' } }
     ],
     pagination: false,
     lastUpdated: false,

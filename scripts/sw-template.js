@@ -24,7 +24,7 @@ async function notify(message){
 }
 async function status(){
   const a=await active();
-  return {type:'OFFLINE_STATUS',ready:!!a,version:a?.version||null,bytes:a?.bytes||0,count:a?.count||0,build:BUILD,progress};
+  return {type:'OFFLINE_STATUS',capability:2,ready:!!a,version:a?.version||null,bytes:a?.bytes||0,count:a?.count||0,build:BUILD,progress};
 }
 async function timedFetch(input,options={},ms=8000){
   const controller=new AbortController(), timer=setTimeout(()=>controller.abort(),ms);

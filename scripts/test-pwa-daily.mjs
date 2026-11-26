@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {resolvePwaDailyState as resolve, serializeDailyOffer, parseDailyOffer} from '../public/pwa-daily-state.mjs';
+const today='2026-11-26', base={storageAccepted:true,today,offlinePackCapabilityAvailable:true};
+assert.equal(resolve({...base,storageAccepted:false}).state,'blocked');
+assert.equal(resolve({...base,installPromptAvailable:true}).state,'install');
+assert.equal(resolve({...base,isStandalone:true}).state,'offline-download');
+assert.equal(resolve({...base,isStandalone:true,offlinePackCapabilityAvailable:false}).state,'none');
+assert.equal(resolve({...base,offlineCopyAvailable:true,offlineCopyStale:true}).state,'offline-update');
+assert.equal(resolve({...base,offlineCopyAvailable:true,offlineCopyStale:true,offlineAutoUpdateEnabled:true,dailyOffer:parseDailyOffer(serializeDailyOffer('install',today))}).state,'offline-update-automatic');
+assert.equal(resolve({...base,isStandalone:true,dailyOffer:parseDailyOffer(serializeDailyOffer('install',today))}).state,'none');
+assert.equal(resolve({...base,offlineAutoUpdateEnabled:true}).state,'offline-update-automatic');
+console.log('PWA daily state passed.');

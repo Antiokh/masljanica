@@ -4,6 +4,8 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 <StarlightPage frontmatter={{title:'Офлайн',template:'splash'}}>
   <p>Скачайте полную копию праздника заранее: страницы, поиск, тексты, игры, расписание, сценарий и все локальные аудиозаписи.</p>
   <p>При обновлении скачиваются только изменённые файлы. Предыдущая рабочая копия сохраняется до завершения загрузки. YouTube и внешние иллюстрации требуют интернета.</p>
+  <label class="offline-preference"><input id="offline-auto" type="checkbox" disabled/> Автоматически скачивать и обновлять офлайн-копию</label>
+  <p class="muted">Выключение автоматического обновления сохраняет уже скачанные материалы. Удаление — отдельное действие.</p>
   <p id="offline-status" role="status">Проверка локальной копии…</p>
   <p id="offline-size" class="muted"></p>
   <progress id="offline-progress" value="0" max="1" hidden></progress>

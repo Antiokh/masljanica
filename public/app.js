@@ -1,8 +1,46 @@
+import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resolvePwaDailyState } from './pwa-daily-state.mjs';
 // One global runtime. Astro swaps page DOM, not the document listeners.
 (() => {
  if(window.__masljanicaRuntime)return;window.__masljanicaRuntime=true;
  const sw=navigator.serviceWorker;
  let state={ready:false,progress:null},latest=null,error='',checking=false,registrationFailed=false;
+ let verified=false,installPrompt=null,lastCheck=0,offer=null,autoAttempt=null;
+ const PREF='masljanica-pwa-offline-preference-v1';
+ const get=k=>{try{return localStorage.getItem(k);}catch{return null;}};
+ const set=(k,v)=>{try{localStorage.setItem(k,v);return true;}catch{return false;}};
+ const accepted=()=>get(KEYS.storageNoticeAck)==='1';
+ const automatic=()=>get(PREF)==='enabled';
+ const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+ const noteStandalone=()=>{if(standalone())set(KEYS.lastStandaloneDate,localDayKey());};
+ const startDownload=()=>{
+   if(!sw?.controller||state.progress||!navigator.onLine)return;
+   error='';state.progress={done:0,total:0,bytes:0,totalBytes:0};offer=null;render();send('OFFLINE_DOWNLOAD');
+ };
+ function resolveOffer(){
+   noteStandalone();
+   if(!accepted()||!verified||!sw?.controller||state.progress||!navigator.onLine||error)return;
+   const stale=!!(state.ready&&latest&&latest.version!==state.version);
+   const result=resolvePwaDailyState({
+     storageAccepted:true,isStandalone:standalone(),lastStandaloneDate:get(KEYS.lastStandaloneDate),
+     dailyOffer:get(KEYS.dailyOffer),installPromptAvailable:!!installPrompt,
+     offlinePackCapabilityAvailable:verified,offlineCopyAvailable:state.ready,
+     offlineCopyStale:stale,offlineAutoUpdateEnabled:automatic()&&!!latest
+   });
+   if(result.state==='offline-update-automatic'){
+     const target=latest?.version;
+     if(target&&autoAttempt!==target){autoAttempt=target;startDownload();}
+     return;
+   }
+   if(offer)return;
+   if(['install','offline-download','offline-update'].includes(result.state)){
+     if(result.state!=='install'&&!latest)return;
+     // An offer counts only if the presentation exists on the current page.
+     if(document.querySelector('#pwa-offer')&&set(KEYS.dailyOffer,serializeDailyOffer(result.state)))offer=result.state;
+   }
+ }
+ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;resolveOffer();render();});
+ window.addEventListener('appinstalled',()=>{installPrompt=null;offer=null;render();});
+
  const fmt=n=>((n||0)/1e6).toFixed(1).replace('.',',')+' МБ';
  const send=type=>sw?.controller?.postMessage({type});
  const syncTheme=()=>{const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=document.documentElement.dataset.theme==='light'?'#FFFFFF':'#101827';};
@@ -23,40 +61,61 @@
  function render(){
    const label=document.querySelector('#offline-status'),size=document.querySelector('#offline-size'),button=document.querySelector('#offline-update'),remove=document.querySelector('#offline-delete'),bar=document.querySelector('#offline-progress');
    const busy=!!state.progress,stale=state.ready&&latest&&latest.version!==state.version;
+   const notice=document.querySelector('#pwa-storage-notice'),prompt=document.querySelector('#pwa-offer'),message=document.querySelector('#pwa-offer-message'),action=document.querySelector('#pwa-offer-action'),auto=document.querySelector('#offline-auto'),indicator=document.querySelector('#offline-indicator');
+   if(notice)notice.hidden=accepted()||!sw;
+   if(auto){auto.checked=automatic();auto.disabled=!accepted()||!verified;}
+   if(prompt)prompt.hidden=!accepted()||!offer||busy;
+   if(message&&offer)message.textContent=offer==='install'?'Установите Масляницу на устройство.':(offer==='offline-download'?'Скачайте материалы праздника':'Доступна новая версия материалов')+(latest?' · '+fmt(latest.bytes):'')+'.';
+   if(action&&offer)action.textContent=offer==='install'?'Установить':offer==='offline-download'?'Скачать':'Обновить';
+   if(indicator){indicator.dataset.state=busy?'busy':!navigator.onLine?(state.ready?'ready':'unavailable'):'online';indicator.title=busy?'Загрузка офлайн-копии':!navigator.onLine?(state.ready?'Офлайн-копия готова':'Нет сети и полной копии'):'В сети';indicator.setAttribute('aria-label',indicator.title);}
+
    document.documentElement.dataset.offlineReady=String(state.ready);
    if(label)label.textContent=error||(!sw?'Офлайн-режим не поддерживается.':registrationFailed?'Не удалось запустить Service Worker.':!sw.controller?'Подключение Service Worker…':busy?'Загрузка: '+state.progress.done+' из '+(state.progress.total||'…')+' файлов':state.ready?(stale?'Доступно обновление. Старая копия сохранена.':'Офлайн-копия готова.'):'Полная копия ещё не скачана.');
    if(size)size.textContent=latest?'Размер полной копии: '+fmt(latest.bytes):state.ready?'Сохранено: '+fmt(state.bytes):'';
-   if(button){button.disabled=!sw?.controller||busy||checking||!navigator.onLine;button.textContent=state.ready?(stale?'Обновить копию':'Проверить и обновить'):'Скачать для офлайна';}
+   if(button){button.disabled=!accepted()||!verified||!sw?.controller||busy||checking||!navigator.onLine;button.textContent=state.ready?(stale?'Обновить копию':'Проверить и обновить'):'Скачать для офлайна';}
    if(remove){remove.disabled=busy||!state.ready||!sw?.controller;}
    if(bar){bar.hidden=!busy;if(busy){bar.max=state.progress.totalBytes||1;bar.value=state.progress.bytes||0;}}
  }
- async function checkVersion(){
-   if(checking||!navigator.onLine)return;
-   checking=true;render();
-   try{const r=await fetch('/offline-version.json',{cache:'no-store',signal:AbortSignal.timeout(5000)});if(r.ok){const v=await r.json();if(v.schema===1)latest=v;}}catch{}finally{checking=false;render();}
+ async function checkVersion(force=false){
+   if(checking||!navigator.onLine||(!force&&Date.now()-lastCheck<60000))return;
+   checking=true;lastCheck=Date.now();render();
+   try{const r=await fetch('/offline-version.json',{cache:'no-store',signal:AbortSignal.timeout(5000)});if(r.ok){const v=await r.json();if(v.schema===1)latest=v;}}catch{}finally{checking=false;resolveOffer();render();}
  }
  document.addEventListener('click',e=>{
    const target=e.target instanceof Element?e.target:null;
    const menu=document.querySelector('.more-menu');if(menu?.open&&target&&!menu.contains(target))menu.open=false;
-   if(target?.closest('#offline-update')){error='';state.progress={done:0,total:0,bytes:0,totalBytes:0};render();send('OFFLINE_DOWNLOAD');}
-   if(target?.closest('#offline-delete')&&confirm('Удалить полную офлайн-копию?')){error='';send('OFFLINE_DELETE');}
+   if(target?.closest('#offline-update')&&accepted())startDownload();
+   if(target?.closest('#offline-delete')&&confirm('Удалить полную офлайн-копию?')){error='';set(PREF,'disabled');autoAttempt=null;send('OFFLINE_DELETE');render();}
+   if(target?.closest('#pwa-storage-accept')){set(KEYS.storageNoticeAck,'1');resolveOffer();render();}
+   if(target?.closest('#pwa-offer-dismiss')){offer=null;render();}
+   if(target?.closest('#pwa-offer-action')){
+     const current=offer;offer=null;render();
+     if(current==='install'&&installPrompt){const p=installPrompt;installPrompt=null;p.prompt().catch(()=>{});}
+     if(current==='offline-download'||current==='offline-update')startDownload();
+   }
  });
  sw?.addEventListener('message',e=>{
    const m=e.data;
-   if(m?.type==='OFFLINE_STATUS')state=m;
+   if(m?.type==='OFFLINE_STATUS'){state=m;verified=m.capability===2;if(verified)resolveOffer();}
    if(m?.type==='OFFLINE_PROGRESS')state.progress=m.progress;
-   if(m?.type==='OFFLINE_COMPLETE'){error='';checkVersion();}
+   if(m?.type==='OFFLINE_COMPLETE'){error='';checkVersion(true);}
    if(m?.type==='OFFLINE_ERROR')error='Загрузка не завершена: '+m.message;
    render();
  });
  function pageLoad(){
    syncTheme();refreshCatalog();render();
-   if(document.querySelector('#offline-status')){send('OFFLINE_STATUS');checkVersion();}
+   noteStandalone();send('OFFLINE_STATUS');checkVersion();resolveOffer();render();
  }
  document.addEventListener('astro:page-load',pageLoad);
- window.addEventListener('online',()=>{render();if(document.querySelector('#offline-status'))checkVersion();});
+ document.addEventListener('change',e=>{
+   if(e.target?.id==='offline-auto'&&accepted()){
+     set(PREF,e.target.checked?'enabled':'disabled');autoAttempt=null;error='';resolveOffer();checkVersion(true);render();
+   }
+ });
+ window.addEventListener('online',()=>{autoAttempt=null;error='';render();checkVersion(true);});
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){send('OFFLINE_STATUS');checkVersion();}});
  window.addEventListener('offline',render);
- sw?.addEventListener('controllerchange',()=>{send('OFFLINE_STATUS');render();});
+ sw?.addEventListener('controllerchange',()=>{verified=false;send('OFFLINE_STATUS');checkVersion(true);render();});
  if(sw&&(location.protocol==='https:'||location.hostname==='localhost')){
    sw.register('/sw.js').then(()=>{send('OFFLINE_STATUS');render();}).catch(()=>{registrationFailed=true;render();});
  }

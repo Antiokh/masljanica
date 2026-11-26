@@ -29,5 +29,14 @@ const moreActive = more.some(link=>active(link.href));
       <div class="more-links">{more.map(link=><a data-astro-prefetch="hover" href={link.href} aria-current={active(link.href)?'page':undefined}>{link.title}</a>)}</div>
     </details>
   </nav>
-  <div class="header-actions"><Search /><ThemeSelect /></div>
+  <div class="header-actions"><a id="offline-indicator" href="/offline/" title="Состояние офлайн-копии" aria-label="Состояние офлайн-копии"></a><Search /><ThemeSelect /></div>
+</div>
+
+<div class="pwa-notice" id="pwa-storage-notice" hidden role="region" aria-label="Локальное хранилище">
+  <p>Приложение использует локальное хранилище для темы и офлайн-материалов. Полную копию можно скачать и удалить в разделе «Офлайн».</p>
+  <button class="app-button" id="pwa-storage-accept">Понятно</button>
+</div>
+<div class="pwa-notice" id="pwa-offer" hidden role="region" aria-label="Приложение">
+  <p id="pwa-offer-message"></p>
+  <div class="pwa-notice-actions"><button class="app-button" id="pwa-offer-action">Скачать</button><button class="offline-delete" id="pwa-offer-dismiss">Не сейчас</button></div>
 </div>

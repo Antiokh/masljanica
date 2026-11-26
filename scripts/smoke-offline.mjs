@@ -15,6 +15,7 @@ try {
   const page=await context.newPage();
   await page.goto(origin);
   await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
+  await page.locator('#pwa-storage-accept').click();
   await page.evaluate(()=>{window.__navigationTest='persisted';});
   await page.locator('.app-nav a[href="/songs/"]').click();
   await page.waitForURL('**/songs/');

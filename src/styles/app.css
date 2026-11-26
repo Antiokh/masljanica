@@ -114,3 +114,17 @@ audio { display:block; width:100%; margin-block:1rem; }
 }
 /* No decorative delay on navigation. */
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0s; }
+
+@layer app {
+ .offline-preference { display:flex; align-items:center; gap:.65rem; margin-block:1rem; font-weight:600; }
+ .offline-preference input { width:1.2rem; height:1.2rem; accent-color:var(--sl-color-accent); }
+ #offline-indicator { display:block; flex:none; width:.65rem; height:.65rem; border-radius:50%; background:var(--sl-color-gray-4); }
+ #offline-indicator[data-state=online] { background:#38a169; }
+ #offline-indicator[data-state=ready] { background:#4285e8; }
+ #offline-indicator[data-state=unavailable] { background:#b5232c; }
+ .pwa-notice { position:fixed; z-index:110; bottom:1rem; right:1rem; width:min(26rem,calc(100vw - 2rem)); background:var(--sl-color-bg-nav); color:var(--sl-color-text); border:1px solid var(--sl-color-gray-5); border-radius:.85rem; padding:1rem; box-shadow:0 8px 30px #0003; }
+ .pwa-notice[hidden] { display:none!important; }
+ .pwa-notice p { margin:0 0 .75rem; font-size:.9rem; line-height:1.5; }
+ .pwa-notice-actions { display:flex; flex-wrap:wrap; gap:.6rem; }
+ @media(max-width:60rem) { .pwa-notice { bottom:calc(var(--festival-mobile-nav-height) + env(safe-area-inset-bottom,0px) + .75rem); } }
+}
