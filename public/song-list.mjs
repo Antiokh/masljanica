@@ -33,13 +33,6 @@ export function installSongList(){
       if(audio.paused||audio.ended)play(audio);else{audio.pause();sync(audio);}
       return;
     }
-    const video=target?.closest('.song-video-load');
-    if(video){
-      const iframe=document.createElement('iframe');
-      iframe.className='video';iframe.title='Видео исполнения';iframe.allowFullscreen=true;
-      iframe.src=video.dataset.video;
-      video.replaceWith(iframe);
-    }
   });
   document.addEventListener('change',e=>{
     if(!(e.target instanceof HTMLSelectElement)||!e.target.matches('.song-variant'))return;

@@ -32,7 +32,7 @@ const duration=(seconds:number)=>Math.floor(seconds/60)+':'+String(Math.floor(se
             <summary>
               <span class="song-heading">
                 <strong>{song.title}</strong>
-                <small>{[tracks.length>1?tracks.length+' варианта исполнения':tracks.length===1&&tracks[0].duration?duration(tracks[0].duration):'',video?'Видео':''].filter(Boolean).join(' · ')}</small>
+                <small>{tracks.length>1?tracks.length+' варианта исполнения':tracks.length===1&&tracks[0].duration?duration(tracks[0].duration):''}{video && <span data-online-only hidden>{tracks.length>1||(tracks.length===1&&tracks[0].duration)?' · ':''}Видео</span>}</small>
               </span>
               <svg class="song-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
             </summary>
@@ -50,9 +50,10 @@ const duration=(seconds:number)=>Math.floor(seconds/60)+':'+String(Math.floor(se
                 </div>
               )}
               {song.lyrics && <div class="song-lyrics">{song.lyrics}</div>}
-              {video && <div class="song-video">
+              {video && <div class="song-video" data-online-only data-external-embed data-embed-src={video.embed||undefined} data-embed-mode="manual" hidden>
                 <h3>Видео</h3>
-                {video.embed && <button class="offline-delete song-video-load" type="button" data-video={video.embed}>Смотреть видео</button>}
+                {video.embed && <button class="offline-delete song-video-load" type="button" data-embed-load>Смотреть видео</button>}
+                <div data-embed-surface hidden></div>
                 <a href={video.link} target="_blank" rel="noopener noreferrer">Открыть видео в новой вкладке</a>
               </div>}
             </div>

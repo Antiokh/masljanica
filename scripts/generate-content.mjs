@@ -14,7 +14,7 @@ function audioSource(source) {
 }
 function media(x){
   let output='';
-  if(x.video){try{const u=new URL(x.video);const id=u.hostname==='youtu.be'?u.pathname.slice(1):u.searchParams.get('v');if(id&&/^[\w-]{11}$/.test(id))output+='<iframe class="video" src="https://www.youtube-nocookie.com/embed/'+id+'" title="Видео" loading="lazy" allowfullscreen></iframe>\n\n';else if(url(x.video))output+='[Видео]('+url(x.video)+')\n\n';}catch{}}
+  if(x.video){try{const u=new URL(x.video);const id=u.hostname==='youtu.be'?u.pathname.slice(1):u.searchParams.get('v');if(id&&/^[\w-]{11}$/.test(id))output+='<div class="external-video" data-online-only data-external-embed data-embed-src="https://www.youtube-nocookie.com/embed/'+id+'" data-embed-mode="auto" hidden><div data-embed-surface hidden></div></div>\n\n';else if(url(x.video))output+='<p data-online-only hidden><a href="'+url(x.video)+'" target="_blank" rel="noopener noreferrer">Видео</a></p>\n\n';}catch{}}
   for(const audio of x.audio??[]){const src=audioSource(audio);if(src)output+='<audio controls preload="none" src="'+src+'"></audio>\n\n';}
   return output;
 }

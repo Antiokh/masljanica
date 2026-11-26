@@ -12,6 +12,8 @@ try {
   }
   browser=await chromium.launch({headless:true});
   const context=await browser.newContext({viewport:{width:390,height:844}});
+  let providerRequests=0;
+  await context.route('https://www.youtube-nocookie.com/**',route=>{providerRequests++;return route.fulfill({contentType:'text/html',body:'<html><body>Video fixture</body></html>'});});
   const page=await context.newPage();
   await page.goto(origin);
   await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
@@ -32,6 +34,17 @@ try {
   await row.locator('.song-lyrics').waitFor({state:'visible'});
   assert.equal(await row.locator('.song-variant option').count(),2);
   assert.equal(await row.locator('iframe').count(),0,'Video is lazy loaded');
+  await row.locator('.song-video-load').click();
+  await row.locator('iframe').waitFor({state:'visible'});
+  await page.waitForFunction(()=>document.querySelector('[data-song="Квашня"] iframe')?.getAttribute('src')?.includes('youtube-nocookie'));
+  await context.setOffline(true);
+  await row.locator('.song-video').waitFor({state:'hidden'});
+  assert.equal(await row.locator('iframe').count(),0,'Hot offline hides and releases external video');
+  await row.locator('.song-lyrics').waitFor({state:'visible'});
+  await row.locator('audio').waitFor({state:'visible'});
+  await context.setOffline(false);
+  await row.locator('.song-video-load').waitFor({state:'visible'});
+  assert.equal(await row.locator('iframe').count(),0,'Manual video waits for a click on reconnect');
   await row.locator('.song-variant').selectOption({index:1});
   assert.match(await row.locator('audio').getAttribute('src'),/^\/media\/audio\//);
   await row.locator('summary').click();
@@ -64,6 +77,22 @@ try {
   await page.locator('.app-nav a[href="/songs/"]').click();
   await page.waitForURL('**/songs/');
   await page.locator('[data-entry]').first().waitFor();
+  const coldRow=page.locator('.song-row').filter({hasText:'Квашня'});
+  await coldRow.locator('summary').click();
+  await coldRow.locator('.song-lyrics').waitFor({state:'visible'});
+  await coldRow.locator('.song-video').waitFor({state:'hidden'});
+  assert.equal(await coldRow.locator('iframe').count(),0,'Cold offline never creates a video iframe');
+  const offlineRequests=providerRequests;
+  await page.goto(origin+'/games/'+encodeURIComponent('дударь')+'/');
+  await page.locator('[data-external-embed]').waitFor({state:'attached'});
+  await page.locator('[data-external-embed]').waitFor({state:'hidden'});
+  assert.equal(await page.locator('[data-external-embed] iframe').count(),0,'Cold offline game page must not create a provider iframe');
+  assert.equal(providerRequests,offlineRequests,'No provider requests during cold offline');
+  await context.setOffline(false);
+  await page.locator('[data-external-embed] iframe').waitFor({state:'visible'});
+  await context.setOffline(true);
+  await page.locator('[data-external-embed]').waitFor({state:'hidden'});
+  assert.equal(await page.locator('[data-external-embed] iframe').count(),0,'Hot offline game page releases the provider');
   const range=await page.evaluate(async url=>{
     const response=await fetch(url,{headers:{Range:'bytes=0-127'}});
     return {status:response.status,bytes:(await response.arrayBuffer()).byteLength,range:response.headers.get('content-range')};

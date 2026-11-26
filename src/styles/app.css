@@ -164,3 +164,7 @@ audio { display:block; width:100%; margin-block:1rem; }
   .song-list .song-error[hidden] { display:none; }
   @media(prefers-reduced-motion:reduce){.song-list .song-chevron { transition:none; }}
 }
+
+/* Hide the entire external-media surface, including headings and links, not just the frame. */
+[data-online-only][hidden], [data-embed-surface][hidden], [data-embed-load][hidden] { display:none!important; }
+html[data-network="offline"] [data-online-only] { display:none!important; }
