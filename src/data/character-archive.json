@@ -1,7 +1,71 @@
 {
-  "files": {},
+  "files": {
+    "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/8zz4qeDsHyaQDAtfZZsk.png": {
+      "path": "/media/characters/2228a4654fe90ecd2533.webp",
+      "width": 427,
+      "height": 640,
+      "bytes": 85496,
+      "sha256": "db9a9f11a09067082373d7f3f640fa85fe75db6492e41a70105ed691a73a2820"
+    },
+    "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/Fl8OFuJYLIvOqyGts7np.png": {
+      "path": "/media/characters/376b25b20f426c257d70.webp",
+      "width": 427,
+      "height": 640,
+      "bytes": 104580,
+      "sha256": "bcf4e9fcf18d1600ec7a45ff9b45cd45793d1db5eefe2a0f47ebbf10362f11c6"
+    },
+    "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/GZQKqA1uqeYk1bQ7RBmN.png": {
+      "path": "/media/characters/f788d70b0e1574041c1e.webp",
+      "width": 427,
+      "height": 640,
+      "bytes": 111150,
+      "sha256": "e1b61aa2fac5e53250a20c9f8e8725ca59f56deb28fb04b534a11fe079b52b85"
+    },
+    "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/JQLXg3bswsgukjqlppfd.png": {
+      "path": "/media/characters/e66240626940ef9f6fa8.webp",
+      "width": 427,
+      "height": 640,
+      "bytes": 93358,
+      "sha256": "9fc94503f35eb7e2a4ac9c412a3dfdfd9134313fec3ca1002bf8b5e49db5faac"
+    },
+    "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/gZmfqYLJlzLgauth69Ml.png": {
+      "path": "/media/characters/a2ee9ccf79829dd3aaae.webp",
+      "width": 427,
+      "height": 640,
+      "bytes": 97060,
+      "sha256": "4d45756ec600235d5d7ef54f03515c18c87b72f22c8745116c3ec35dc569c42e"
+    },
+    "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/hnZCcb9jA3wHWnVpp1NE.png": {
+      "path": "/media/characters/e64a3ba00953866cc752.webp",
+      "width": 427,
+      "height": 640,
+      "bytes": 104090,
+      "sha256": "c7b88682b0c17d09610bfe2efab5f445e41cbe6f35fcc1439a20b8db533a9b24"
+    },
+    "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/nNbqlCwohfeh9k7OPrHv.png": {
+      "path": "/media/characters/40f21a30b3edd84a5cf6.webp",
+      "width": 427,
+      "height": 640,
+      "bytes": 89732,
+      "sha256": "c87c027e465208e4bb356760517b28dd305844b570e6758be54297234c949b7a"
+    },
+    "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/qtWHk1dsZjKts1Pn8fHp.png": {
+      "path": "/media/characters/8b2a8fb7b152be72f851.webp",
+      "width": 427,
+      "height": 640,
+      "bytes": 89718,
+      "sha256": "461990656293b6dedfa23905bac74740be662813698f6a456349a8067cb5e01d"
+    },
+    "https://storage.googleapis.com/glide-prod.appspot.com/uploads-v2/bZKAt3KuBdteqNhSkLDK/pub/vVf9dO56CqRoESLqidHz.png": {
+      "path": "/media/characters/9964633996fe76288ca7.webp",
+      "width": 427,
+      "height": 640,
+      "bytes": 95180,
+      "sha256": "4cff46da890625bb7133f0fe21129808389170be8a35bb35389d19d048841151"
+    }
+  },
   "errors": {},
   "total": 9,
-  "archived": 0,
-  "bytes": 0
+  "archived": 9,
+  "bytes": 870364
 }
