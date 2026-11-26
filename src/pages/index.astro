@@ -1,4 +1,6 @@
 ---
+import { existsSync } from 'node:fs';
+const heroLogo = existsSync(process.cwd()+'/public/media/maslenitsa-sun.webp') ? '/media/maslenitsa-sun.webp' : '/icon.svg';
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { frontmatter } from '../data/home.md';
 import event from '../data/event.json';
@@ -37,7 +39,7 @@ const sections = [
           </a>
         </div>
       </div>
-      <div class="home-hero-art" aria-hidden="true"><img src="/icon.svg" alt="" width="112" height="112"/></div>
+      <div class="home-hero-art" aria-hidden="true"><img src={heroLogo} alt="" width="112" height="112"/></div>
     </section>
     <div class="home-main">
       <section class="home-sections" aria-label="Материалы праздника">
