@@ -23,7 +23,7 @@
   --festival-surface: #1D2B40;
   --festival-hero: #172840;
   --festival-on-action: #FFFFFF;
-  --festival-mobile-nav-height: 3.125rem;
+  --festival-mobile-nav-height: 3.375rem;
   --sl-content-width: 68rem;
 }
 :root[data-theme='light'] {
@@ -96,7 +96,7 @@ audio { display:block; width:100%; margin-block:1rem; }
   .app-nav > a, .app-nav > .more-menu > summary {
     box-sizing:border-box; width:100%; min-width:0; min-height:0; height:100%;
     flex-direction:column; align-items:center; justify-content:center;
-    font-size:.72rem; line-height:1.15; gap:.1rem; padding:0 .1rem;
+    font-size:.72rem; line-height:1.15; gap:.15rem; padding:0 .1rem;
     text-align:center;
   }
   .app-nav .nav-icon { width:1.25rem; height:1.25rem; }

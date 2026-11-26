@@ -152,7 +152,7 @@ try {
   });
   assert.ok(compact.gap>=0&&compact.gap<=24,'First mobile control must sit immediately under header');
   assert.ok(compact.titleHeight<=1,'Semantic H1 must not occupy visible space');
-  assert.ok(compact.navHeight>=48&&compact.navHeight<=52&&Math.abs(compact.navBottom)<=1,'50px bottom nav remains flush');
+  assert.ok(compact.navHeight>=52&&compact.navHeight<=56&&Math.abs(compact.navBottom)<=1,'54px bottom nav remains flush');
   assert.equal(compact.bodyPadding,0,'No duplicate body bottom reservation');
   const bottomLayout=await page.evaluate(async()=>{
     const y=scrollY;
