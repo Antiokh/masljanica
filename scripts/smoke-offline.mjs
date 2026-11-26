@@ -28,11 +28,36 @@ try {
   assert.ok(navBounds&&searchBounds&&themeBounds,'Desktop header controls must be visible');
   assert.ok(searchBounds.x>=navBounds.x+navBounds.width-1 && searchBounds.x-(navBounds.x+navBounds.width)<=16,'Desktop search must sit next to the central navigation');
   assert.ok(searchBounds.x+searchBounds.width<=themeBounds.x+1,'Search must not overlap theme switch');
+  async function assertProgressTheme(){
+    const result=await page.evaluate(()=>{
+      const line=document.querySelector('[data-pwa-nav-progress]');
+      const bar=line.querySelector('progress');
+      const header=line.closest('header');
+      const hidden=line.hidden, previous=bar.getAttribute('value');
+      line.hidden=false;bar.value=50;
+      try{
+        const r=line.getBoundingClientRect(),h=header.getBoundingClientRect();
+        const probe=document.createElement('span');probe.style.color='var(--sl-color-accent)';document.body.append(probe);
+        const accent=getComputedStyle(probe).color;probe.remove();
+        return {left:r.left-h.left,right:r.right-h.right,bottom:r.bottom-h.bottom,height:r.height,
+          fill:getComputedStyle(bar,'::-webkit-progress-value').backgroundColor,
+          color:getComputedStyle(bar).color,track:getComputedStyle(bar).backgroundColor,accent,
+          appearance:getComputedStyle(bar).appearance};
+      }finally{line.hidden=hidden;if(previous===null)bar.removeAttribute('value');else bar.setAttribute('value',previous);}
+    });
+    assert.ok(Math.abs(result.left)<=1&&Math.abs(result.right)<=1&&Math.abs(result.bottom)<=1,'Progress must follow the full outer header bottom edge');
+    assert.ok(result.height>0&&result.height<=4,'Progress line must stay thin');
+    assert.equal(result.color,result.accent,'Progress uses the resolved theme accent');
+    assert.equal(result.appearance,'none','No OS-native progress styling');
+    assert.equal(result.track,'rgba(0, 0, 0, 0)','Header progress track is transparent');
+  }
   await themeSwitch.focus();
   await themeSwitch.press('Home');
   await page.waitForFunction(()=>document.documentElement.dataset.theme==='light' && localStorage.getItem('starlight-theme')==='light');
+  await assertProgressTheme();
   await themeSwitch.press('End');
   await page.waitForFunction(()=>document.documentElement.dataset.theme==='dark' && localStorage.getItem('starlight-theme')==='dark');
+  await assertProgressTheme();
   await themeSwitch.press('ArrowLeft');
   await page.waitForFunction(()=>document.querySelector('[data-theme-switch]')?.getAttribute('data-theme-mode')==='auto');
   await page.setViewportSize({width:390,height:844});
