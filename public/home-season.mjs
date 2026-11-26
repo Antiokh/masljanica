@@ -26,6 +26,7 @@ export function installHomeSeason(){
     const state=seasonState(config);
     root.querySelectorAll('[data-home-season]').forEach(el=>{el.hidden=!state[el.dataset.homeSeason];});
     root.querySelectorAll('[data-home-timeless]').forEach(el=>{el.hidden=state.event;});
+    document.querySelectorAll('[data-header-event-date]').forEach(el=>{el.hidden=!state.event;});
     // An open offline page also expires after midnight without navigation.
     timer=setTimeout(refresh,30000);
   }

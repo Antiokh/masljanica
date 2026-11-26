@@ -18,18 +18,22 @@ try {
   const page=await context.newPage();
   await page.goto(origin);
   await page.locator('[data-home-dashboard]').waitFor();
+  assert.equal(await page.locator('.festival-brand-title').innerText(),'Масленица');
+  assert.match(await page.locator('.festival-brand-subtitle').innerText(),/^Белград/);
   await page.waitForFunction(()=>document.querySelector('.home-dashboard .home-section-card') && document.querySelector('.home-dashboard [data-home-season="event"]')?.hidden === (document.querySelector('.home-dashboard').dataset.eventEnabled!=='true'||document.querySelector('.home-dashboard').dataset.eventDate < new Intl.DateTimeFormat('sv-SE',{timeZone:document.querySelector('.home-dashboard').dataset.eventTimezone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())));
   assert.equal(await page.locator('.home-section-card').count(),4);
   assert.equal(await page.locator('.home-character-card').count(),5);
   const home=page.locator('[data-home-dashboard]');
   await home.evaluate(el=>{el.dataset.eventDate='2000-01-01';window.dispatchEvent(new Event('pageshow'));});
   await page.locator('.home-program').waitFor({state:'hidden'});
+  await page.locator('[data-header-event-date]').waitFor({state:'hidden'});
   await page.locator('.home-section-card').first().waitFor({state:'visible'});
   await home.evaluate(el=>{el.dataset.eventEnabled='true';el.dataset.eventDate='2099-12-31';el.dataset.scheduleEnabled='false';window.dispatchEvent(new Event('pageshow'));});
   await page.locator('.home-event-meta').waitFor({state:'visible'});
   await page.locator('.home-program').waitFor({state:'hidden'});
   await home.evaluate(el=>{el.dataset.scheduleEnabled='true';window.dispatchEvent(new Event('pageshow'));});
   await page.locator('.home-program').waitFor({state:'visible'});
+  await page.locator('[data-header-event-date]').waitFor({state:'visible'});
   await page.setViewportSize({width:1440,height:900});
   const geometry=await page.evaluate(()=>{
     const box=s=>document.querySelector(s).getBoundingClientRect();
@@ -138,6 +142,19 @@ try {
   await page.evaluate(()=>{window.__navigationTest='persisted';});
   await page.locator('.app-nav a[href="/songs/"]').click();
   await page.waitForURL('**/songs/');
+  await page.waitForFunction(()=>document.querySelector('.festival-brand-title')?.textContent==='Песни');
+  assert.equal(await page.locator('.festival-brand-subtitle').innerText(),'Масленица');
+  await page.setViewportSize({width:390,height:844});
+  const compact=await page.evaluate(()=>{
+    const header=document.querySelector('header').getBoundingClientRect(), search=document.querySelector('#catalog-search').getBoundingClientRect();
+    const title=document.querySelector('#_top').getBoundingClientRect(),nav=document.querySelector('.app-nav').getBoundingClientRect();
+    return {gap:search.top-header.bottom,titleHeight:title.height,navHeight:nav.height,navBottom:innerHeight-nav.bottom,bodyPadding:parseFloat(getComputedStyle(document.body).paddingBottom)};
+  });
+  assert.ok(compact.gap>=0&&compact.gap<=24,'First mobile control must sit immediately under header');
+  assert.ok(compact.titleHeight<=1,'Semantic H1 must not occupy visible space');
+  assert.ok(compact.navHeight<=66&&Math.abs(compact.navBottom)<=1,'Compact bottom nav remains flush');
+  assert.equal(compact.bodyPadding,0,'No duplicate body bottom reservation');
+
   await page.locator('#catalog-search').waitFor();
   assert.equal(await page.evaluate(()=>window.__navigationTest),'persisted','SPA navigation must keep the same window');
   await page.waitForFunction(()=>performance.getEntriesByName('masljanica-nav-swap').length>0);

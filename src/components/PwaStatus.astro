@@ -1,11 +1,19 @@
 ---
+import { frontmatter } from '../data/home.md';
+const home=Astro.url.pathname==='/';
+const title=home?'Масленица':Astro.locals.starlightRoute.entry.data.title;
+const event=frontmatter.event;
+const dateLabel=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',timeZone:'UTC'}).format(new Date(event.date+'T00:00:00Z'));
 ---
 <div class="festival-brand">
   <button type="button" class="festival-brand-icon" data-pwa-menu-trigger popovertarget="festival-pwa-menu" aria-label="Состояние приложения" aria-controls="festival-pwa-menu" aria-expanded="false">
     <img src="/icon.svg" alt="" width="44" height="44"/>
     <span id="offline-indicator" data-state="unknown" aria-hidden="true"></span>
   </button>
-  <a class="festival-brand-title" href="/">Масляница · Белград</a>
+  <a class="festival-brand-label" href="/" aria-label={home?'Масленица — главная':title+' — на главную'}>
+    <span class="festival-brand-title" title={title}>{title}</span>
+    <span class="festival-brand-subtitle">{home?<><span>Белград</span><span data-header-event-date hidden> · {dateLabel}</span></>:'Масленица'}</span>
+  </a>
   <section id="festival-pwa-menu" class="festival-pwa-menu" popover="auto" aria-label="Состояние приложения">
     <h2>Состояние приложения</h2>
     <div class="pwa-status-grid">
