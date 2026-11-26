@@ -111,6 +111,9 @@ try {
   const navItems=await page.locator('.app-nav > a,.app-nav > details').evaluateAll(els=>els.map(el=>el.getBoundingClientRect().width));
   assert.equal(navItems.length,4);
   assert.ok(Math.max(...navItems)-Math.min(...navItems)<=1,'Mobile navigation must retain four equal columns');
+  const tapColors=await page.locator('.app-nav > a,.app-nav > details > summary,.festival-brand-icon,.home-section-card,.mobile-theme-control select').evaluateAll(els=>els.map(el=>getComputedStyle(el).webkitTapHighlightColor));
+  assert.ok(tapColors.length>=5 && tapColors.every(c=>c==='rgba(0, 0, 0, 0)'),'Native tap highlight must be transparent');
+
 
   await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
   await page.locator('#pwa-storage-accept').click();

@@ -655,3 +655,19 @@ progress[data-pwa-bar]:indeterminate::-moz-progress-bar, progress#offline-progre
   .sl-markdown-content > .playlist-panel + .song-list { margin-top:.65rem; }
   .sl-markdown-content > :last-child { margin-bottom:0; }
 }
+
+/* Browser tap feedback must not introduce a blue overlay over themed controls.
+   Keep keyboard focus visible and preserve native text selection. */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+:where(a,button,summary,label,select,input,[role="button"],[tabindex]) {
+  -webkit-tap-highlight-color: transparent;
+}
+:where(a,button,summary,select,input,[role="button"],[tabindex]):focus-visible {
+  outline:2px solid var(--sl-color-text-accent);
+  outline-offset:2px;
+}
+:where(a,button,summary,[role="button"]):focus:not(:focus-visible) {
+  outline:none;
+}
