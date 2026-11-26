@@ -1,17 +1,15 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import CharacterGallery from '../../components/CharacterGallery.astro';
-import parts from '../../data/parts.json';
 export function getStaticPaths() {
-  return ['characters','scenario'].map(section=>({params:{section}}));
+  return ['characters'].map(section=>({params:{section}}));
 }
 const section = Astro.params.section!;
-const titles:Record<string,string>={characters:'Персонажи',scenario:'Сказ'};
+const titles:Record<string,string>={characters:'Персонажи'};
 type Entry = {slug:string;title:string;subtitle?:string;image?:string;category?:string;video?:boolean};
 const sort = (a:Entry,b:Entry)=>a.title.localeCompare(b.title,'ru');
 let entries:Entry[] = [];
 
-if(section==='scenario') entries=parts.map(x=>({slug:String(x.number),title:x.title}));
 const groups=[''];
 ---
 <StarlightPage frontmatter={{title:titles[section],template:'splash'}}>

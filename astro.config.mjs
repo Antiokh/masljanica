@@ -8,7 +8,7 @@ export default defineConfig({
     defaultLocale: 'root',
     locales: { root: { label: 'Русский', lang: 'ru' } },
     favicon: '/icon.svg',
-    customCss: ['./src/styles/app.css','./src/styles/games.css','./src/styles/workshops.css'],
+    customCss: ['./src/styles/app.css','./src/styles/games.css','./src/styles/workshops.css','./src/styles/story.css'],
     components: { Header: './src/components/Header.astro', Head: './src/components/AppHead.astro', Footer: './src/components/AppFooter.astro' },
     head: [
       { tag: 'link', attrs: { rel: 'manifest', href: '/manifest.webmanifest' } },

@@ -1,3 +1,4 @@
+import { installStoryBook } from './story-book.mjs';
 import { installWorkshopGallery } from './workshop-gallery.mjs';
 import { installGameList } from './game-list.mjs';
 import { createRuntimeEnvironment } from './runtime-environment.mjs';
@@ -15,6 +16,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  installSongList();
  installGameList();
  installWorkshopGallery();
+ installStoryBook();
  installExternalEmbeds();
  installHomeSeason();
  installCharacterDialogs();

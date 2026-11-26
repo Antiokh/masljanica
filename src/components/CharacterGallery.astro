@@ -1,4 +1,5 @@
 ---
+import CharacterDialog from './CharacterDialog.astro';
 import characters from '../data/characters.json';
 import archive from '../data/character-archive.json';
 import { existsSync } from 'node:fs';
@@ -15,12 +16,5 @@ const people=characters.filter(x=>x.show).map(x=>{
     <span class="home-character-art" aria-hidden="true">{x.src?<img src={x.src} alt="" width={files[x.image]?.width||640} height={files[x.image]?.height||640} decoding="async"/>:<span>{x.title.slice(0,1)}</span>}</span>
     <strong>{x.title}</strong>
   </button>)}
-  {people.map(x=><dialog class="character-dialog" id={'character-'+x.slug} aria-labelledby={'character-title-'+x.slug} data-character-dialog>
-    <div class="character-dialog-inner">
-      <button type="button" class="character-dialog-close" data-character-close aria-label="Закрыть" autofocus><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
-      {x.src && <img class="character-dialog-art" src={x.src} alt="" loading="lazy" decoding="async"/>}
-      <h2 id={'character-title-'+x.slug}>{x.title}</h2>
-      {x.description.split(/\n\s*\n/).map(text=><p>{text}</p>)}
-    </div>
-  </dialog>)}
+  {people.map(x=><CharacterDialog person={x}/>)}
 </div>
