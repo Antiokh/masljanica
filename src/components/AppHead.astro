@@ -2,5 +2,39 @@
 import Head from '@astrojs/starlight/components/Head.astro';
 import { ClientRouter } from 'astro:transitions';
 ---
+<!-- Capture Telegram's launch theme before router/other scripts can change the hash.
+     No request to Telegram in an ordinary browser. The adapter owns live synchronization. -->
+<script is:inline>
+  (() => {
+    if (window.__masljanicaTelegramLaunch) return;
+    try {
+      const url = new URL(location.href);
+      for (const raw of [url.hash.slice(1), url.search.slice(1)]) {
+        const p = new URLSearchParams(raw);
+        const platform = p.get('tgWebAppPlatform'), version = p.get('tgWebAppVersion');
+        if (!/^[a-z][a-z0-9_]{1,23}$/i.test(platform || '') || platform === 'unknown' ||
+            !/^\d+(?:\.\d+){0,3}$/.test(version || '') ||
+            (!p.has('tgWebAppData') && !p.has('tgWebAppThemeParams'))) continue;
+        let theme = null;
+        try {
+          const bg = JSON.parse(p.get('tgWebAppThemeParams') || '{}').bg_color;
+          if (/^#[0-9a-f]{6}$/i.test(bg || '')) {
+            const [r,g,b] = bg.slice(1).match(/../g).map(x => parseInt(x,16));
+            theme = r*.299+g*.587+b*.114 < 128 ? 'dark' : 'light';
+          }
+        } catch {}
+        window.__masljanicaTelegramLaunch = {platform, version, theme};
+        if (!window.Telegram?.WebApp && !document.querySelector('script[data-telegram-bridge]')) {
+          const script = document.createElement('script');
+          script.src = 'https://telegram.org/js/telegram-web-app.js?65';
+          script.async = true;
+          script.dataset.telegramBridge = '';
+          document.head.append(script);
+        }
+        break;
+      }
+    } catch {}
+  })();
+</script>
 <Head />
 <ClientRouter fallback="swap" />

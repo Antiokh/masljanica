@@ -43,6 +43,10 @@ const themeCopy = { change: 'Цветовая тема', light: 'Светлая 
   const modes: Theme[] = ['light', 'auto', 'dark'];
 
   function preferredTheme(): DisplayTheme {
+    // The environment adapter resolves Telegram auto mode, not the OS picker.
+    if (document.documentElement.dataset.runtimeEnvironment === 'telegram') {
+      return document.documentElement.dataset.telegramTheme === 'light' ? 'light' : document.documentElement.dataset.telegramTheme === 'dark' ? 'dark' : displayTheme();
+    }
     return matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
   }
 

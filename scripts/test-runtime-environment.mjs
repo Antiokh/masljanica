@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { parseTelegramLaunch, detectTelegram, resolveTheme, themeMode, copyRetention, createRuntimeEnvironment } from '../public/runtime-environment.mjs';
+import { parseTelegramLaunch, detectTelegram, resolveTheme, themeMode, copyRetention, createRuntimeEnvironment, readBridgeTheme, themeFromParams } from '../public/runtime-environment.mjs';
 const origin='https://example.com/';
 const make=(platform='android',bg='#101827')=>origin+'#'+new URLSearchParams({tgWebAppPlatform:platform,tgWebAppVersion:'9.0',tgWebAppThemeParams:JSON.stringify({bg_color:bg})});
 assert.deepEqual(parseTelegramLaunch(make()),{platform:'android',version:'9.0',theme:'dark'});
@@ -13,6 +13,13 @@ for(const system of ['light','dark'])for(const telegram of ['light','dark',null]
   assert.equal(resolveTheme('auto',system,telegram),telegram||system);
   for(const explicit of ['light','dark'])assert.equal(resolveTheme(explicit,system,telegram),explicit);
 }
+assert.equal(themeFromParams({bg_color:'#17212b'}),'dark');
+assert.equal(themeFromParams({bg_color:'#ffffff'}),'light');
+assert.equal(themeFromParams({bg_color:'invalid'}),null);
+assert.equal(readBridgeTheme({colorScheme:'light'},'dark'), 'dark','Uninitialized SDK cannot erase launch theme');
+assert.equal(readBridgeTheme({colorScheme:'dark'},'light',true),'dark','Confirmed event overrides launch theme');
+assert.equal(readBridgeTheme({themeParams:{bg_color:'#ffffff'},colorScheme:'light'},'dark'),'light');
+assert.equal(readBridgeTheme({themeParams:{bg_color:'#17212b'}},'light'),'dark');
 assert.equal(themeMode(''),'auto');assert.equal(themeMode('bad'),'auto');
 assert.equal(copyRetention('v1',false,false),'checking');
 assert.equal(copyRetention(null,true,true),'unknown');

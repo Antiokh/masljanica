@@ -5,13 +5,24 @@ const versionOK=v=>/^\d+(?:\.\d+){0,3}$/.test(v||'');
 const scheme=s=>s==='light'||s==='dark'?s:null;
 export const themeMode=value=>scheme(value)||'auto';
 export const resolveTheme=(mode,system,telegram)=>scheme(mode)||scheme(telegram)||scheme(system)||'light';
+export function themeFromParams(params){
+  const bg=params?.bg_color;
+  if(!/^#[0-9a-f]{6}$/i.test(bg||''))return null;
+  const [r,g,b]=bg.slice(1).match(/../g).map(x=>parseInt(x,16));
+  return r*.299+g*.587+b*.114<128?'dark':'light';
+}
+// The SDK can expose a default colorScheme before receiving real theme data.
+export function readBridgeTheme(api,previous=null,confirmed=false){
+  if(themeFromParams(api?.themeParams))return scheme(api.colorScheme)||themeFromParams(api.themeParams);
+  return confirmed?scheme(api?.colorScheme)||previous:previous;
+}
 export function parseTelegramLaunch(input){
   let url;try{url=new URL(input);}catch{return null;}
   for(const raw of [url.hash.slice(1),url.search.slice(1)]){
     const p=new URLSearchParams(raw),platform=p.get('tgWebAppPlatform'),version=p.get('tgWebAppVersion'),theme=p.get('tgWebAppThemeParams');
     if(!platformOK(platform)||!versionOK(version)||(!p.has('tgWebAppData')&&!theme))continue;
     let color=null;
-    try{const bg=JSON.parse(theme||'{}').bg_color;if(/^#[0-9a-f]{6}$/i.test(bg||'')){const [r,g,b]=bg.slice(1).match(/../g).map(x=>parseInt(x,16));color=r*.299+g*.587+b*.114<128?'dark':'light';}}catch{}
+    try{color=themeFromParams(JSON.parse(theme||'{}'));}catch{}
     return {platform,version,theme:color};
   }
   return null;
@@ -29,7 +40,7 @@ export function createRuntimeEnvironment(win=window){
   const set=(kind,key,value)=>{try{win[kind].setItem(key,value);return true;}catch{return false;}};
   let session;try{session=JSON.parse(get('sessionStorage',SESSION)||'null');}catch{}
   const api=()=>win.Telegram?.WebApp;
-  const context=detectTelegram({url:win.location.href,session,api:api()});
+  const context=detectTelegram({url:win.location.href,session:win.__masljanicaTelegramLaunch||session,api:api()});
   const isTelegram=!!context;
   const isStandalone=()=>!isTelegram&&(win.matchMedia('(display-mode: standalone)').matches||win.navigator.standalone===true);
   let sw,cacheStorage=false;
@@ -38,7 +49,7 @@ export function createRuntimeEnvironment(win=window){
   if(isTelegram&&!cacheStorage)sw=undefined;
   const previous=isTelegram?get('localStorage',COPY):null;
   let retention='checking',observed=false,telegramTheme=context?.theme||null,bridge=null,bridgeStatus='connecting',bridgeLoading=false;
-  let volatileMode=null;
+  let volatileMode=null,themeSource=context?.theme?'launch':'system',lastNativeTheme=null;
   const call=(obj,name,...args)=>{try{if(typeof obj?.[name]==='function')return obj[name](...args);}catch{}};
   const mode=()=>volatileMode||themeMode(get('localStorage',THEME));
   const system=()=>win.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
@@ -47,9 +58,11 @@ export function createRuntimeEnvironment(win=window){
     if(!isTelegram)return;
     const selected=mode(),display=resolveTheme(selected,system(),telegramTheme);
     if(root().dataset.runtimeEnvironment!=='telegram')root().dataset.runtimeEnvironment='telegram';
+    if(telegramTheme)root().dataset.telegramTheme=telegramTheme;
     if(root().dataset.theme!==display)root().dataset.theme=display;
     doc.querySelectorAll('[data-telegram-theme]').forEach(el=>{el.value=selected;});
-    if(bridge){
+    if(bridge&&lastNativeTheme!==display){
+      lastNativeTheme=display;
       const bg=display==='light'?'#FFFFFF':'#101827',nav=display==='light'?'#FFFFFF':'#1D2B40';
       call(bridge,'setHeaderColor',nav);call(bridge,'setBackgroundColor',bg);
       if(call(bridge,'isVersionAtLeast','7.10'))call(bridge,'setBottomBarColor',nav);
@@ -63,7 +76,7 @@ export function createRuntimeEnvironment(win=window){
   }
   function diagnostics(){
     if(!isTelegram)return;
-    const values={environment:'Telegram Mini App · '+context.platform,bridge:bridgeStatus==='ready'?'Подключён':bridgeStatus==='unavailable'?'Недоступен · резервный режим':'Подключение…',sw:sw?'API доступен':'Недоступен',cache:cacheStorage?'API доступен':'Недоступен',retention:retention==='retained'?'Предыдущая копия обнаружена':retention==='missing'?'Предыдущая копия не обнаружена':retention==='checking'?'Проверяем…':'Нет данных о предыдущем запуске'};
+    const values={themeMode:mode(),telegramTheme:telegramTheme||'Не получена',themeSource:mode()!=='auto'?'Ручной выбор':themeSource==='bridge'?'Telegram SDK':themeSource==='launch'?'Параметры Telegram':'Системная (резерв)',appliedTheme:root().dataset.theme,environment:'Telegram Mini App · '+context.platform,bridge:bridgeStatus==='ready'?'Подключён':bridgeStatus==='unavailable'?'Недоступен · резервный режим':'Подключение…',sw:sw?'API доступен':'Недоступен',cache:cacheStorage?'API доступен':'Недоступен',retention:retention==='retained'?'Предыдущая копия обнаружена':retention==='missing'?'Предыдущая копия не обнаружена':retention==='checking'?'Проверяем…':'Нет данных о предыдущем запуске'};
     for(const [key,value] of Object.entries(values))doc.querySelectorAll('[data-runtime-value="'+key+'"]').forEach(el=>{el.textContent=value;});
   }
   function sync(){if(isTelegram){syncTheme();syncInsets();diagnostics();}}
@@ -71,26 +84,40 @@ export function createRuntimeEnvironment(win=window){
     const candidate=api();if(!candidate||typeof candidate.onEvent!=='function')return false;
     if(bridge===candidate)return true;
     bridge=candidate;bridgeStatus='ready';
-    const update=()=>{telegramTheme=scheme(bridge.colorScheme)||telegramTheme;save();syncTheme();};
-    update();call(bridge,'onEvent','themeChanged',update);
+    const update=(confirmed=false)=>{
+      const next=readBridgeTheme(bridge,telegramTheme,confirmed);
+      if(next&&(confirmed||themeFromParams(bridge.themeParams))){telegramTheme=next;themeSource='bridge';}
+      save();syncTheme();diagnostics();
+    };
+    call(bridge,'onEvent','themeChanged',()=>update(true));
+    update(false);
+    requestTheme();
     for(const event of ['safeAreaChanged','contentSafeAreaChanged','viewportChanged','fullscreenChanged'])call(bridge,'onEvent',event,syncInsets);
     call(bridge,'ready');sync();return true;
+  }
+  function requestTheme(){
+    if(bridge)call(win.Telegram?.WebView,'postEvent','web_app_request_theme',false);
   }
   function loadBridge(){
     if(connect()||bridgeLoading)return;
     bridgeLoading=true;
     // Official bridge only in Mini App. A failed SDK cannot block local content.
-    const script=doc.createElement('script');script.src='https://telegram.org/js/telegram-web-app.js?65';script.async=true;
+    const early=doc.querySelector('script[data-telegram-bridge]');
+    const script=early||doc.createElement('script');
+    if(!early){script.src='https://telegram.org/js/telegram-web-app.js?65';script.async=true;script.dataset.telegramBridge='';}
     const fail=()=>{bridgeLoading=false;if(bridgeStatus!=='ready'){bridgeStatus='unavailable';diagnostics();}};
     const timeout=win.setTimeout(fail,5000);
     script.addEventListener('load',()=>{win.clearTimeout(timeout);bridgeLoading=false;if(!connect())fail();},{once:true});
     script.addEventListener('error',()=>{win.clearTimeout(timeout);fail();},{once:true});
-    doc.head.append(script);
+    if(!early)doc.head.append(script);
   }
   if(isTelegram){
     save();sync();
     doc.addEventListener('astro:after-swap',sync);doc.addEventListener('astro:page-load',sync);
-    win.addEventListener('pageshow',sync);win.addEventListener('online',()=>{if(!bridge)loadBridge();sync();});
+    const resume=()=>{if(!bridge)loadBridge();else{const next=readBridgeTheme(bridge,telegramTheme);if(next&&themeFromParams(bridge.themeParams)){telegramTheme=next;themeSource='bridge';save();}requestTheme();}sync();};
+    win.addEventListener('pageshow',resume);win.addEventListener('online',resume);
+    doc.addEventListener('visibilitychange',()=>{if(doc.visibilityState==='visible')resume();});
+    win.addEventListener('focus',resume);
     win.addEventListener('storage',e=>{if(e.key===THEME||e.key===null){volatileMode=null;syncTheme();}});
     doc.addEventListener('change',e=>{
       if(e.target?.matches?.('[data-telegram-theme]')){
@@ -99,10 +126,10 @@ export function createRuntimeEnvironment(win=window){
         call(win.StarlightThemeProvider,'updatePickers',selected);
       }else if(e.target?.matches?.('starlight-theme-select select'))volatileMode=null;
       else return;
-      queueMicrotask(syncTheme);
+      queueMicrotask(()=>{syncTheme();diagnostics();});
     });
     win.matchMedia('(prefers-color-scheme: light)').addEventListener?.('change',()=>queueMicrotask(syncTheme));
-    new win.MutationObserver(syncTheme).observe(root(),{attributes:true,attributeFilter:['data-theme','data-runtime-environment']});
+    new win.MutationObserver(()=>{syncTheme();diagnostics();}).observe(root(),{attributes:true,attributeFilter:['data-theme','data-runtime-environment']});
     loadBridge();
   }
   return {isTelegram,isStandalone,canOfferInstall:()=>!isTelegram&&!isStandalone(),serviceWorker:sw,
