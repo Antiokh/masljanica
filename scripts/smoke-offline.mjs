@@ -18,7 +18,7 @@ try {
   const page=await context.newPage();
   await page.goto(origin);
   await page.locator('[data-home-dashboard]').waitFor();
-  assert.equal(await page.locator('.festival-brand-title').innerText(),'Масленица');
+  assert.equal(await page.locator('.festival-brand-title').innerText(),'Масляница');
   assert.match(await page.locator('.festival-brand-subtitle').innerText(),/^Белград/);
   await page.waitForFunction(()=>document.querySelector('.home-dashboard .home-section-card') && document.querySelector('.home-dashboard [data-home-season="event"]')?.hidden === (document.querySelector('.home-dashboard').dataset.eventEnabled!=='true'||document.querySelector('.home-dashboard').dataset.eventDate < new Intl.DateTimeFormat('sv-SE',{timeZone:document.querySelector('.home-dashboard').dataset.eventTimezone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())));
   assert.equal(await page.locator('.home-section-card').count(),4);
@@ -143,7 +143,7 @@ try {
   await page.locator('.app-nav a[href="/songs/"]').click();
   await page.waitForURL('**/songs/');
   await page.waitForFunction(()=>document.querySelector('.festival-brand-title')?.textContent==='Песни');
-  assert.equal(await page.locator('.festival-brand-subtitle').innerText(),'Масленица');
+  assert.equal(await page.locator('.festival-brand-subtitle').innerText(),'Масляница');
   await page.setViewportSize({width:390,height:844});
   const compact=await page.evaluate(()=>{
     const header=document.querySelector('header').getBoundingClientRect(), search=document.querySelector('#catalog-search').getBoundingClientRect();
