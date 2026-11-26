@@ -1,0 +1,64 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import songs from '../data/songs.json';
+import archive from '../data/audio-archive.json';
+const files = archive.files as Record<string,{path:string;duration:number}>;
+const ordered = [...songs].sort((a,b)=>a.title.localeCompare(b.title,'ru'));
+function videoURL(value:string) {
+  try {
+    const u=new URL(value);
+    if(u.protocol!=='https:' && u.protocol!=='http:')return null;
+    const host=u.hostname.replace(/^www\./,'');
+    const id=host==='youtu.be'?u.pathname.slice(1):host==='youtube.com'?u.searchParams.get('v'):null;
+    return id && /^[\w-]{11}$/.test(id) ? {link:u.href,embed:'https://www.youtube-nocookie.com/embed/'+id} : {link:u.href,embed:null};
+  }catch{return null;}
+}
+const duration=(seconds:number)=>Math.floor(seconds/60)+':'+String(Math.floor(seconds%60)).padStart(2,'0');
+---
+<StarlightPage frontmatter={{title:'Песни',template:'splash',description:'Песенник Масляницы: слушайте записи и раскрывайте тексты прямо в списке.'}}>
+  <div class="catalog-tools"><input id="catalog-search" type="search" placeholder="Найти песню…" aria-label="Поиск по песням"/></div>
+  <p id="catalog-empty" hidden>Ничего не найдено.</p>
+  <section class="catalog-group song-list" aria-label="Песенник">
+    {ordered.map(song=>{
+      const tracks=song.audio.map(url=>({src:files[url]?.path||url,duration:files[url]?.duration}));
+      const video=videoURL(song.video);
+      return (
+        <article id={song.slug} class="song-row" data-entry data-search={song.title+' '+song.lyrics} data-song={song.title}>
+          <button type="button" class="song-play" aria-label={'Воспроизвести: '+song.title} data-playing="false" disabled={tracks.length===0}>
+            <svg class="song-play-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+            <svg class="song-pause-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="7" y="5.5" width="4" height="13" rx="1"/><rect x="13" y="5.5" width="4" height="13" rx="1"/></svg>
+          </button>
+          <details class="song-details">
+            <summary>
+              <span class="song-heading">
+                <strong>{song.title}</strong>
+                <small>{[tracks.length>1?tracks.length+' варианта исполнения':tracks.length===1&&tracks[0].duration?duration(tracks[0].duration):'',video?'Видео':''].filter(Boolean).join(' · ')}</small>
+              </span>
+              <svg class="song-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <div class="song-body">
+              {tracks.length>0 && (
+                <div class="song-media">
+                  {tracks.length>1 && <label class="song-variant-label">Вариант исполнения
+                    <select class="song-variant" aria-label={'Вариант исполнения: '+song.title}>
+                      {tracks.map((track,i)=><option value={track.src}>Запись {i+1}{track.duration?' · '+duration(track.duration):''}</option>)}
+                    </select>
+                  </label>}
+                  <audio class="song-audio" controls preload="none" src={tracks[0].src}></audio>
+                  <p class="song-error" role="status" hidden></p>
+                  <noscript>{tracks.slice(1).map((track,i)=><p><a href={track.src}>Запись {i+2}</a></p>)}</noscript>
+                </div>
+              )}
+              {song.lyrics && <div class="song-lyrics">{song.lyrics}</div>}
+              {video && <div class="song-video">
+                <h3>Видео</h3>
+                {video.embed && <button class="offline-delete song-video-load" type="button" data-video={video.embed}>Смотреть видео</button>}
+                <a href={video.link} target="_blank" rel="noopener noreferrer">Открыть видео в новой вкладке</a>
+              </div>}
+            </div>
+          </details>
+        </article>
+      );
+    })}
+  </section>
+</StarlightPage>

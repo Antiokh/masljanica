@@ -1,19 +1,17 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
-import songs from '../../data/songs.json';
 import games from '../../data/games.json';
 import characters from '../../data/characters.json';
 import workshops from '../../data/workshops.json';
 import parts from '../../data/parts.json';
 export function getStaticPaths() {
-  return ['songs','games','characters','workshops','scenario'].map(section=>({params:{section}}));
+  return ['games','characters','workshops','scenario'].map(section=>({params:{section}}));
 }
 const section = Astro.params.section!;
-const titles:Record<string,string>={songs:'Песни',games:'Игры',characters:'Персонажи',workshops:'Мастер-классы',scenario:'Сказ'};
+const titles:Record<string,string>={games:'Игры',characters:'Персонажи',workshops:'Мастер-классы',scenario:'Сказ'};
 type Entry = {slug:string;title:string;subtitle?:string;image?:string;category?:string};
 const sort = (a:Entry,b:Entry)=>a.title.localeCompare(b.title,'ru');
 let entries:Entry[] = [];
-if(section==='songs') entries=songs.map(x=>({slug:x.slug,title:x.title,subtitle:[x.audio.length?('Аудио ×'+x.audio.length):'',x.video?'Видео':''].filter(Boolean).join(' · ')})).sort(sort);
 if(section==='games') entries=games.map(x=>({slug:x.slug,title:x.title,subtitle:[x.audience,x.audio.length?'Аудио':'',x.video?'Видео':''].filter(Boolean).join(' · '),category:x.historical?'Исторические':'Развлекательные'})).sort(sort);
 if(section==='characters') entries=characters.filter(x=>x.show).map(x=>({slug:x.slug,title:x.title,subtitle:x.description.split('\n')[0],image:x.image}));
 if(section==='workshops') entries=workshops.map(x=>({slug:x.slug,title:x.title,subtitle:[x.host,x.enabled?'':'Уточняется'].filter(Boolean).join(' · ')}));

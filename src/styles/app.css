@@ -128,3 +128,39 @@ audio { display:block; width:100%; margin-block:1rem; }
  .pwa-notice-actions { display:flex; flex-wrap:wrap; gap:.6rem; }
  @media(max-width:60rem) { .pwa-notice { bottom:calc(var(--festival-mobile-nav-height) + env(safe-area-inset-bottom,0px) + .75rem); } }
 }
+
+@layer app {
+  .song-list { display:flex; flex-direction:column; gap:0; border:1px solid var(--sl-color-gray-5); border-radius:.85rem; overflow:clip; }
+  .song-list[hidden], .song-row[hidden] { display:none!important; }
+  .song-list .song-row { position:relative; margin:0; background:var(--sl-color-bg); scroll-margin-top:5rem; }
+  .song-row + .song-row { border-top:1px solid var(--sl-color-gray-5); }
+  .song-list .song-details { border:0; background:transparent; padding:0; margin:0; }
+  .song-list .song-details > summary { display:grid; grid-template-columns:minmax(0,1fr) 1.4rem; align-items:center; gap:.75rem; min-height:4.25rem; padding:.8rem .9rem .8rem 4.3rem; cursor:pointer; list-style:none; color:var(--sl-color-text); font:inherit; }
+  .song-list .song-details > summary::-webkit-details-marker { display:none; }
+  .song-list .song-details > summary::before { display:none; }
+  .song-list .song-details > summary:hover { background:var(--festival-surface); }
+  .song-list .song-heading { display:flex; flex-direction:column; gap:.18rem; min-width:0; }
+  .song-heading strong { color:var(--sl-color-white); line-height:1.35; overflow-wrap:anywhere; }
+  .song-heading small { color:var(--sl-color-gray-3); font-size:.78rem; }
+  .song-heading small:empty { display:none; }
+  .song-list .song-chevron { width:1.3rem; height:1.3rem; color:var(--sl-color-gray-3); transition:transform .15s; }
+  .song-details[open] > summary .song-chevron { transform:rotate(180deg); color:var(--sl-color-text-accent); }
+  .song-list .song-play { position:absolute; z-index:1; top:.8rem; left:.8rem; display:grid; place-items:center; width:2.65rem; height:2.65rem; padding:0; margin:0; background:var(--sl-color-accent-low); color:var(--sl-color-text-accent); border:0; border-radius:50%; cursor:pointer; }
+  .song-list .song-play:disabled { opacity:.35; cursor:default; }
+  .song-list .song-play[data-playing=true] { background:var(--festival-action); color:var(--festival-on-action); }
+  .song-list .song-play svg { width:1.5rem; height:1.5rem; }
+  .song-play[data-playing=true] .song-play-icon, .song-play[data-playing=false] .song-pause-icon { display:none; }
+  .song-list :is(button,summary,select):focus-visible { outline:2px solid var(--sl-color-text-accent); outline-offset:-2px; }
+  .song-list .song-body { padding:.9rem 1rem 1.2rem; margin:0; background:var(--festival-surface); border-top:1px solid var(--sl-color-gray-5); }
+  .song-list .song-body > * + * { margin-top:1rem; }
+  .song-list .song-media { margin:0; }
+  .song-list .song-audio { display:block; width:100%; margin:.5rem 0 0; }
+  .song-list .song-variant-label { display:flex; flex-direction:column; gap:.35rem; color:var(--sl-color-gray-3); font-size:.85rem; }
+  .song-list .song-variant { width:100%; padding:.55rem; border:1px solid var(--sl-color-gray-5); border-radius:.5rem; color:var(--sl-color-text); background:var(--sl-color-bg); font:inherit; }
+  .song-list .song-lyrics { font-size:1.05rem; line-height:1.65; }
+  .song-list .song-video { display:flex; flex-direction:column; align-items:flex-start; gap:.5rem; }
+  .song-list .song-video h3 { margin:0; font-size:1rem; }
+  .song-list .song-error { font-size:.85rem; color:var(--sl-color-text-accent); }
+  .song-list .song-error[hidden] { display:none; }
+  @media(prefers-reduced-motion:reduce){.song-list .song-chevron { transition:none; }}
+}

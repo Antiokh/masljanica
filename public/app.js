@@ -1,7 +1,9 @@
+import { installSongList } from './song-list.mjs';
 import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resolvePwaDailyState } from './pwa-daily-state.mjs';
 // One global runtime. Astro swaps page DOM, not the document listeners.
 (() => {
  if(window.__masljanicaRuntime)return;window.__masljanicaRuntime=true;
+ installSongList();
  const sw=navigator.serviceWorker;
  let state={ready:false,progress:null},latest=null,error='',checking=false,registrationFailed=false;
  let verified=false,installPrompt=null,lastCheck=0,offer=null,autoAttempt=null;
