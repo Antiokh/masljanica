@@ -385,6 +385,7 @@ try {
     assert.equal(await tg.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--festival-action').trim().toLowerCase()),'#c43d32');
     await tg.evaluate(()=>window.__tgTheme('dark'));
     assert.equal(await tg.evaluate(()=>document.documentElement.dataset.theme),'light');
+    assert.equal(await tg.locator('[data-telegram-theme] option[value="auto"]').innerText(),'Telegram');
     await tg.locator('[data-telegram-theme]').selectOption('auto');
     await tg.waitForFunction(()=>document.documentElement.dataset.theme==='dark');
     await tg.evaluate(()=>window.__tgTheme('light'));

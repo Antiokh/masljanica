@@ -63,7 +63,7 @@ const themeCopy = { change: 'Цветовая тема', light: 'Светлая 
   function label(button: Element, theme: Theme): string {
     if (theme === 'light') return button.getAttribute('data-theme-label-light') || 'Light theme';
     if (theme === 'dark') return button.getAttribute('data-theme-label-dark') || 'Dark theme';
-    return button.getAttribute('data-theme-label-auto') || 'System theme';
+    return document.documentElement.dataset.runtimeEnvironment === 'telegram' ? 'Telegram' : button.getAttribute('data-theme-label-auto') || 'System theme';
   }
 
   function setTheme(theme: Theme): void {
