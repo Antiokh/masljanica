@@ -1,3 +1,4 @@
+import { installPwaPresentation } from './pwa-presentation.mjs';
 import { installExternalEmbeds } from './external-embeds.mjs';
 import { installSongList } from './song-list.mjs';
 import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resolvePwaDailyState } from './pwa-daily-state.mjs';
@@ -30,7 +31,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  document.addEventListener('astro:after-swap',()=>{if(performance.getEntriesByName('masljanica-nav-start').length){performance.measure('masljanica-nav-swap','masljanica-nav-start');performance.clearMarks('masljanica-nav-start');if(performance.getEntriesByName('masljanica-nav-swap').length>100)performance.clearMeasures('masljanica-nav-swap');}});
 
  let state={ready:false,progress:null},latest=null,error='',checking=false,registrationFailed=false;
- let verified=false,installPrompt=null,lastCheck=0,offer=null,autoAttempt=null;
+ let readiness='unknown',verified=false,installPrompt=null,lastCheck=0,offer=null,autoAttempt=null;
  const PREF='masljanica-pwa-offline-preference-v1';
  const get=k=>{try{return localStorage.getItem(k);}catch{return null;}};
  const set=(k,v)=>{try{localStorage.setItem(k,v);return true;}catch{return false;}};
@@ -38,8 +39,9 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  const automatic=()=>get(PREF)==='enabled';
  const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
  const noteStandalone=()=>{if(standalone())set(KEYS.lastStandaloneDate,localDayKey());};
+ const presentation=installPwaPresentation({onOpen:()=>{send('OFFLINE_STATUS');checkVersion();render();}});
  const startDownload=()=>{
-   if(!sw?.controller||state.progress||!navigator.onLine)return;
+   if(!accepted()||!verified||!sw?.controller||state.progress||!navigator.onLine)return;
    error='';state.progress={done:0,total:0,bytes:0,totalBytes:0};offer=null;render();send('OFFLINE_DOWNLOAD');
  };
  function resolveOffer(){
@@ -93,38 +95,40 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
    if(prompt)prompt.hidden=!accepted()||!offer||busy;
    if(message&&offer)message.textContent=offer==='install'?'Установите Масляницу на устройство.':(offer==='offline-download'?'Скачайте материалы праздника':'Доступна новая версия материалов')+(latest?' · '+fmt(latest.bytes):'')+'.';
    if(action&&offer)action.textContent=offer==='install'?'Установить':offer==='offline-download'?'Скачать':'Обновить';
-   if(indicator){indicator.dataset.state=busy?'busy':!navigator.onLine?(state.ready?'ready':'unavailable'):'online';indicator.title=busy?'Загрузка офлайн-копии':!navigator.onLine?(state.ready?'Офлайн-копия готова':'Нет сети и полной копии'):'В сети';indicator.setAttribute('aria-label',indicator.title);}
+   presentation.render({online:navigator.onLine,standalone:standalone(),readiness,ready:state.ready,stale:!!stale,busy,checking,progress:state.progress,automatic:automatic(),canChange:accepted()&&verified,canDelete:verified&&!busy&&(state.ready||state.staging),canDownload:accepted()&&verified&&!busy&&!checking&&navigator.onLine,error});
 
    document.documentElement.dataset.offlineReady=String(state.ready);
+   document.documentElement.dataset.offlineReadiness=readiness;
    if(label)label.textContent=error||(!sw?'Офлайн-режим не поддерживается.':registrationFailed?'Не удалось запустить Service Worker.':!sw.controller?'Подключение Service Worker…':busy?'Загрузка: '+state.progress.done+' из '+(state.progress.total||'…')+' файлов':state.ready?(stale?'Доступно обновление. Старая копия сохранена.':'Офлайн-копия готова.'):'Полная копия ещё не скачана.');
    if(size)size.textContent=latest?'Размер полной копии: '+fmt(latest.bytes):state.ready?'Сохранено: '+fmt(state.bytes):'';
    if(button){button.disabled=!accepted()||!verified||!sw?.controller||busy||checking||!navigator.onLine;button.textContent=state.ready?(stale?'Обновить копию':'Проверить и обновить'):'Скачать для офлайна';}
-   if(remove){remove.disabled=busy||!state.ready||!sw?.controller;}
-   if(bar){bar.hidden=!busy;if(busy){bar.max=state.progress.totalBytes||1;bar.value=state.progress.bytes||0;}}
+   if(remove){remove.disabled=busy||!(state.ready||state.staging)||!verified;}
+   if(bar){bar.hidden=!busy;if(busy){bar.max=state.progress.total||1;bar.value=state.progress.done||0;}}
  }
  async function checkVersion(force=false){
-   if(checking||!navigator.onLine||(!force&&Date.now()-lastCheck<60000))return;
+   if(!accepted()||checking||!navigator.onLine||(!force&&Date.now()-lastCheck<60000))return;
    checking=true;lastCheck=Date.now();render();
    try{const r=await fetch('/offline-version.json',{cache:'no-store',signal:AbortSignal.timeout(5000)});if(r.ok){const v=await r.json();if(v.schema===1)latest=v;}}catch{}finally{checking=false;resolveOffer();render();}
  }
  document.addEventListener('click',e=>{
    const target=e.target instanceof Element?e.target:null;
    const menu=document.querySelector('.more-menu');if(menu?.open&&target&&!menu.contains(target))menu.open=false;
-   if(target?.closest('#offline-update')&&accepted())startDownload();
-   if(target?.closest('#offline-delete')&&confirm('Удалить полную офлайн-копию?')){error='';set(PREF,'disabled');autoAttempt=null;send('OFFLINE_DELETE');render();}
-   if(target?.closest('#pwa-storage-accept')){set(KEYS.storageNoticeAck,'1');resolveOffer();render();}
+   if(target?.closest('#offline-update,[data-pwa-download]')&&accepted())startDownload();
+   if(target?.closest('[data-pwa-auto]')&&accepted()&&verified){set(PREF,automatic()?'disabled':'enabled');autoAttempt=null;error='';resolveOffer();checkVersion(true);render();}
+   if(target?.closest('#offline-delete,[data-pwa-delete]')&&verified&&!state.progress&&confirm('Удалить офлайн-данные?')){error='';set(PREF,'disabled');autoAttempt=null;send('OFFLINE_DELETE');render();}
+   if(target?.closest('#pwa-storage-accept')){set(KEYS.storageNoticeAck,'1');resolveOffer();checkVersion(true);render();}
    if(target?.closest('#pwa-offer-dismiss')){offer=null;render();}
    if(target?.closest('#pwa-offer-action')){
      const current=offer;offer=null;render();
      if(current==='install'&&installPrompt){const p=installPrompt;installPrompt=null;p.prompt().catch(()=>{});}
-     if(current==='offline-download'||current==='offline-update')startDownload();
+     if(current==='offline-download'){set(PREF,'enabled');startDownload();}else if(current==='offline-update')startDownload();
    }
  });
  sw?.addEventListener('message',e=>{
    const m=e.data;
-   if(m?.type==='OFFLINE_STATUS'){state=m;verified=m.capability===2;if(verified)resolveOffer();}
+   if(m?.type==='OFFLINE_STATUS'){state=m;verified=m.capability===2;readiness=verified?(m.ready?'ready':'unavailable'):'unknown';if(verified)resolveOffer();}
    if(m?.type==='OFFLINE_PROGRESS')state.progress=m.progress;
-   if(m?.type==='OFFLINE_COMPLETE'){error='';checkVersion(true);}
+   if(m?.type==='OFFLINE_COMPLETE'){error='';presentation.refreshStorage();checkVersion(true);}
    if(m?.type==='OFFLINE_ERROR')error='Загрузка не завершена: '+m.message;
    render();
  });
@@ -141,9 +145,9 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  window.addEventListener('online',()=>{autoAttempt=null;error='';render();checkVersion(true);warmNavigation();});
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){send('OFFLINE_STATUS');checkVersion();}});
  window.addEventListener('offline',render);
- sw?.addEventListener('controllerchange',()=>{verified=false;send('OFFLINE_STATUS');checkVersion(true);render();warmNavigation();});
+ sw?.addEventListener('controllerchange',()=>{verified=false;readiness='unknown';send('OFFLINE_STATUS');checkVersion(true);render();warmNavigation();});
  if(sw&&(location.protocol==='https:'||location.hostname==='localhost')){
-   sw.register('/sw.js').then(()=>{send('OFFLINE_STATUS');render();}).catch(()=>{registrationFailed=true;render();});
+   sw.register('/sw.js').then(()=>{send('OFFLINE_STATUS');render();}).catch(()=>{registrationFailed=true;readiness='unavailable';render();});
  }
  pageLoad();
 })();

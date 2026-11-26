@@ -1,0 +1,32 @@
+---
+---
+<div class="festival-brand">
+  <button type="button" class="festival-brand-icon" data-pwa-menu-trigger aria-label="Состояние приложения" aria-controls="festival-pwa-menu" aria-expanded="false">
+    <img src="/icon.svg" alt="" width="44" height="44"/>
+    <span id="offline-indicator" data-state="unknown" aria-hidden="true"></span>
+  </button>
+  <a class="festival-brand-title" href="/">Масляница · Белград</a>
+  <section id="festival-pwa-menu" class="festival-pwa-menu" popover="auto" aria-label="Состояние приложения">
+    <h2>Состояние приложения</h2>
+    <div class="pwa-status-grid">
+      <span>Подключение</span><strong data-pwa-value="connection">Проверяем…</strong>
+      <span>Запуск</span><strong data-pwa-value="launch">Браузер</strong>
+      <span>Офлайн-копия</span>
+      <div class="pwa-status-control">
+        <strong data-pwa-value="copy">Проверяем…</strong>
+        <button type="button" class="pwa-trash" data-pwa-delete title="Удалить офлайн-данные" aria-label="Удалить офлайн-данные" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5"/></svg>
+        </button>
+      </div>
+      <span>Автообновление</span>
+      <div class="pwa-status-control"><button type="button" class="pwa-switch" role="switch" aria-label="Автообновление офлайн-копии" aria-checked="false" data-pwa-auto disabled><span></span></button></div>
+      <span>Хранилище</span><strong data-pwa-value="storage">—</strong>
+    </div>
+    <div class="pwa-menu-progress" data-pwa-progress hidden>
+      <div class="pwa-progress-heading"><span>Прогресс · материалы</span><strong data-pwa-value="percent">0%</strong></div>
+      <progress max="100" value="0" data-pwa-bar aria-label="Прогресс офлайн-загрузки"></progress>
+    </div>
+    <p class="pwa-menu-error" data-pwa-error hidden></p>
+    <div class="pwa-menu-footer"><a href="/offline/">Подробнее</a><button type="button" class="pwa-text-action" data-pwa-download disabled>Скачать</button></div>
+  </section>
+</div>

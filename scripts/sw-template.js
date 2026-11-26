@@ -1,5 +1,5 @@
 const META='masljanica-meta-v2', RUNTIME='masljanica-runtime-v2-'+BUILD;
-const PREFIX='masljanica-pack-v2-', MARKER='/__offline_active__';
+const PREFIX='masljanica-pack-v2-', STAGING='masljanica-staging-v2-', MARKER='/__offline_active__';
 const CONTROL=new Set(['/sw.js','/offline-version.json','/offline-manifest.json']);
 let activePromise, runtimePromise, task, progress=null, degradedUntil=0;
 const currentRevision = path => Object.hasOwn(CURRENT_REVISIONS,path) ? CURRENT_REVISIONS[path] : null;
@@ -14,12 +14,12 @@ async function active(){
     const marker=await (await caches.open(META)).match(absolute(MARKER));
     if(!marker)return null;
     const info=await marker.json();
-    if(typeof info.cache!=='string'||!info.cache.startsWith(PREFIX)||!(await caches.has(info.cache)))return null;
+    if(typeof info.cache!=='string'||!(info.cache.startsWith(PREFIX)||info.cache.startsWith(STAGING))||!(await caches.has(info.cache)))return null;
     const cache=await caches.open(info.cache);
     const manifest=await cache.match(absolute('/__offline_manifest__'));
     if(!(await cache.match(absolute('/')))||!manifest)return null;
     const entries=(await manifest.json()).entries;
-    return {...info,cache,revisions:new Map(entries.map(entry=>[entry.url,entry.revision]))};
+    return {...info,cacheName:info.cache,cache,revisions:new Map(entries.map(entry=>[entry.url,entry.revision]))};
   })().catch(()=>null);
   return activePromise;
 }
@@ -28,7 +28,7 @@ async function notify(message){
 }
 async function status(){
   const a=await active();
-  return {type:'OFFLINE_STATUS',capability:2,ready:!!a,version:a?.version||null,bytes:a?.bytes||0,count:a?.count||0,build:BUILD,progress};
+  return {type:'OFFLINE_STATUS',capability:2,staging:(await caches.keys()).some(name=>name.startsWith(STAGING)&&name!==a?.cacheName),ready:!!a,version:a?.version||null,bytes:a?.bytes||0,count:a?.count||0,build:BUILD,progress};
 }
 async function timedFetch(input,options={},ms=8000){
   const controller=new AbortController(), timer=setTimeout(()=>controller.abort(),ms);
@@ -99,46 +99,69 @@ async function download(){
   if(old?.version===manifest.version)return;
   const previous=old?await old.cache.match(absolute('/__offline_manifest__')):null;
   const revisions=new Map(previous?(await previous.json()).entries.map(x=>[x.url,x.revision]):[]);
-  const name=PREFIX+manifest.version+'-'+crypto.randomUUID(), stage=await caches.open(name);
+  const name=STAGING+manifest.version, stage=await caches.open(name);
+  // A deterministic staging cache permits a later attempt to resume the same version.
   let done=0,bytes=0,idx=0,failure;
-  progress={done,total:manifest.entries.length,bytes,totalBytes:manifest.bytes};
-  await notify({type:'OFFLINE_PROGRESS',progress});
+  const deferred=[];
+  async function report(){
+    progress={done,total:manifest.count,bytes,totalBytes:manifest.bytes};
+    await notify({type:'OFFLINE_PROGRESS',progress});
+  }
+  await report();
+  async function valid(response,entry){
+    if(!response||response.status!==200)return false;
+    const body=await response.clone().arrayBuffer();
+    if(body.byteLength!==entry.bytes)return false;
+    const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',body)),x=>x.toString(16).padStart(2,'0')).join('');
+    return digest===entry.revision;
+  }
+  async function populate(entry){
+    let file=await stage.match(absolute(entry.url));
+    if(file&&!(await valid(file,entry))){await stage.delete(absolute(entry.url));file=null;}
+    if(!file&&revisions.get(entry.url)===entry.revision)file=await old.cache.match(absolute(entry.url));
+    if(!file){
+      let last;
+      for(let attempt=0;attempt<3;attempt++){
+        if(self.navigator.onLine===false)throw Error('Нет подключения');
+        try{
+          file=await timedFetch(absolute(entry.url),{cache:'no-store'},30000);
+          if(file.status!==200||new URL(file.url).origin!==self.location.origin){
+            const err=Error('HTTP '+file.status);err.permanent=!(file.status===408||file.status===425||file.status===429||file.status>=500);throw err;
+          }
+          if(!(await valid(file,entry)))throw Error('Ревизия файла изменилась');
+          last=null;break;
+        }catch(e){last=e;file=null;if(e.permanent)throw e;if(attempt<2)await new Promise(resolve=>setTimeout(resolve,[1000,3000][attempt]));}
+      }
+      if(last||!file)throw last||Error('Файл недоступен');
+    }
+    await stage.put(absolute(entry.url),file);
+    done++;bytes+=entry.bytes;
+    if(done%5===0||done===manifest.count)await report();
+  }
   async function worker(){
     while(!failure&&idx<manifest.entries.length){
+      if(self.navigator.onLine===false){failure=Error('Нет подключения. Загрузка сохранена для продолжения.');return;}
       const entry=manifest.entries[idx++];
-      try{
-        let file=revisions.get(entry.url)===entry.revision?await old.cache.match(absolute(entry.url)):null;
-        if(!file){
-          let last;
-          for(let attempt=0;attempt<3;attempt++){
-            try{
-              file=await timedFetch(absolute(entry.url),{cache:'no-store'},30000);
-              if(file.status!==200||new URL(file.url).origin!==self.location.origin)throw Error('HTTP '+file.status);
-              const body=await file.clone().arrayBuffer();
-              const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',body)),x=>x.toString(16).padStart(2,'0')).join('');
-              if(body.byteLength!==entry.bytes||digest!==entry.revision)throw Error('Ревизия файла изменилась');
-              last=null;break;
-            }catch(e){last=e;file=null;if(attempt<2)await new Promise(resolve=>setTimeout(resolve,300*(attempt+1)));}
-          }
-          if(last||!file)throw last||Error('Файл недоступен');
-        }
-        await stage.put(absolute(entry.url),file);
-        done++;bytes+=entry.bytes;
-        progress={done,total:manifest.count,bytes,totalBytes:manifest.bytes};
-        if(done%5===0||done===manifest.count)await notify({type:'OFFLINE_PROGRESS',progress});
-      }catch(e){failure=Error(entry.url+': '+e.message);}
+      try{await populate(entry);}catch(e){
+        if(e.permanent){failure=Error(entry.url+': '+e.message);return;}
+        deferred.push(entry);
+      }
     }
   }
-  try{
-    await Promise.all(Array.from({length:4},worker));
-    if(failure)throw failure;
-    if(done!==manifest.count||bytes!==manifest.bytes)throw Error('Неполная офлайн-копия');
-    await stage.put(absolute('/__offline_manifest__'),json(manifest));
-    await (await caches.open(META)).put(absolute(MARKER),json({cache:name,version:manifest.version,bytes,count:done}));
-    activePromise=undefined;
-    // Do not delete the previous pack before the pointer is committed.
-    for(const cacheName of await caches.keys())if(cacheName!==name&&(cacheName.startsWith(PREFIX)||/^masljanica-[a-f0-9]{16}$/.test(cacheName)))await caches.delete(cacheName).catch(()=>{});
-  }catch(e){await caches.delete(name);throw e;}
+  await Promise.all(Array.from({length:3},worker));
+  if(failure)throw failure;
+  const remaining=[];
+  for(const entry of deferred){
+    try{await populate(entry);}catch(e){remaining.push(entry.url+': '+e.message);if(self.navigator.onLine===false)break;}
+  }
+  if(remaining.length||done!==manifest.count||bytes!==manifest.bytes)throw Error('Неполная офлайн-копия. Загрузка сохранена для продолжения. '+remaining.slice(0,3).join('; '));
+  for(const entry of manifest.entries)if(!(await stage.match(absolute(entry.url))))throw Error('В копии отсутствует '+entry.url);
+  await stage.put(absolute('/__offline_manifest__'),json(manifest));
+  // Activate only a complete, checked staging cache; the old pointer survives every failure.
+  await (await caches.open(META)).put(absolute(MARKER),json({cache:name,version:manifest.version,bytes,count:done}));
+  activePromise=undefined;
+  for(const cacheName of await caches.keys())if(cacheName!==name&&(cacheName.startsWith(PREFIX)||cacheName.startsWith(STAGING)||/^masljanica-[a-f0-9]{16}$/.test(cacheName)))await caches.delete(cacheName).catch(()=>{});
+
 }
 self.addEventListener('install',event=>event.waitUntil(self.skipWaiting()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{
@@ -164,7 +187,7 @@ self.addEventListener('message',event=>{
   }
   if(type==='OFFLINE_DELETE'&&!task)event.waitUntil((async()=>{
     await (await caches.open(META)).delete(absolute(MARKER));activePromise=undefined;
-    for(const name of await caches.keys())if(name.startsWith(PREFIX)||/^masljanica-[a-f0-9]{16}$/.test(name))await caches.delete(name);
+    for(const name of await caches.keys())if(name.startsWith(PREFIX)||name.startsWith(STAGING)||/^masljanica-[a-f0-9]{16}$/.test(name))await caches.delete(name);
     await notify(await status());
   })());
 });

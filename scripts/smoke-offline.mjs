@@ -32,6 +32,15 @@ try {
 
   await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
   await page.locator('#pwa-storage-accept').click();
+  await page.locator('.festival-brand-icon').click();
+  await page.locator('#festival-pwa-menu').waitFor({state:'visible'});
+  await page.locator('[data-pwa-auto]').waitFor({state:'visible'});
+  assert.equal(await page.locator('[data-pwa-auto]').getAttribute('aria-checked'),'false');
+  assert.equal(await page.locator('[data-pwa-delete]').isDisabled(),true);
+  const bounds=await page.locator('#festival-pwa-menu').boundingBox();
+  assert.ok(bounds.x>=0&&bounds.x+bounds.width<=390,'Popover must fit mobile viewport');
+  await page.keyboard.press('Escape');
+  await page.locator('#festival-pwa-menu').waitFor({state:'hidden'});
   await page.evaluate(()=>{window.__navigationTest='persisted';});
   await page.locator('.app-nav a[href="/songs/"]').click();
   await page.waitForURL('**/songs/');
