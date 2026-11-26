@@ -2,6 +2,9 @@
 // Queue order is the catalog order, then the archived variants of each song.
 export function installSongList(){
   let audio=null,queue=[],index=-1,attempt=0;
+  const selectedBySong=new Map();
+  const fmt=seconds=>Math.floor(Math.max(0,seconds)/60)+':'+String(Math.floor(Math.max(0,seconds)%60)).padStart(2,'0');
+  const progress=()=>Number.isFinite(audio?.duration)&&audio.duration>0?Math.min(100,Math.max(0,audio.currentTime/audio.duration*100)):0;
   const rows=()=>[...document.querySelectorAll('.song-row')];
   const active=()=>queue[index];
   function showError(message=''){
@@ -12,26 +15,28 @@ export function installSongList(){
     if(!audio||!audio.isConnected)return;
     const track=active(),playing=!!track&&!audio.paused&&!audio.ended&&!audio.error;
     for(const row of rows()){
-      const button=row.querySelector('.song-play'),selected=track?.song===row.id;
-      const on=selected&&playing;
-      if(button){button.dataset.playing=String(on);button.setAttribute('aria-label',(on?'Пауза: ':'Воспроизвести: ')+row.dataset.song);}
+      const button=row.querySelector('.song-play'),current=track?.song===row.id;
+      const on=current&&playing;
+      if(button){button.dataset.playing=String(on);button.setAttribute('aria-label',(on?'Пауза: ':'Воспроизвести: ')+row.dataset.song);button.style.setProperty('--song-progress',current?String(progress()):'0');}
       row.classList.toggle('is-playing',on);
-      if(selected){const select=row.querySelector('.song-variant');if(select)select.value=track.src;}
+      const selected=selectedBySong.get(row.id)??0;
+      for(const variant of row.querySelectorAll('.song-variant')){
+        const n=Number(variant.dataset.variant),isSelected=n===selected,isCurrent=current&&track.variant===n;
+        variant.dataset.selected=String(isSelected);
+        variant.dataset.playing=String(isCurrent&&playing);
+        variant.setAttribute('aria-pressed',String(isSelected));
+        variant.setAttribute('aria-label',((isCurrent&&playing)?'Пауза: ':'Воспроизвести: ')+'запись '+(n+1)+' — '+row.dataset.song);
+        variant.style.setProperty('--song-progress',isCurrent?String(progress()):'0');
+        const time=variant.querySelector('.song-variant-time');
+        if(time){const total=Number(time.dataset.duration)||0;time.textContent=isCurrent?fmt(audio.currentTime)+' / '+fmt(Number.isFinite(audio.duration)?audio.duration:total):fmt(total);}
+      }
     }
-    const player=document.getElementById('song-player');
-    if(!player)return;
-    player.hidden=!track;
-    if(!track)return;
-    document.getElementById('song-player-title').textContent=track.title+(track.count>1?' · Запись '+(track.variant+1)+'/'+track.count:'');
-    document.getElementById('song-player-position').textContent=(index+1)+' / '+queue.length;
-    player.querySelector('[data-song-player="previous"]').disabled=index<=0;
-    player.querySelector('[data-song-player="next"]').disabled=index>=queue.length-1;
   }
   function bind(){
     const next=document.getElementById('song-player-audio');
     if(next===audio)return;
     if(audio){attempt++;audio.pause();}
-    audio=next;index=-1;queue=[];
+    audio=next;index=-1;queue=[];selectedBySong.clear();
     if(!audio)return;
     for(const row of rows()){
       let tracks;try{tracks=JSON.parse(row.dataset.tracks||'[]');}catch{continue;}
@@ -49,7 +54,7 @@ export function installSongList(){
     // Invoke play synchronously during the user's click, preserving mobile activation.
     current.play().catch(e=>{
       if(token!==attempt||audio!==current||e.name==='AbortError')return;
-      showError('Не удалось воспроизвести локальную запись: '+(e.name==='NotAllowedError'?'нажмите Play в плеере.':'проверьте подключение или загрузите офлайн-копию.'));
+      showError('Не удалось воспроизвести локальную запись: '+(e.name==='NotAllowedError'?'нажмите Play ещё раз.':'проверьте подключение или загрузите офлайн-копию.'));
       sync();
     });
     sync();
@@ -57,7 +62,7 @@ export function installSongList(){
   function select(next,autoplay=true){
     if(!audio||next<0||next>=queue.length)return;
     attempt++;
-    audio.pause();index=next;
+    audio.pause();index=next;selectedBySong.set(queue[index].song,queue[index].variant);
     // Assign only same-origin archived MP3 URLs. No old hosting fallback.
     audio.src=queue[index].src;
     audio.load();
@@ -66,30 +71,19 @@ export function installSongList(){
   }
   document.addEventListener('click',e=>{
     const target=e.target instanceof Element?e.target:null;
-    const button=target?.closest('.song-play');
-    if(button){
-      bind();if(!audio)return;
-      const row=button.closest('.song-row'),variant=row.querySelector('.song-variant')?.value;
-      if(active()?.song===row.id&&(!variant||active().src===variant)){
-        if(audio.paused||audio.ended){if(audio.ended)audio.currentTime=0;play();}
-        else{attempt++;audio.pause();sync();}
-      }else{
-        const next=queue.findIndex(t=>t.song===row.id&&(!variant||t.src===variant));
-        select(next);
-      }
-      return;
-    }
-    const action=target?.closest('[data-song-player]')?.dataset.songPlayer;
-    if(action){bind();select(index+(action==='previous'?-1:1));}
+    const button=target?.closest('.song-play,.song-variant');
+    if(!button)return;
+    bind();if(!audio)return;
+    const row=button.closest('.song-row');
+    const variant=button.matches('.song-variant')?Number(button.dataset.variant):(selectedBySong.get(row.id)??0);
+    const next=queue.findIndex(t=>t.song===row.id&&t.variant===variant);
+    if(next<0)return;
+    if(index===next){
+      if(audio.paused||audio.ended){if(audio.ended)audio.currentTime=0;play();}
+      else{attempt++;audio.pause();sync();}
+    }else select(next);
   });
-  document.addEventListener('change',e=>{
-    if(!(e.target instanceof HTMLSelectElement)||!e.target.matches('.song-variant'))return;
-    bind();
-    const row=e.target.closest('.song-row');
-    if(active()?.song!==row.id)return;
-    select(queue.findIndex(t=>t.song===row.id&&t.src===e.target.value),!audio.paused&&!audio.ended);
-  });
-  for(const event of ['play','playing','pause','ended','emptied','error'])document.addEventListener(event,e=>{
+  for(const event of ['play','playing','pause','ended','emptied','error','timeupdate','loadedmetadata','durationchange'])document.addEventListener(event,e=>{
     if(e.target!==audio)return;
     if(event==='ended'&&index+1<queue.length){select(index+1);return;}
     if(event==='error'&&active())showError('Локальная запись недоступна. Проверьте подключение или офлайн-копию.');
