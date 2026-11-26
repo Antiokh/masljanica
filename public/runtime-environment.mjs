@@ -1,3 +1,4 @@
+import { setupTelegramBackNavigation } from './telegram-back.mjs';
 // One environment adapter. Launch hints affect UI only, never authentication.
 const SESSION='masljanica-telegram-context-v1', COPY='masljanica-telegram-last-copy-v1', THEME='starlight-theme';
 const platformOK=p=>/^[a-z][a-z0-9_]{1,23}$/i.test(p||'')&&p!=='unknown';
@@ -49,6 +50,7 @@ export function createRuntimeEnvironment(win=window){
   if(isTelegram&&!cacheStorage)sw=undefined;
   const previous=isTelegram?get('localStorage',COPY):null;
   let retention='checking',observed=false,telegramTheme=context?.theme||null,bridge=null,bridgeStatus='connecting',bridgeLoading=false;
+  let backNavigation=null;
   let volatileMode=null,themeSource=context?.theme?'launch':'system',lastNativeTheme=null;
   const call=(obj,name,...args)=>{try{if(typeof obj?.[name]==='function')return obj[name](...args);}catch{}};
   const mode=()=>volatileMode||themeMode(get('localStorage',THEME));
@@ -93,6 +95,7 @@ export function createRuntimeEnvironment(win=window){
     update(false);
     requestTheme();
     for(const event of ['safeAreaChanged','contentSafeAreaChanged','viewportChanged','fullscreenChanged'])call(bridge,'onEvent',event,syncInsets);
+    if(!backNavigation)backNavigation=setupTelegramBackNavigation(win,bridge);
     call(bridge,'ready');sync();return true;
   }
   function requestTheme(){

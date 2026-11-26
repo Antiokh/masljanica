@@ -96,6 +96,8 @@ SSR содержит data-embed-src, но не внешний iframe src. Root d
 
 Среда определяется одним runtime adapter; SDK не владеет Cache Storage или PWA state machine. Telegram не получает install offer и не записывает lastStandaloneDate. При доступных Service Worker и Cache Storage применяется тот же протокол capability:2, manifest, staging, Range, consent и auto update. Факт доступности API не считается доказательством сохранённой копии: readiness сообщает только действующий SW. На /offline/ есть диагностика Telegram, SDK, API, режима темы, входной темы Telegram, источника и фактически применённой темы, а также наличия копии после предыдущего документного запуска; сравнение опирается на ранее сохранённую отметку готовности и подтверждённый SW status, при отсутствии отметки выводится «Нет данных». Кэш не обещает запуск без сети: Telegram контролирует создание WebView, а клиенты могут очищать данные. SDK и WebView не заменяют обычную PWA. Не переносить initData в localStorage, не добавлять отдельное хранилище настроек без согласованной миграции.
 
+Native BackButton и system Back в Telegram управляются одним адаптером `telegram-back.mjs`, с одним history guard и Astro replace navigation; детали и приоритеты в [layout](LAYOUT.md#telegram-back-navigation). Service Worker и транзакции не участвуют в Back.
+
 ## Проверки и границы подтверждения
 
 Node 22.12+. Выполнять:

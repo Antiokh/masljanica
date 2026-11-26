@@ -1,0 +1,42 @@
+import assert from 'node:assert/strict';
+import { normalizedRoute,isPeerRoute,isAppRoute,parentRoute,resolveBackAction,setupTelegramBackNavigation } from '../public/telegram-back.mjs';
+assert.equal(normalizedRoute('/games'),' /games/'.trim());
+for(const path of ['/','/songs/','/games/']){assert.equal(isPeerRoute(path),true);assert.equal(parentRoute(path),null);}
+assert.equal(parentRoute('/games/дударь/'),'/games/');
+assert.equal(parentRoute('/songs/квашня/'),'/songs/');
+assert.equal(parentRoute('/scenario/2/','/games/'),'/scenario/');
+assert.equal(parentRoute('/scenario/','/games/'),'/games/');
+assert.equal(parentRoute('/offline/'),'/');
+assert.equal(parentRoute('/characters/','/not-a-peer/'),'/');
+assert.equal(isAppRoute('/media/audio/test.mp3'),false);
+assert.equal(isAppRoute('/workshops/example/'),true);
+assert.equal(resolveBackAction({search:true,character:true,popover:true,menu:true,path:'/games/x/'}),'search');
+assert.equal(resolveBackAction({character:true,popover:true,menu:true,path:'/games/x/'}),'character');
+assert.equal(resolveBackAction({popover:true,menu:true,path:'/games/x/'}),'popover');
+assert.equal(resolveBackAction({menu:true,path:'/games/x/'}),'menu');
+assert.equal(resolveBackAction({path:'/games/x/'}),'route');
+assert.equal(resolveBackAction({path:'/songs/'}),null);
+// Exercise one guard, native Back, captured popstate and Astro replace-state
+// with minimal test doubles (real DOM/SPA behavior is covered by browser smoke).
+const KEY='__masljanicaTelegramBackGuard',events={},docEvents={};
+let path='/',href='https://example.test/',stack=[{index:0}],pushes=0,closes=0,visible=null,menuOpen=false,nativeHandler;
+const summary={focus(){}};
+const menu={get open(){return menuOpen},set open(v){menuOpen=v},querySelector(){return summary}};
+const location={get href(){return href},get pathname(){return path},origin:'https://example.test'};
+const changeUrl=u=>{href=u;path=new URL(u).pathname;};
+const h={get state(){return stack.at(-1)},replaceState(s,_,u){stack[stack.length-1]=s;changeUrl(u)},pushState(s,_,u){stack.push(s);pushes++;changeUrl(u)}};
+const doc={body:{},readyState:'complete',querySelector(s){return s==='.more-menu[open]'&&menuOpen?menu:null},addEventListener(n,fn){docEvents[n]=fn}};
+const win={document:doc,history:h,location,MutationObserver:class{observe(){}},addEventListener(n,fn){events[n]=fn},setTimeout(){}};
+const back={show(){visible=true},hide(){visible=false},onClick(fn){nativeHandler=fn}};
+const controller=setupTelegramBackNavigation(win,{BackButton:back,close(){closes++}});
+assert.equal(pushes,1);assert.equal(visible,false);
+h.replaceState({index:0},'','https://example.test/songs/');
+controller.refresh();assert.equal(pushes,1);assert.equal(visible,false);
+menuOpen=true;docEvents.toggle();assert.equal(visible,true);nativeHandler();assert.equal(menuOpen,false);assert.equal(visible,false);
+menuOpen=true;docEvents.toggle();
+const base=stack[0];stack.pop();changeUrl('https://example.test/');
+let stopped=false;events.popstate({state:base,stopImmediatePropagation(){stopped=true}});
+assert.equal(stopped,true);assert.equal(menuOpen,false);assert.equal(location.pathname,'/songs/');assert.equal(closes,0);assert.equal(stack.length,2);
+stack.pop();changeUrl('https://example.test/');events.popstate({state:base,stopImmediatePropagation(){}});
+assert.equal(closes,1);assert.equal(stack.length,2);
+console.log('Telegram Back route hierarchy, overlays, single history guard and peer roots passed.');

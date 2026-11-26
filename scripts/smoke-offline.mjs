@@ -319,9 +319,12 @@ try {
   const tgContext=await browser.newContext({viewport:{width:390,height:844},colorScheme:'light'});
   try{
     await tgContext.addInitScript(()=>{
-      const handlers=new Map();window.__tgReady=0;
+      const handlers=new Map();window.__tgReady=0;window.__tgBackVisible=false;window.__tgClosed=0;
+      let backHandler;
+      window.__tgBack=()=>backHandler?.();
       window.Telegram={WebApp:{platform:'android',version:'9.0',initData:'fixture',colorScheme:'light',
         contentSafeAreaInset:{top:0,bottom:0,left:0,right:0},safeAreaInset:{top:0,bottom:0,left:0,right:0},
+        BackButton:{show(){window.__tgBackVisible=true;},hide(){window.__tgBackVisible=false;},onClick(fn){backHandler=fn;}},close(){window.__tgClosed++;},
         onEvent(name,fn){handlers.set(name,fn);},ready(){window.__tgReady++;},setHeaderColor(){},setBackgroundColor(){},setBottomBarColor(){},isVersionAtLeast(){return true;}}};
       window.__tgTheme=theme=>{Telegram.WebApp.colorScheme=theme;Telegram.WebApp.themeParams={bg_color:theme==='dark'?'#17212b':'#ffffff'};handlers.get('themeChanged')?.();};
     });
@@ -329,6 +332,20 @@ try {
     await tg.goto(origin+'/#'+new URLSearchParams({tgWebAppPlatform:'android',tgWebAppVersion:'9.0',tgWebAppThemeParams:JSON.stringify({bg_color:'#101827'})}));
     await tg.waitForFunction(()=>document.documentElement.dataset.runtimeEnvironment==='telegram'&&document.documentElement.dataset.theme==='dark');
     await tg.locator('.festival-brand-label').waitFor({state:'hidden'});
+    await tg.waitForFunction(()=>history.state?.__masljanicaTelegramBackGuard?.role==='top');
+    assert.equal(await tg.evaluate(()=>window.__tgBackVisible),false,'Native Back hidden on root');
+    const initialHistory=await tg.evaluate(()=>history.length);
+    await tg.locator('.more-menu > summary').click();
+    await tg.waitForFunction(()=>window.__tgBackVisible);
+    await tg.evaluate(()=>window.__tgBack());
+    await tg.waitForFunction(()=>!document.querySelector('.more-menu').open&&!window.__tgBackVisible);
+    const firstCharacter=tg.locator('[data-character-open]').first();
+    await firstCharacter.click();
+    await tg.waitForFunction(()=>window.__tgBackVisible);
+    await tg.evaluate(()=>history.back());
+    await tg.locator('dialog[data-character-dialog][open]').waitFor({state:'hidden'});
+    await tg.waitForFunction(()=>!window.__tgBackVisible);
+    assert.equal(await tg.evaluate(()=>window.__tgClosed),0,'System Back closes overlay, not app');
     assert.equal(await tg.evaluate(()=>matchMedia('(prefers-color-scheme: light)').matches),true,'Telegram dark launch must override light OS and uninitialized bridge');
     await tg.evaluate(()=>window.__tgTheme('dark'));
     assert.equal(await tg.locator('#festival-search-dialog').count(),1);
@@ -337,7 +354,9 @@ try {
     await tg.locator('.telegram-menu-tools [data-search-open]').click();
     await tg.locator('#festival-search-input').fill('Квашня');
     await tg.locator('#festival-search-results a[href*="/songs/"]').first().waitFor({state:'visible'});
-    await tg.keyboard.press('Escape');
+    await tg.waitForFunction(()=>window.__tgBackVisible);
+    await tg.evaluate(()=>window.__tgBack());
+    await tg.locator('#festival-search-dialog').waitFor({state:'hidden'});
     await tg.locator('.more-menu > summary').click();
     await tg.locator('[data-telegram-theme]').selectOption('light');
     await tg.waitForFunction(()=>document.documentElement.dataset.theme==='light');
@@ -360,6 +379,21 @@ try {
     assert.equal(await tg.locator('[data-runtime-value="appliedTheme"]').innerText(),'light');
     assert.equal(await tg.locator('[data-runtime-value="themeSource"]').innerText(),'Telegram SDK');
     assert.equal(await tg.evaluate(()=>window.__tgReady),1,'One bridge lifecycle across SPA');
+    await tg.waitForFunction(()=>window.__tgBackVisible);
+    await tg.evaluate(()=>window.__tgBack());
+    await tg.waitForURL('**/songs/');
+    await tg.waitForFunction(()=>!window.__tgBackVisible);
+    await tg.locator('.app-nav a[href="/games/"]').click();
+    await tg.waitForURL('**/games/');
+    await tg.locator('.app-card').first().click();
+    await tg.waitForFunction(()=>location.pathname.startsWith('/games/')&&location.pathname!=='/games/'&&window.__tgBackVisible);
+    await tg.evaluate(()=>history.back());
+    await tg.waitForURL('**/games/');
+    await tg.waitForFunction(()=>!window.__tgBackVisible);
+    assert.equal(await tg.evaluate(()=>history.length),initialHistory,'Peer tabs and nested screens use one guard, not growing browser history');
+    await tg.evaluate(()=>history.back());
+    await tg.waitForFunction(()=>window.__tgClosed===1);
+    assert.equal(new URL(tg.url()).pathname,'/games/','Root system Back closes the app rather than visiting previous tabs');
   }finally{await tgContext.close();}
   await context.close();
   console.log('SPA, search and complete offline audio smoke test passed.');
