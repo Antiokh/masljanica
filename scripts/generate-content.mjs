@@ -1,13 +1,21 @@
-import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdirSync, writeFileSync, rmSync, readFileSync, existsSync } from 'node:fs';
 import { read } from './validate-data.mjs';
 const root=new URL('../src/content/docs/generated/',import.meta.url);
 rmSync(root,{recursive:true,force:true});mkdirSync(root,{recursive:true});
 const escape=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const url=s=>{try{const u=new URL(s);return u.protocol==='https:'||u.protocol==='http:'?escape(u.href):''}catch{return ''}};
+const audioManifest = new URL('../src/data/audio-archive.json', import.meta.url);
+const archivedAudio = existsSync(audioManifest) ? JSON.parse(readFileSync(audioManifest, 'utf8')).files : {};
+function audioSource(source) {
+  const entry = archivedAudio[source];
+  if (entry?.path && /^\/media\/audio\/[a-z0-9_-]+\.mp3$/.test(entry.path)
+      && existsSync(new URL('../public' + entry.path, import.meta.url))) return entry.path;
+  return url(source);
+}
 function media(x){
   let output='';
   if(x.video){try{const u=new URL(x.video);const id=u.hostname==='youtu.be'?u.pathname.slice(1):u.searchParams.get('v');if(id&&/^[\w-]{11}$/.test(id))output+='<iframe class="video" src="https://www.youtube-nocookie.com/embed/'+id+'" title="Видео" loading="lazy" allowfullscreen></iframe>\n\n';else if(url(x.video))output+='[Видео]('+url(x.video)+')\n\n';}catch{}}
-  for(const audio of x.audio??[]){const src=url(audio);if(src)output+='<audio controls preload="none" src="'+src+'"></audio>\n\n';}
+  for(const audio of x.audio??[]){const src=audioSource(audio);if(src)output+='<audio controls preload="none" src="'+src+'"></audio>\n\n';}
   return output;
 }
 function page(section,slug,title,body){

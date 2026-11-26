@@ -1,0 +1,60 @@
+name: Archive audio
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/archive-audio.yml'
+      - 'scripts/archive-audio.py'
+permissions:
+  contents: write
+concurrency:
+  group: archive-audio-main
+  cancel-in-progress: false
+jobs:
+  archive:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Check FFmpeg
+        run: |
+          if ! command -v ffprobe >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+      - name: Download and validate catalog audio
+        run: python3 scripts/archive-audio.py
+      - name: Commit archived files and report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- src/data/audio-archive.json
+          if [ -n "$(find public/media/audio -type f -name '*.mp3' -print -quit)" ]; then
+            git add -- public/media/audio
+          fi
+          if ! git diff --cached --quiet; then
+            git commit -m "Archive catalog audio and record download results"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          with open('src/data/audio-archive.json') as f:
+              report = json.load(f)
+          print(f"Archived **{report['archived']}/{report['total']}** URLs, {report['bytes']:,} bytes.")
+          for url, error in report['errors'].items():
+              print(f"- {url}: {error}")
+          PY
+      - name: Check completeness
+        run: |
+          python3 - <<'PY'
+          import json
+          with open('src/data/audio-archive.json') as f:
+              report = json.load(f)
+          if report['errors']:
+              raise SystemExit("Some audio could not be archived; inspect the committed report.")
+          PY
