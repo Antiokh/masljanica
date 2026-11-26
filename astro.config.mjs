@@ -9,7 +9,7 @@ export default defineConfig({
     locales: { root: { label: 'Русский', lang: 'ru' } },
     favicon: '/icon.svg',
     customCss: ['./src/styles/app.css'],
-    components: { Header: './src/components/Header.astro', Head: './src/components/AppHead.astro' },
+    components: { Header: './src/components/Header.astro', Head: './src/components/AppHead.astro', Footer: './src/components/AppFooter.astro' },
     head: [
       { tag: 'link', attrs: { rel: 'manifest', href: '/manifest.webmanifest' } },
       { tag: 'meta', attrs: { name: 'theme-color', content: '#FFFFFF' } },

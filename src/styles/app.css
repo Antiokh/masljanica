@@ -23,7 +23,7 @@
   --festival-surface: #1D2B40;
   --festival-hero: #172840;
   --festival-on-action: #FFFFFF;
-  --festival-mobile-nav-height: 4.3rem;
+  --festival-mobile-nav-height: 3.125rem;
   --sl-content-width: 68rem;
 }
 :root[data-theme='light'] {
@@ -88,7 +88,7 @@ audio { display:block; width:100%; margin-block:1rem; }
     display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); align-items:stretch;
     gap:0; box-sizing:border-box; height:calc(var(--festival-mobile-nav-height) + env(safe-area-inset-bottom,0px)); min-height:0;
     grid-template-rows:minmax(0,1fr);
-    padding:.2rem max(.35rem,env(safe-area-inset-right,0px)) calc(.2rem + env(safe-area-inset-bottom,0px)) max(.35rem,env(safe-area-inset-left,0px));
+    padding:.125rem max(.25rem,env(safe-area-inset-right,0px)) calc(.125rem + env(safe-area-inset-bottom,0px)) max(.25rem,env(safe-area-inset-left,0px));
     background:var(--sl-color-bg-nav); border-top:1px solid var(--sl-color-gray-5);
     box-shadow:0 -5px 20px #1018270a;
   }
@@ -96,10 +96,10 @@ audio { display:block; width:100%; margin-block:1rem; }
   .app-nav > a, .app-nav > .more-menu > summary {
     box-sizing:border-box; width:100%; min-width:0; min-height:0; height:100%;
     flex-direction:column; align-items:center; justify-content:center;
-    font-size:.75rem; line-height:1.2; gap:.15rem; padding:.2rem .1rem;
+    font-size:.72rem; line-height:1.15; gap:.1rem; padding:0 .1rem;
     text-align:center;
   }
-  .app-nav .nav-icon { width:1.35rem; height:1.35rem; }
+  .app-nav .nav-icon { width:1.25rem; height:1.25rem; }
   .more-links { top:auto; bottom:calc(100% + .7rem); max-width:calc(100vw - 1rem); }
   .header-navigation { gap:0; }
   .header-search { padding-inline:.375rem; }
@@ -645,15 +645,13 @@ progress[data-pwa-bar]:indeterminate::-moz-progress-bar, progress#offline-progre
 .festival-brand-subtitle { display:block; min-width:0; color:var(--sl-color-gray-3); font-size:.72rem; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .festival-brand-subtitle [hidden] { display:none!important; }
 @media(max-width:60rem) {
-  :root { --festival-mobile-nav-height:3.65rem; }
   .festival-brand-label .festival-brand-title { font-size:1rem; }
   .festival-brand-subtitle { font-size:.7rem; }
-  .content-panel:not(:has(> .sl-container > #_top)) { padding-block:.7rem .6rem; }
-  main { padding-bottom:calc(var(--festival-mobile-nav-height) + env(safe-area-inset-bottom,0px)); }
+  .content-panel:not(:has(> .sl-container > #_top)) { padding-block:.7rem .3rem; }
+  .main-pane > main { padding-bottom:calc(var(--festival-mobile-nav-height) + env(safe-area-inset-bottom,0px)); }
   .sl-markdown-content > .catalog-tools:first-child { margin-block:0 .6rem; }
   .catalog-tools input,.catalog-tools select { padding:.5rem .65rem; }
   .sl-markdown-content > .playlist-panel { margin-block:.5rem .65rem; }
   .sl-markdown-content > .playlist-panel + .song-list { margin-top:.65rem; }
   .sl-markdown-content > :last-child { margin-bottom:0; }
-  footer:empty { display:none; }
 }

@@ -152,8 +152,26 @@ try {
   });
   assert.ok(compact.gap>=0&&compact.gap<=24,'First mobile control must sit immediately under header');
   assert.ok(compact.titleHeight<=1,'Semantic H1 must not occupy visible space');
-  assert.ok(compact.navHeight<=66&&Math.abs(compact.navBottom)<=1,'Compact bottom nav remains flush');
+  assert.ok(compact.navHeight>=48&&compact.navHeight<=52&&Math.abs(compact.navBottom)<=1,'50px bottom nav remains flush');
   assert.equal(compact.bodyPadding,0,'No duplicate body bottom reservation');
+  const bottomLayout=await page.evaluate(async()=>{
+    const y=scrollY;
+    const nav=document.querySelector('.app-nav');
+    const items=[...nav.querySelectorAll(':scope > a,:scope > details > summary')];
+    const last=document.querySelector('.song-list');
+    const root=document.scrollingElement;
+    const before=document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior='auto';
+    try{
+      window.scrollTo(0,root.scrollHeight);
+      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      return {gap:nav.getBoundingClientRect().top-last.getBoundingClientRect().bottom,heights:items.map(el=>el.getBoundingClientRect().height),footer:!!document.querySelector('.main-pane main > .content-panel > .sl-container > footer.sl-flex')};
+    }finally{window.scrollTo(0,y);document.documentElement.style.scrollBehavior=before;}
+  });
+  assert.ok(bottomLayout.heights.every(h=>h>=44),'Bottom nav touch targets remain at least 44px high');
+  assert.equal(bottomLayout.footer,false,'Disabled stock footer must not create layout whitespace');
+  assert.ok(bottomLayout.gap>=-1&&bottomLayout.gap<=12,'No blank trailing space or obscured last song at end of scroll');
+
 
   await page.locator('#catalog-search').waitFor();
   assert.equal(await page.evaluate(()=>window.__navigationTest),'persisted','SPA navigation must keep the same window');
