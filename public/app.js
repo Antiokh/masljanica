@@ -1,3 +1,4 @@
+import { installGameList } from './game-list.mjs';
 import { createRuntimeEnvironment } from './runtime-environment.mjs';
 import { installFestivalSearch } from './festival-search.mjs';
 import { installCharacterDialogs } from './character-dialogs.mjs';
@@ -11,6 +12,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  if(window.__masljanicaRuntime)return;window.__masljanicaRuntime=true;
  const environment=createRuntimeEnvironment();
  installSongList();
+ installGameList();
  installExternalEmbeds();
  installHomeSeason();
  installCharacterDialogs();
@@ -83,16 +85,20 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  new MutationObserver(syncTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
  function refreshCatalog(){
    const search=document.querySelector('#catalog-search'),filter=document.querySelector('#catalog-filter');if(!search)return;
+   const category=document.querySelector('[data-game-filter="category"][aria-pressed="true"]')?.dataset.value;
+   const audience=document.querySelector('[data-game-filter="audience"][aria-pressed="true"]')?.dataset.value;
    let count=0;
    document.querySelectorAll('[data-entry]').forEach(el=>{
-     el.hidden=!(el.dataset.search||'').toLocaleLowerCase('ru').includes(search.value.trim().toLocaleLowerCase('ru'))||!!(filter?.value&&el.dataset.category!==filter.value);
+     el.hidden=!(el.dataset.search||'').toLocaleLowerCase('ru').includes(search.value.trim().toLocaleLowerCase('ru'))||!!(filter?.value&&el.dataset.category!==filter.value)||!!(category&&el.dataset.category!==category)||!!(audience&&el.dataset.audience!==audience);
      if(!el.hidden)count++;
    });
    document.querySelectorAll('.catalog-group').forEach(g=>g.hidden=!g.querySelector('[data-entry]:not([hidden])'));
    const empty=document.querySelector('#catalog-empty');if(empty)empty.hidden=count>0;
+   const total=document.querySelector('#game-count');if(total)total.textContent='Найдено игр: '+count;
  }
  document.addEventListener('input',e=>{if(e.target?.id==='catalog-search')refreshCatalog();});
  document.addEventListener('change',e=>{if(e.target?.id==='catalog-filter')refreshCatalog();});
+ document.addEventListener('click',e=>{const button=e.target instanceof Element?e.target.closest('[data-game-filter]'):null;if(!button)return;for(const item of button.parentElement.querySelectorAll('[data-game-filter]'))item.setAttribute('aria-pressed',String(item===button));refreshCatalog();});
  document.addEventListener('play',e=>{if(e.target instanceof HTMLAudioElement)document.querySelectorAll('audio').forEach(a=>{if(a!==e.target)a.pause();});},true);
  function render(){
    const label=document.querySelector('#offline-status'),size=document.querySelector('#offline-size'),button=document.querySelector('#offline-update'),remove=document.querySelector('#offline-delete'),bar=document.querySelector('#offline-progress');

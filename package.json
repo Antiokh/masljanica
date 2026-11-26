@@ -12,10 +12,11 @@
     "prebuild": "node scripts/generate-content.mjs",
     "build": "astro build && node scripts/build-offline.mjs",
     "preview": "astro preview",
-    "test": "node scripts/validate-data.mjs && node scripts/test-pwa-daily.mjs && node scripts/test-navigation-cache.mjs && node scripts/test-offline-transaction.mjs && node scripts/test-home-season.mjs && node scripts/test-runtime-environment.mjs && node scripts/test-telegram-back.mjs"
+    "test": "node scripts/validate-data.mjs && node scripts/test-pwa-daily.mjs && node scripts/test-navigation-cache.mjs && node scripts/test-offline-transaction.mjs && node scripts/test-home-season.mjs && node scripts/test-runtime-environment.mjs && node scripts/test-telegram-back.mjs && node scripts/test-games-data.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.35.0",
-    "astro": "^5.13.0"
+    "astro": "^5.13.0",
+    "markdown-it": "^14.1.0"
   }
 }

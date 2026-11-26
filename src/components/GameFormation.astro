@@ -1,0 +1,22 @@
+---
+const {formation,role}=Astro.props;
+const labels:Record<string,string>={'circle':'Круг','circle-center':'Хоровод с ведущим в центре','circle-two':'Круг с двумя водящими','circle-outside':'Круг, ведущий снаружи','double-circle':'Два круга','lines':'Две шеренги','chain':'Цепочка','gates':'Ворота и вереница','triples':'Тройки по кругу','pairs':'Пары'};
+const points:Array<{x:number;y:number;lead?:boolean}>=[];
+const ring=(cx:number,cy:number,rx:number,ry:number,n:number)=>{for(let i=0;i<n;i++){const a=i*2*Math.PI/n;points.push({x:cx+rx*Math.sin(a),y:cy+ry*Math.cos(a)});}};
+if(formation.startsWith('circle')){ring(120,72,53,51,10);if(formation==='circle-center')points.push({x:120,y:72,lead:true});if(formation==='circle-two')points.push({x:108,y:72,lead:true},{x:132,y:72,lead:true});if(formation==='circle-outside')points.push({x:194,y:72,lead:true});}
+if(formation==='double-circle'){ring(120,72,56,54,10);ring(120,72,31,29,10);if(role)points.push({x:120,y:72,lead:true});}
+if(formation==='lines'){for(let i=0;i<6;i++)points.push({x:45+i*30,y:38},{x:45+i*30,y:105});}
+if(formation==='chain'||formation==='gates'){for(let i=0;i<6;i++)points.push({x:35+i*24,y:72});points.push({x:192,y:51,lead:true},{x:192,y:93,lead:true});}
+if(formation==='triples'){for(let i=0;i<6;i++){const a=i*Math.PI/3;for(const offset of [-8,0,8])points.push({x:120+48*Math.sin(a)+offset*Math.cos(a),y:72+48*Math.cos(a)-offset*Math.sin(a)});}points.push({x:195,y:72,lead:true});}
+if(formation==='pairs'){for(let i=0;i<5;i++)points.push({x:40+i*40,y:61},{x:40+i*40,y:82});}
+---
+<figure class="game-formation">
+ <svg viewBox="0 0 240 144" role="img" aria-label={labels[formation]||'Расстановка участников'}>
+  {formation.startsWith('circle')&&<ellipse cx="120" cy="72" rx="53" ry="51" class="formation-guide"/>}
+  {formation==='double-circle'&&<><ellipse cx="120" cy="72" rx="56" ry="54" class="formation-guide"/><ellipse cx="120" cy="72" rx="31" ry="29" class="formation-guide"/></>}
+  {formation==='lines'&&<path d="M45 38H195M45 105H195" class="formation-guide"/>}
+  {(formation==='chain'||formation==='gates')&&<path d="M35 72H155M192 51V93" class="formation-guide"/>}
+  {points.map(p=><circle cx={p.x} cy={p.y} r={p.lead?6.5:5.5} class:list={['formation-person',{'formation-lead':p.lead}]}/>)}
+ </svg>
+ <figcaption><strong>{labels[formation]}</strong>{role&&<span>{role}</span>}<small>Условная схема, число точек не задаёт количество игроков.</small></figcaption>
+</figure>

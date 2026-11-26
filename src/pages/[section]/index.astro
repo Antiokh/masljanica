@@ -1,25 +1,23 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
-import games from '../../data/games.json';
 import CharacterGallery from '../../components/CharacterGallery.astro';
 import workshops from '../../data/workshops.json';
 import parts from '../../data/parts.json';
 export function getStaticPaths() {
-  return ['games','characters','workshops','scenario'].map(section=>({params:{section}}));
+  return ['characters','workshops','scenario'].map(section=>({params:{section}}));
 }
 const section = Astro.params.section!;
-const titles:Record<string,string>={games:'Игры',characters:'Персонажи',workshops:'Мастер-классы',scenario:'Сказ'};
+const titles:Record<string,string>={characters:'Персонажи',workshops:'Мастер-классы',scenario:'Сказ'};
 type Entry = {slug:string;title:string;subtitle?:string;image?:string;category?:string;video?:boolean};
 const sort = (a:Entry,b:Entry)=>a.title.localeCompare(b.title,'ru');
 let entries:Entry[] = [];
-if(section==='games') entries=games.map(x=>({slug:x.slug,title:x.title,subtitle:[x.audience,x.audio.length?'Аудио':''].filter(Boolean).join(' · '),video:!!x.video,category:x.historical?'Исторические':'Развлекательные'})).sort(sort);
 
 if(section==='workshops') entries=workshops.map(x=>({slug:x.slug,title:x.title,subtitle:[x.host,x.enabled?'':'Уточняется'].filter(Boolean).join(' · ')}));
 if(section==='scenario') entries=parts.map(x=>({slug:String(x.number),title:x.title}));
-const groups=section==='games'?['Исторические','Развлекательные']:[''];
+const groups=[''];
 ---
 <StarlightPage frontmatter={{title:titles[section],template:'splash'}}>
-    {section==='characters'?<CharacterGallery />:<><div class="catalog-tools"><input id="catalog-search" type="search" placeholder="Поиск…" aria-label="Поиск по разделу"/>{section==='games'&&<select id="catalog-filter" aria-label="Категория"><option value="">Все категории</option>{groups.map(g=><option value={g}>{g}</option>)}</select>}</div>
+    {section==='characters'?<CharacterGallery />:<><div class="catalog-tools"><input id="catalog-search" type="search" placeholder="Поиск…" aria-label="Поиск по разделу"/></div>
     <p id="catalog-empty" hidden>Ничего не найдено.</p>
     {groups.map(group=><section class="catalog-group" data-group={group}>{group&&<h2>{group}</h2>}<div class="app-grid">{entries.filter(x=>!group||x.category===group).map(x=><a class="app-card" data-astro-prefetch="hover" data-entry data-search={x.title+' '+(x.subtitle||'')} data-category={x.category||''} href={'/'+section+'/'+x.slug+'/'}>{x.image&&<img src={x.image} alt={x.title} loading="lazy"/>}<div><strong>{x.title}</strong>{(x.subtitle||x.video)&&<small>{x.subtitle}{x.video&&<span data-online-only hidden>{x.subtitle?' · ':''}Видео</span>}</small>}</div></a>)}</div></section>)}</>}
 </StarlightPage>

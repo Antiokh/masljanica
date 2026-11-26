@@ -1,0 +1,73 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import GameIcon from '../components/GameIcon.astro';
+import GameFormation from '../components/GameFormation.astro';
+import games from '../data/games.json';
+import meta from '../data/game-details.json';
+import archive from '../data/audio-archive.json';
+import MarkdownIt from 'markdown-it';
+import {existsSync} from 'node:fs';
+const markdown=new MarkdownIt({html:false,linkify:false,breaks:false});
+const audiences=[{id:'children',title:'Дети',icon:'baby',match:'Дети'},{id:'teens',title:'Дети и подростки',icon:'users',match:'Дети и подростки'},{id:'youth',title:'Молодёжь',icon:'heart',match:'Молодёжь'},{id:'family',title:'Взрослые и дети',icon:'users',match:'Взрослые и дети'},{id:'strength',title:'Добры молодцы',icon:'strength',match:'Добры молодцы'}];
+const audienceOf=(s:string)=>audiences.find(a=>s.endsWith(a.match))||{id:'other',title:s,icon:'users'};
+type Details={formation?:string;role?:string;equipment?:string;age_min?:number;age_max?:number;players_min?:number;players_max?:number};
+const details=meta as Record<string,Details>;
+const files=archive.files as Record<string,{path:string;duration:number}>;
+const localTrack=(url:string)=>{const t=files[url];if(!t||!/^\/media\/audio\/[a-z0-9_-]+\.mp3$/.test(t.path)||!existsSync(process.cwd()+'/public'+t.path))throw Error('Missing game audio '+url);return t;};
+const fmt=(n:number)=>Math.floor(n/60)+':'+String(Math.floor(n%60)).padStart(2,'0');
+function videoURL(value:string){try{const u=new URL(value);if(!['https:','http:'].includes(u.protocol))return null;const h=u.hostname.replace(/^www\./,'');const id=h==='youtu.be'?u.pathname.slice(1):h==='youtube.com'?u.searchParams.get('v'):null;return {link:u.href,embed:id&&/^[\w-]{11}$/.test(id)?'https://www.youtube-nocookie.com/embed/'+id:null};}catch{return null;}}
+const sorted=[...games].sort((a,b)=>a.title.localeCompare(b.title,'ru'));
+---
+<StarlightPage frontmatter={{title:'Игры',template:'splash',description:'Народные игры и забавы: правила, расстановка, музыка и видео.'}}>
+ <div class="game-catalog">
+  <div class="catalog-tools"><input id="catalog-search" type="search" placeholder="Найти игру…" aria-label="Поиск по играм"/></div>
+  <div class="game-filters" aria-label="Фильтры игр">
+   <div class="game-filter-row" role="group" aria-label="Категория">
+    {([{id:'',title:'Все'},{id:'historical',title:'Исторические'},{id:'entertainment',title:'Развлекательные'}]).map(f=><button type="button" data-game-filter="category" data-value={f.id} aria-pressed={f.id===''?'true':'false'}>{f.title}</button>)}
+   </div>
+   <div class="game-filter-row" role="group" aria-label="Аудитория">
+    <button type="button" data-game-filter="audience" data-value="" aria-pressed="true">Все участники</button>
+    {audiences.map(a=><button type="button" data-game-filter="audience" data-value={a.id} aria-pressed="false"><GameIcon name={a.icon}/>{a.title}</button>)}
+   </div>
+  </div>
+  <p class="game-count" id="game-count" aria-live="polite">{games.length} игр</p>
+  <p id="catalog-empty" hidden>Ничего не найдено.</p>
+  <audio id="game-audio" preload="none" hidden></audio>
+  <p id="game-audio-error" role="status" hidden></p>
+  {['historical','entertainment'].map(category=><section class="catalog-group game-group" data-group={category}>
+   <h2>{category==='historical'?'Исторические':'Развлекательные'}</h2>
+   <div class="game-list">
+    {sorted.filter(g=>g.historical===(category==='historical')).map(game=>{
+      const a=audienceOf(game.audience),d=details[game.slug]||{},tracks=game.audio.map(localTrack),video=videoURL(game.video);
+      const age=d.age_min?(d.age_max?d.age_min+'–'+d.age_max:d.age_min+'+')+' лет':'';
+      const players=d.players_min?(d.players_max?d.players_min+'–'+d.players_max:d.players_min+'+'):'';
+      const description=game.description.replace(/^\s*#{1,6}[^\n]*\n+/,'');
+      return <article class="game-card" id={game.slug} data-entry data-category={category} data-audience={a.id} data-search={[game.title,a.title,game.description,d.equipment||''].join(' ')}>
+       <details class="game-details">
+        <summary>
+         <span class="game-pictogram"><GameIcon name={d.formation==='lines'?'lines':d.formation==='gates'||d.formation==='chain'?'chain':a.icon}/></span>
+         <span class="game-heading"><strong>{game.title}</strong><small>{a.title}{age?' · '+age:''}</small></span>
+         <span class="game-media-icons">{tracks.length>0&&<span title="Аудио"><GameIcon name="music"/></span>}{video&&<span title="Видео" data-online-only hidden><GameIcon name="video"/></span>}</span>
+         <GameIcon name="chevron" class="game-chevron"/>
+        </summary>
+        <div class="game-body">
+         {(age||players||d.equipment)&&<dl class="game-facts">{age&&<div><dt>Возраст</dt><dd>{age}</dd></div>}{players&&<div><dt>Участники</dt><dd>{players}</dd></div>}{d.equipment&&<div><dt>Реквизит</dt><dd>{d.equipment}</dd></div>}</dl>}
+         {tracks.map((track,i)=><div class="game-track" data-game-track={track.path} data-duration={track.duration} data-playing="false">
+          <button type="button" class="game-audio-toggle" aria-label={'Воспроизвести: '+game.title}>
+           <svg viewBox="0 0 40 40" class="game-audio-ring" aria-hidden="true"><circle cx="20" cy="20" r="17" class="game-ring-track"/><circle cx="20" cy="20" r="17" pathLength="100" class="game-ring-progress"/></svg>
+           <svg viewBox="0 0 24 24" class="game-play-icon" fill="currentColor" aria-hidden="true"><path d="M8 5v14l12-7z"/></svg><svg viewBox="0 0 24 24" class="game-pause-icon" fill="currentColor" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg>
+          </button>
+          <div class="game-track-main"><div><strong>{tracks.length>1?'Запись '+(i+1):'Музыкальное сопровождение'}</strong><span class="game-track-time">{fmt(track.duration)}</span></div><input type="range" class="game-seek" min="0" max="1000" step="1" value="0" aria-label={'Перемотка: '+game.title}/></div>
+         </div>)}
+         {d.formation&&<GameFormation formation={d.formation} role={d.role}/>}
+         <div class="game-rules" set:html={markdown.render(description)}/>
+         {video&&<div class="game-video" data-online-only data-external-embed data-embed-src={video.embed||undefined} data-embed-mode="manual" hidden><h3>Видео</h3>{video.embed&&<button type="button" class="app-button" data-embed-load>Смотреть видео</button>}<div data-embed-surface hidden></div><a href={video.link} target="_blank" rel="noopener noreferrer">Открыть видео в новой вкладке</a></div>}
+         <a class="game-permalink" href={'/games/'+game.slug+'/'}>Открыть отдельную страницу</a>
+        </div>
+       </details>
+      </article>;
+    })}
+   </div>
+  </section>)}
+ </div>
+</StarlightPage>

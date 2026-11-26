@@ -1,0 +1,129 @@
+{
+  "яша-и-маша": {
+    "formation": "circle-two",
+    "equipment": "Повязка на глаза",
+    "role": "Яша и Маша"
+  },
+  "утица": {
+    "formation": "gates",
+    "role": "Ворота и вереница утят"
+  },
+  "селезень-за-утицей-догоняет": {
+    "formation": "circle-two",
+    "role": "Селезень и утица"
+  },
+  "заинька": {
+    "formation": "circle-center",
+    "role": "Заинька"
+  },
+  "челнок": {
+    "formation": "lines",
+    "role": "Челноки между шеренгами"
+  },
+  "чиж": {
+    "formation": "circle-center",
+    "role": "Чиж"
+  },
+  "коршун": {
+    "formation": "circle-center",
+    "role": "Коршун"
+  },
+  "заря-заряница": {
+    "formation": "circle-center",
+    "equipment": "Платок или шарф",
+    "role": "Заря"
+  },
+  "дядя-трифон": {
+    "formation": "circle-center",
+    "role": "Трифон"
+  },
+  "сижу-сижу-на-камушке": {
+    "formation": "circle-center",
+    "role": "Игрок в центре"
+  },
+  "я-на-бочке-сижу": {
+    "formation": "circle-center",
+    "role": "Один или несколько игроков в центре"
+  },
+  "подушечка": {
+    "formation": "circle-center",
+    "equipment": "Подушечка или сложенный шарф",
+    "role": "Игрок с подушечкой"
+  },
+  "растяпа": {
+    "formation": "double-circle",
+    "equipment": "Гармошка",
+    "role": "Растяпа в центре"
+  },
+  "подъем-гири": {
+    "equipment": "Гиря"
+  },
+  "шишки-желуди-орехи": {
+    "formation": "triples",
+    "role": "Ведущий за кругом"
+  },
+  "горячая-картошка": {
+    "formation": "circle",
+    "equipment": "Мяч, музыка"
+  },
+  "карусель-комплиментов": {
+    "formation": "circle"
+  },
+  "шапка-солнца": {
+    "formation": "circle",
+    "equipment": "Шапка, венок или корона"
+  },
+  "передай-блины": {
+    "equipment": "Поднос или шляпа (вместо блина)"
+  },
+  "дударь": {
+    "formation": "circle-center",
+    "role": "Дударь",
+    "age_min": 3,
+    "age_max": 6
+  },
+  "ворон-иван-петрович": {
+    "age_min": 4
+  },
+  "тетера": {
+    "formation": "chain",
+    "role": "Пара и цепочка участников",
+    "age_min": 5
+  },
+  "сиди-яша": {
+    "formation": "circle-center",
+    "role": "Яша",
+    "age_min": 5
+  },
+  "умер-покойник": {
+    "formation": "circle-center",
+    "equipment": "Лавочка или несколько стульев",
+    "role": "Игрок на лавочке",
+    "age_min": 4
+  },
+  "корзиночки": {
+    "formation": "pairs",
+    "age_min": 4
+  },
+  "ремень": {
+    "formation": "double-circle",
+    "age_min": 6
+  },
+  "жмурки-ванька-и-манька": {
+    "formation": "circle-two",
+    "equipment": "Платки для глаз",
+    "role": "Два водящих",
+    "age_min": 4
+  },
+  "где-квас-варят": {
+    "formation": "circle-outside",
+    "role": "Ведущий за кругом",
+    "age_min": 4
+  },
+  "бояре-мы-к-вам-пришли": {
+    "formation": "lines",
+    "age_min": 6,
+    "players_min": 10,
+    "players_max": 20
+  }
+}
