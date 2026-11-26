@@ -37,6 +37,10 @@ const sections = [
           <a class="home-location" data-online-only hidden href={'https://www.google.com/maps?q='+encodeURIComponent(event.coords)} target="_blank" rel="noopener noreferrer">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg> Место проведения
           </a>
+          {items.length>0 && <a class="home-calendar" href="/event.ics" download="maslyanica.ics">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18m-9 3v5m-2.5-2.5h5"/></svg>
+            Добавить в календарь
+          </a>}
         </div>
       </div>
       <div class="home-hero-art" aria-hidden="true"><img src={heroLogo} alt="" width="112" height="112"/></div>
@@ -54,12 +58,21 @@ const sections = [
       {items.length>0 && <section class="home-program" aria-labelledby="home-program-title" data-home-season="schedule" data-pagefind-ignore hidden>
         <div class="home-section-heading"><h2 id="home-program-title">Программа праздника</h2><span>{dateLabel}</span></div>
         <div class="home-program-body"><ol class="home-timeline">
-          {items.map(item=><li><time>{item.start}</time><div><strong>{item.title}</strong>{item.classes && <a href="/workshops/">Мастер-классы</a>}</div></li>)}
+          {items.map(item=><li><span class="home-time-range"><time>{item.start}</time><time>{item.end}</time></span><div><strong>{item.title}</strong>{item.classes && <a href="/workshops/">Мастер-классы</a>}</div></li>)}
         </ol></div>
       </section>}
     </div>
+    {config.enabled && <section class="home-admission" data-home-season="event" data-pagefind-ignore hidden>
+      <strong>Мероприятие без билетов.</strong>
+      <p>Приветствуется донейшн на блины в коробочку у Бабы Яги. Действо проводится на волонтёрских началах.</p>
+    </section>}
     <section class="home-traditions" aria-labelledby="home-story-title">
   <h2 id="home-story-title">Наша масляница</h2>
+  <div class="home-history-links">
+    <a href="/scenario/#story-history-title">О Маслянице →</a>
+    <a href="/scenario/#why-maslyanica">Почему через «я»? →</a>
+    <a href="https://rslive.ru/masljanica/" data-online-only hidden target="_blank" rel="noopener noreferrer">Страница в «Инструкции по Сербии» ↗</a>
+  </div>
   <p>Сюжет нашей масляницы театрализованный, адаптированный к публике, мало знакомой с традицией.</p>
   <details class="home-story-details">
     <summary>Краткая суть сюжета</summary>

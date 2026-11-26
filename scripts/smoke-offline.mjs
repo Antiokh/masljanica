@@ -329,6 +329,12 @@ try {
   assert.equal(await page.locator('[data-story-line]').count(),49);
   assert.equal(await page.locator('[data-story-music]').count(),3);
   await page.locator('.story-history').waitFor({state:'visible'});
+  await page.locator('.story-history-details summary').click();
+  assert.match(await page.locator('.story-history-content').innerText(),/Сырную неделю/);
+  await page.locator('.story-name-details summary').click();
+  assert.match(await page.locator('.story-name-content').innerText(),/Дубровский/);
+  const calendar=await page.request.get('/event.ics');
+  assert.ok(calendar.ok());assert.match(await calendar.text(),/BEGIN:VEVENT/);
   const firstStory=page.locator('#part-1');
   assert.equal(await firstStory.evaluate(el=>el.open),true);
   const actorButton=firstStory.locator('[data-character-open]').first();

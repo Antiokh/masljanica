@@ -12,6 +12,8 @@ import songs from '../data/songs.json';
 import MarkdownIt from 'markdown-it';
 import {existsSync} from 'node:fs';
 import historySource from '../data/maslyanica-history.md?raw';
+import nameSource from '../data/maslyanica-name.md?raw';
+const nameHistory=nameSource.trim();
 const md=new MarkdownIt({html:false});
 const history=historySource.trim();
 const portraits=characterArchive.files as Record<string,{path:string;width:number;height:number}>;
@@ -34,7 +36,13 @@ const prepared=ordered.map(row=>{const actor=actors.get(row.actor),song=row.song
   <section class="story-history" aria-labelledby="story-history-title">
     <div class="story-history-art" aria-hidden="true"><img src="/media/story-sun.svg" width="64" height="64" alt=""/></div>
     <h2 id="story-history-title">Что такое Масляница?</h2>
-    {history?<details class="story-history-details"><summary>История праздника и народные традиции <GameIcon name="chevron"/></summary><div class="story-history-content" set:html={md.render(history)}/></details>:<p class="story-history-placeholder">История праздника и народные традиции. Текст готовится.</p>}
+    {history?<details class="story-history-details"><summary>История праздника и народные традиции <GameIcon name="chevron"/></summary><div class="story-history-content" set:html={md.render(history)}></div></details>:<p class="story-history-placeholder">История праздника и народные традиции. Текст готовится.</p>}
+  </section>
+  <section class="story-name" id="why-maslyanica" aria-labelledby="story-name-title">
+    <details class="story-name-details">
+      <summary><span id="story-name-title">Почему Масляница через «я»?</span><GameIcon name="chevron"/></summary>
+      <div class="story-name-content" set:html={md.render(nameHistory)}></div>
+    </details>
   </section>
   <section class="story-scenario" aria-labelledby="story-scenario-title">
     <h2 id="story-scenario-title">Наш масляничный сказ</h2>
