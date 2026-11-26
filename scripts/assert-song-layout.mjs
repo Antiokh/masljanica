@@ -22,7 +22,7 @@ export async function assertSongLayout(page) {
           const slider=selected.querySelector('.song-seek'),group=q('.song-variants');
           const panel=document.getElementById('song-player'),next=el.nextElementSibling;
           const css=style(el),body=style(q('.song-body')),summary=style(q('summary'));
-          return {card:rect(el),panel:rect(panel),panelPosition:style(panel).position,group:rect(group),selected:rect(selected),inactive:inactive.map(x=>rect(x)),slider:rect(slider),disc:rect(disc),icon:rect(icon),play:rect(play),heading:rect(heading),next:next?rect(next):null,radius:parseFloat(css.borderTopLeftRadius),border:parseFloat(css.borderTopWidth),bodyBg:body.backgroundColor,summaryBg:summary.backgroundColor,bodyBorder:parseFloat(body.borderTopWidth),color:style(selected).color,background:style(selected).backgroundColor,selectedToken:style(document.documentElement).getPropertyValue('--festival-selected').trim(),audioCount:document.querySelectorAll('audio').length,hiddenAudio:document.querySelector('#song-player-audio')?.hidden};
+          return {card:rect(el),panel:rect(panel),panelPosition:style(panel).position,group:rect(group),selected:rect(selected),inactive:inactive.map(x=>rect(x)),slider:rect(slider),disc:rect(disc),icon:rect(icon),play:rect(play),heading:rect(heading),next:next?rect(next):null,radius:parseFloat(css.borderTopLeftRadius),border:parseFloat(css.borderTopWidth),bodyBg:body.backgroundColor,summaryBg:summary.backgroundColor,bodyBorder:parseFloat(body.borderTopWidth),color:style(selected).color,background:style(selected).backgroundColor,selectedToken:style(document.documentElement).getPropertyValue('--festival-action').trim(),audioCount:document.querySelectorAll('audio').length,hiddenAudio:document.querySelector('#song-player-audio')?.hidden};
         });
         const label=width+'px '+theme;
         assert.equal(metrics.panelPosition,'sticky',label+' sticky top playlist');
@@ -44,9 +44,10 @@ export async function assertSongLayout(page) {
         assert.ok(metrics.slider.w>12,label+' usable seek area');
         assert.ok(Math.abs(center(metrics.slider)[1]-center(metrics.selected)[1])<=6,label+' vertically centered seek');
         assert.ok(metrics.group.right<=metrics.card.right+1 && metrics.group.x>=metrics.card.x-1,label+' no overflow');
-        assert.equal(metrics.selectedToken.toUpperCase(),'#B5232C',label+' approved saturated red token');
+        const expected=theme==='dark'?'rgb(208, 46, 67)':'rgb(196, 61, 50)';
+        assert.equal(metrics.selectedToken.toUpperCase(),theme==='dark'?'#D02E43':'#C43D32',label+' approved theme-specific red token');
         assert.equal(metrics.color,'rgb(255, 255, 255)',label+' white foreground');
-        assert.equal(metrics.background,'rgb(181, 35, 44)',label+' selected red background');
+        assert.equal(metrics.background,expected,label+' selected red background');
       }
     }
   } finally {

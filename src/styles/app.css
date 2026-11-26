@@ -14,11 +14,11 @@
   --sl-color-bg-nav: #1D2B40;
   --sl-color-bg-sidebar: #17243A;
   --sl-color-text: #E2E8F0;
-  --sl-color-text-accent: #F18A76;
-  --sl-color-accent-low: #3B2634;
-  --sl-color-accent: #F18A76;
-  --sl-color-accent-high: #FFD4C8;
-  --festival-action: #C32935;
+  --sl-color-text-accent: #FF5768;
+  --sl-color-accent-low: #382332;
+  --sl-color-accent: #FF5768;
+  --sl-color-accent-high: #FFC0C9;
+  --festival-action: #D02E43;
   --festival-gold: #EBC47B;
   --festival-surface: #1D2B40;
   --festival-hero: #172840;
@@ -39,11 +39,11 @@
   --sl-color-bg-nav: #FFFFFF;
   --sl-color-bg-sidebar: #F2F5F8;
   --sl-color-text: #243344;
-  --sl-color-text-accent: #B5232C;
-  --sl-color-accent-low: #FCE8E8;
-  --sl-color-accent: #B5232C;
-  --sl-color-accent-high: #811922;
-  --festival-action: #B5232C;
+  --sl-color-text-accent: #C43D32;
+  --sl-color-accent-low: #FFF1ED;
+  --sl-color-accent: #C43D32;
+  --sl-color-accent-high: #8D2923;
+  --festival-action: #C43D32;
   --festival-gold: #E9B44C;
   --festival-surface: #F2F5F8;
   --festival-hero: #F0F5F8;
@@ -440,13 +440,13 @@ progress[data-pwa-bar]:indeterminate::-moz-progress-bar, progress#offline-progre
 
 /* Strong, shared action palette. Reserve low accents for hover and secondary surfaces. */
 :root {
-  --festival-selected: #B5232C;
+  --festival-selected: var(--festival-action);
   --festival-selected-text: #FFFFFF;
   --festival-control-border: #546780;
   --festival-control-text: #E2E8F0;
 }
 :root[data-theme='light'] {
-  --festival-selected: #B5232C;
+  --festival-selected: var(--festival-action);
   --festival-selected-text: #FFFFFF;
   --festival-control-border: #B6C4D1;
   --festival-control-text: #243344;

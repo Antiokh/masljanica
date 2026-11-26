@@ -82,6 +82,8 @@ try {
     assert.ok(Math.abs(result.left)<=1&&Math.abs(result.right)<=1&&Math.abs(result.bottom)<=1,'Progress must follow the full outer header bottom edge');
     assert.ok(result.height>0&&result.height<=4,'Progress line must stay thin');
     assert.equal(result.color,result.accent,'Progress uses the resolved theme accent');
+    const theme=await page.evaluate(()=>document.documentElement.dataset.theme);
+    assert.equal(result.accent,theme==='dark'?'rgb(255, 87, 104)':'rgb(196, 61, 50)','Approved accent for resolved theme');
     assert.equal(result.appearance,'none','No OS-native progress styling');
     assert.equal(result.track,'rgba(0, 0, 0, 0)','Header progress track is transparent');
   }
