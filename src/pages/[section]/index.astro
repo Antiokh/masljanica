@@ -5,12 +5,11 @@ import games from '../../data/games.json';
 import characters from '../../data/characters.json';
 import workshops from '../../data/workshops.json';
 import parts from '../../data/parts.json';
-import ditties from '../../data/ditties.json';
 export function getStaticPaths() {
-  return ['songs','games','characters','workshops','scenario','ditties'].map(section=>({params:{section}}));
+  return ['songs','games','characters','workshops','scenario'].map(section=>({params:{section}}));
 }
 const section = Astro.params.section!;
-const titles:Record<string,string>={songs:'Песни',games:'Игры',characters:'Персонажи',workshops:'Мастер-классы',scenario:'Сказ',ditties:'Частушки'};
+const titles:Record<string,string>={songs:'Песни',games:'Игры',characters:'Персонажи',workshops:'Мастер-классы',scenario:'Сказ'};
 type Entry = {slug:string;title:string;subtitle?:string;image?:string;category?:string};
 const sort = (a:Entry,b:Entry)=>a.title.localeCompare(b.title,'ru');
 let entries:Entry[] = [];
@@ -22,11 +21,9 @@ if(section==='scenario') entries=parts.map(x=>({slug:String(x.number),title:x.ti
 const groups=section==='games'?['Исторические','Развлекательные']:[''];
 ---
 <StarlightPage frontmatter={{title:titles[section],template:'splash'}}>
-  {section==='ditties' ? <div>{ditties.map((x,i)=><section><p class="song-lyrics">{x.text}</p>{i<ditties.length-1&&<hr/>}</section>)}</div> : <>
     <div class="catalog-tools"><input id="catalog-search" type="search" placeholder="Поиск…" aria-label="Поиск по разделу"/>{section==='games'&&<select id="catalog-filter" aria-label="Категория"><option value="">Все категории</option>{groups.map(g=><option value={g}>{g}</option>)}</select>}</div>
     <p id="catalog-empty" hidden>Ничего не найдено.</p>
     {groups.map(group=><section class="catalog-group" data-group={group}>{group&&<h2>{group}</h2>}<div class="app-grid">{entries.filter(x=>!group||x.category===group).map(x=><a class="app-card" data-entry data-search={x.title+' '+(x.subtitle||'')} data-category={x.category||''} href={'/'+section+'/'+x.slug+'/'}>{x.image&&<img src={x.image} alt={x.title} loading="lazy"/>}<div><strong>{x.title}</strong>{x.subtitle&&<small>{x.subtitle}</small>}</div></a>)}</div></section>)}
-  </>}
 </StarlightPage>
 <script>
 const search=document.querySelector<HTMLInputElement>('#catalog-search');
