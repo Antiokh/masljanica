@@ -11,6 +11,7 @@ legacy/
 
 # Generated discovery assets (single source: festival sun and src/data)
 /public/og/
+/public/og-square/
 /public/_llms-txt/
 /public/llms*.txt
 /public/robots.txt

@@ -55,7 +55,10 @@ const details=[
 ];
 export const pages=[...sections,...details];
 export const pageFor=path=>pages.find(p=>p.path===canonicalPath(path));
-export const ogPath=path=>path==='/'?'/og/index.png':'/og/'+createHash('sha256').update(canonicalPath(path)).digest('hex').slice(0,20)+'.png';
+export const ogPath=(path,format='landscape')=>{
+ const dir=format==='square'?'/og-square/':'/og/';
+ return dir+(canonicalPath(path)==='/'?'index':createHash('sha256').update(canonicalPath(path)).digest('hex').slice(0,20))+'.png';
+};
 const id=site+'/#website';
 export const website={'@type':'WebSite','@id':id,name:brand,alternateName:['Масленица в Белграде','Masljanica'],url:site+'/',inLanguage:'ru',description:sections[0].description,sameAs:socials.map(s=>s.href)};
 export function structuredData(p){

@@ -1,9 +1,9 @@
 import sharp from 'sharp';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {site,brand,sections,pages,ogPath,url,aiIntro,ogEvent} from '../src/lib/site-content.mjs';
-import {renderOgSvg} from './og-layout.mjs';
+import {renderOgSvg,ogFormats} from './og-layout.mjs';
 const out='public',sun='public/media/maslyanica-sun.webp';
-await mkdir(out+'/og',{recursive:true});await mkdir(out+'/_llms-txt',{recursive:true});
+await mkdir(out+'/og',{recursive:true});await mkdir(out+'/og-square',{recursive:true});await mkdir(out+'/_llms-txt',{recursive:true});
 const png=async(size,inner=size,bg={r:0,g:0,b:0,alpha:0})=>{
  const art=await sharp(sun).resize(inner,inner,{fit:'contain',background:{r:0,g:0,b:0,alpha:0}}).png().toBuffer();
  return sharp({create:{width:size,height:size,channels:4,background:bg}}).composite([{input:art,gravity:'centre'}]).png().toBuffer();
@@ -15,10 +15,12 @@ const sizes=[16,32,48],icons=await Promise.all(sizes.map(s=>png(s)));
 const ico=Buffer.alloc(6+16*sizes.length);ico.writeUInt16LE(1,2);ico.writeUInt16LE(sizes.length,4);let offset=ico.length;
 for(const [i,size] of sizes.entries()){const p=6+i*16;ico[p]=size;ico[p+1]=size;ico.writeUInt16LE(1,p+4);ico.writeUInt16LE(32,p+6);ico.writeUInt32LE(icons[i].length,p+8);ico.writeUInt32LE(offset,p+12);offset+=icons[i].length;}
 await writeFile(out+'/favicon.ico',Buffer.concat([ico,...icons]));
-const art=await png(354,354);
-for(const p of pages){
- const svg=Buffer.from(renderOgSvg(p.title,ogEvent));
- await sharp(svg).composite([{input:art,left:785,top:63}]).png({compressionLevel:9}).toFile(out+ogPath(p.path));
+for(const [format,layout] of Object.entries(ogFormats)){
+ const art=await png(layout.sun.size,layout.sun.size);
+ for(const p of pages){
+  const svg=Buffer.from(renderOgSvg(p.title,ogEvent,p.description,format));
+  await sharp(svg).composite([{input:art,left:layout.sun.x,top:layout.sun.y}]).png({compressionLevel:9}).toFile(out+ogPath(p.path,format));
+ }
 }
 const slug=p=>p.path==='/'?'festival':p.path.split('/').filter(Boolean)[0];
 const fragment=p=>aiIntro+'\n# '+p.title+'\n\nКанонический URL: '+url(p.path)+'\n\n'+p.body+'\n';

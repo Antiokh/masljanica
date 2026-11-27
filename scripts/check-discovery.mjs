@@ -2,9 +2,13 @@ import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import sharp from 'sharp';
 import {pages,site,url,ogPath,ogEvent} from '../src/lib/site-content.mjs';
-import {renderOgSvg} from './og-layout.mjs';
-const sample=renderOgSvg('Сказ',{date:'14 марта 2027',time:'11:30–16:00',location:'Roštilj zona, Ada Ciganlija, Beograd'});
-for(const text of ['14 марта 2027','11:30–16:00','Roštilj zona, Ada Ciganlija, Beograd'])assert.ok(sample.includes(text),'OG event footer: '+text);
+import {renderOgSvg,ogFormats} from './og-layout.mjs';
+for(const [format,layout] of Object.entries(ogFormats)){
+ const sample=renderOgSvg('Сказ',{date:'14 марта 2027',time:'11:30–16:00',location:'Roštilj zona, Ada Ciganlija, Beograd'},'Герои, сценарий праздника и музыкальное сопровождение.',format);
+ for(const text of ['14 марта 2027','11:30–16:00','Roštilj zona','Сказ','Герои, сценарий'])assert.ok(sample.includes(text),'OG content: '+format+' '+text);
+ assert.ok(layout.sun.x+layout.sun.size<=layout.width&&layout.sun.y+layout.sun.size<=layout.height,'Sun fits canvas');
+ assert.ok(!renderOgSvg('Сказ',null,'',format).includes('11:30'),'No expired event');
+}
 assert.ok(!renderOgSvg('Сказ',null).includes('11:30'),'No stale event in timeless preview');
 if(ogEvent){
  const active=renderOgSvg('Сказ',ogEvent);
@@ -21,7 +25,11 @@ for(const p of pages){
  const file=candidates.find(existsSync);assert.ok(file,'Canonical page missing: '+p.path);
  const html=readFileSync(file,'utf8');
  for(const marker of ['og:image','twitter:card','masljanica-schema','rel="canonical"',site+ogPath(p.path)])assert.ok(html.includes(marker),p.path+' missing '+marker);
- const m=await sharp(root+ogPath(p.path)).metadata();assert.equal(m.width,1200);assert.equal(m.height,630);assert.equal(m.format,'png');
+ const images=[...html.matchAll(/<meta\b[^>]*property="og:image"[^>]*content="([^"]+)"/g)].map(m=>m[1]);
+ assert.deepEqual(images,[site+ogPath(p.path),site+ogPath(p.path,'square')],p.path+' ordered OG alternatives');
+ for(const [format,layout] of Object.entries(ogFormats)){
+  const m=await sharp(root+ogPath(p.path,format)).metadata();assert.equal(m.width,layout.width);assert.equal(m.height,layout.height);assert.equal(m.format,'png');
+ }
 }
 for(const [path,size] of [['favicon-96x96.png',96],['apple-touch-icon.png',180],['web-app-manifest-192x192.png',192],['web-app-manifest-512x512.png',512],['maskable-512x512.png',512]]){const m=await sharp(root+'/'+path).metadata();assert.equal(m.width,size);assert.equal(m.height,size);}
 assert.ok(existsSync(root+'/favicon.ico'));

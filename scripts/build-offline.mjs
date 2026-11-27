@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 const root='dist';
 const excluded=new Set(['sw.js','_headers','_redirects','_routes.json','404.html','offline-manifest.json','offline-version.json']);
 function walk(dir){return readdirSync(dir,{withFileTypes:true}).flatMap(x=>x.isDirectory()?walk(join(dir,x.name)):[join(dir,x.name)]);}
-const entries=walk(root).filter(p=>{const path=relative(root,p).split('\\').join('/');return !excluded.has(path)&&!path.startsWith('og/')&&!path.startsWith('_llms-txt/')&&!['llms.txt','llms-small.txt','llms-full.txt','robots.txt'].includes(path)&&!(path.startsWith('sitemap')&&path.endsWith('.xml'));}).sort().map(p=>{
+const entries=walk(root).filter(p=>{const path=relative(root,p).split('\\').join('/');return !excluded.has(path)&&!path.startsWith('og/')&&!path.startsWith('og-square/')&&!path.startsWith('_llms-txt/')&&!['llms.txt','llms-small.txt','llms-full.txt','robots.txt'].includes(path)&&!(path.startsWith('sitemap')&&path.endsWith('.xml'));}).sort().map(p=>{
   const content=readFileSync(p);
   let url='/'+relative(root,p).split('/').map(encodeURIComponent).join('/');
   if(url.endsWith('/index.html'))url=url.slice(0,-10);
