@@ -10,7 +10,7 @@ const setMeta=(key:string,name:string,content:string)=>{
 };
 if(page){
   const image=site+ogPath(page.path),title=page.path==='/'?page.title:page.title+' · '+brand;
-  const titleTag=head.find(t=>t.tag==='title');if(titleTag)titleTag.content=title;
+  const titleTag=head.find(t=>t.tag==='title');if(titleTag)titleTag.content=page.seoTitle||title;
   setMeta('name','description',page.description);
   for(const [key,value] of Object.entries({'og:title':title,'og:description':page.description,'og:url':url(page.path),'og:site_name':brand,'og:type':'website','og:locale':'ru_RU','og:image':image,'og:image:type':'image/png','og:image:width':'1200','og:image:height':'630','og:image:alt':page.title+' — Масляница в Белграде'}))setMeta('property',key,value);
   // Ordered alternatives: landscape first, square second, each with its own dimensions.

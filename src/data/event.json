@@ -1,5 +1,9 @@
 {
   "address": "Roštilj zona, Ada Ciganlija, Beograd",
   "coords": "44.789836,20.405237",
-  "mapUrl": "https://www.google.com/maps/d/u/0/viewer?ll=44.789937681706746%2C20.40512529814756&z=19&mid=1FieSC0jWzlWoK4-wNDwlf8DwNyKWE18"
+  "mapUrl": "https://www.google.com/maps/d/u/0/viewer?ll=44.789937681706746%2C20.40512529814756&z=19&mid=1FieSC0jWzlWoK4-wNDwlf8DwNyKWE18",
+  "city": "Beograd",
+  "country": "Srbija",
+  "countryCode": "RS",
+  "venue": "Roštilj zona, Ada Ciganlija"
 }

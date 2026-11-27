@@ -1,5 +1,6 @@
 import { mkdirSync, writeFileSync, rmSync, readFileSync, existsSync } from 'node:fs';
 import { read } from './validate-data.mjs';
+import {editorialPages,pageFor} from '../src/lib/site-content.mjs';
 const root=new URL('../src/content/docs/generated/',import.meta.url);
 rmSync(root,{recursive:true,force:true});mkdirSync(root,{recursive:true});
 const escape=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
@@ -20,18 +21,25 @@ function media(x){
 }
 function page(section,slug,title,body){
   const dir=new URL(section+'/',root);mkdirSync(dir,{recursive:true});
-  const front='---\ntitle: '+JSON.stringify(title)+'\nslug: '+JSON.stringify(section+'/'+slug)+'\ntemplate: splash\n---\n\n';
+  const meta=pageFor('/'+section+'/'+slug+'/');
+  const front='---\ntitle: '+JSON.stringify(title)+'\nslug: '+JSON.stringify(section+'/'+slug)+'\ndescription: '+JSON.stringify(meta?.description||title)+'\ntemplate: splash\n---\n\n';
   writeFileSync(new URL(encodeURIComponent(slug)+'.md',dir),front+'[← К списку](/'+section+'/)\n\n'+body+'\n');
 }
 const songs=read('songs'),games=read('games'),actors=read('characters');
 for(const x of songs)page('songs',x.slug,x.title,media(x)+'<div class="song-lyrics">'+escape(x.lyrics)+'</div>');
 for(const x of games)page('games',x.slug,x.title,escape(x.audience)+'\n\n'+media(x)+x.description);
-for(const x of read('workshops'))page('workshops',x.slug,x.title,(x.host?'Ведущий: '+escape(x.host)+'\n\n':'')+'<div class="scenario-text">'+escape(x.description)+'</div>');
+for(const x of read('workshops'))page('workshops',x.slug,x.title,(x.enabled?'В программе.':'Пока не подтверждено (участие уточняется).')+'\n\n'+(x.host?'Ведущий: '+escape(x.host)+'\n\n':'')+'<div class="scenario-text">'+escape(x.description)+'</div>');
 for(const p of read('parts')) {
  const body=read('scenario').filter(x=>x.part===p.number).map(x=>{
  const actor=actors.find(a=>a.id===x.actor),song=songs.find(s=>s.id===x.song);
  return '<p class="scenario-role">'+escape(actor?.title)+'</p>\n\n<div class="scenario-text">'+escape(x.text)+'</div>\n\n'+(song?'[♫ '+song.title+'](/songs/#'+song.slug+')\n\n':'')+'---\n\n';
  }).join('');
  page('scenario',String(p.number),p.title,body);
+}
+for(const p of editorialPages){
+ const segments=p.path.split('/').filter(Boolean).map(decodeURIComponent);
+ if(segments.length===2){page(segments[0],segments[1],p.title,p.body);continue;}
+ const front='---\ntitle: '+JSON.stringify(p.title)+'\nslug: '+JSON.stringify(segments.join('/'))+'\ndescription: '+JSON.stringify(p.description)+'\ntemplate: splash\n---\n\n';
+ writeFileSync(new URL(segments[0]+'.md',root),front+'[← На главную](/)\n\n'+p.body+'\n');
 }
 console.log('Generated public content pages.');

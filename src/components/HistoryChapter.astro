@@ -24,6 +24,7 @@ const pictures=(chapter.images||[]).map((id:string)=>{const img=media.find(x=>x.
     {musical.map(item=><StoryMusic {...item}/>)}
     {playful.length>0 && <div class="history-links"><span>Попробуйте на нашем празднике</span>{playful.map(game=><a class="history-game-link" href={'/games/#'+game.slug}>{game.title} →</a>)}</div>}
     {(chapter.links||[]).map((link:{href:string;title:string})=><a class="history-related" href={link.href}>{link.title} →</a>)}
+    <p><a href={'/history/'+chapter.id+'/'}>Читать отдельную статью →</a> · <a href="/sources/">Источники</a></p>
     <small class="history-source">По источникам: {chapter.source}.</small>
   </div>
 </section>

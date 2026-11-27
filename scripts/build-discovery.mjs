@@ -1,6 +1,6 @@
 import sharp from 'sharp';
 import {mkdir,writeFile} from 'node:fs/promises';
-import {site,brand,sections,pages,ogPath,url,aiIntro,ogEvent} from '../src/lib/site-content.mjs';
+import {site,brand,sections,pages,ogPath,url,aiIntro,ogEvent,editorialPages,festivalData,knowledgeGraph} from '../src/lib/site-content.mjs';
 import {renderOgSvg,ogFormats} from './og-layout.mjs';
 const out='public',sun='public/media/maslyanica-sun.webp';
 await mkdir(out+'/og',{recursive:true});await mkdir(out+'/og-square',{recursive:true});await mkdir(out+'/_llms-txt',{recursive:true});
@@ -28,6 +28,8 @@ for(const p of sections)await writeFile(out+'/_llms-txt/'+slug(p)+'.txt',fragmen
 const index=aiIntro+'\n## Разделы\n\n'+sections.map(p=>'- ['+p.title+']('+url(p.path)+'): '+p.description+' ([текст]('+site+'/_llms-txt/'+slug(p)+'.txt))').join('\n')+'\n\n## Дополнительные материалы\n\n- [Полный текст]('+site+'/llms-full.txt)\n- [Краткий текст]('+site+'/llms-small.txt)\n- [Sitemap]('+site+'/sitemap-index.xml)\n';
 await writeFile(out+'/llms.txt',index,'utf8');
 await writeFile(out+'/llms-small.txt',index+'\n## Афиша и традиции\n\n'+sections[0].body+'\n','utf8');
-await writeFile(out+'/llms-full.txt',aiIntro+'\n'+sections.map(p=>'# '+p.title+'\n\nКанонический URL: '+url(p.path)+'\n\n'+p.body).join('\n\n---\n\n')+'\n','utf8');
+await writeFile(out+'/llms-full.txt',aiIntro+'\n'+[...sections,...editorialPages.filter(p=>!sections.includes(p))].map(p=>'# '+p.title+'\n\nКанонический URL: '+url(p.path)+'\n\n'+p.body).join('\n\n---\n\n')+'\n','utf8');
+await writeFile(out+'/festival.json',JSON.stringify(festivalData,null,2),'utf8');
+await writeFile(out+'/knowledge.jsonld',JSON.stringify(knowledgeGraph()),'utf8');
 await writeFile(out+'/robots.txt','User-agent: *\nAllow: /\nSitemap: '+site+'/sitemap-index.xml\n','utf8');
 console.log('Discovery assets generated: '+pages.length+' social images, icons, AI text exports.');

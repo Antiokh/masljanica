@@ -102,6 +102,7 @@ const duration=(seconds:number)=>Math.floor(seconds/60)+':'+String(Math.floor(se
                 </div>
               )}
               {song.lyrics && <div class="song-lyrics">{song.lyrics}</div>}
+              <p><a href={'/songs/'+song.slug+'/'}>Открыть отдельную страницу песни</a></p>
               {video && <div class="song-video" data-online-only data-external-embed data-embed-src={video.embed||undefined} data-embed-mode="manual" hidden>
                 <h3>Видео</h3>
                 {video.embed && <button class="offline-delete song-video-load" type="button" data-embed-load>Смотреть видео</button>}

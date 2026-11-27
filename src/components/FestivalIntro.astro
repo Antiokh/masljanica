@@ -19,7 +19,7 @@ const nameHistory=nameSource.trim();
   <section class="story-name" id="why-maslyanica" aria-labelledby="story-name-title">
     <details class="story-name-details">
       <summary><span id="story-name-title">Почему Масляница через «я»?</span><GameIcon name="chevron"/></summary>
-      <div class="story-name-content" set:html={md.render(nameHistory)}></div>
+      <div class="story-name-content"><div set:html={md.render(nameHistory)}></div><p><a href="/history/name/">Отдельная статья о написании →</a></p></div>
     </details>
   </section>
   <slot/>

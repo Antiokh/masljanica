@@ -12,6 +12,9 @@ import schedule from '../data/schedule.json';
 import { calendarEvent, googleCalendarUrl } from '../lib/event-calendar.mjs';
 import HomeProgramme from '../components/HomeProgramme.astro';
 import FestivalIntro from '../components/FestivalIntro.astro';
+import plotSource from '../data/festival-plot.md?raw';
+import MarkdownIt from 'markdown-it';
+const plotHtml=new MarkdownIt({html:false}).render(plotSource);
 import GameIcon from '../components/GameIcon.astro';
 import WorkshopPreview from '../components/WorkshopPreview.astro';
 import songs from '../data/songs.json';
@@ -110,18 +113,14 @@ const sections = [
           <summary><span id="home-story-title">Наша масляница</span><GameIcon name="chevron"/></summary>
           <div class="story-name-content">
             <figure class="home-story-figure"><img src={storyArt} alt="Персонажи нашей Масляницы" width="1536" height="1024" loading="lazy" decoding="async"/></figure>
-            <p>Сюжет нашей масляницы театрализованный, адаптированный к публике, мало знакомой с традицией.</p>
-            <h3>Краткая суть сюжета</h3>
-    <p>Во время празднования Масляницы весёлый Скоморох устраивает шумное представление, чем тревожит Бабу Ягу. Разгневанная Яга угрожает проклятиями, если гости не знают традиций праздника. Скоморох вместе со зрителями разгадывает её загадку, заслуживая благосклонность колдуньи. Однако за свою дерзость он получает наказание – развлекать народ песнями и играми.</p>
-    <p>Веселье продолжается, но Масляница так и не появляется. Скоморох обращается за ответом к Бабе Яге, и та вызывает духов Масляницы, Зимы и Весны. Выясняется, что Зима заточила Масляницу, ведь только она может привести Весну.</p>
-    <p>Освободить её можно лишь сожжением чучела, а из его пепла Весна должна испечь блины, чтобы окончательно сменить Зиму.</p>
-    <p>Скоморох собирает дружину, получая помощь от Бабы Яги, лесных духов, а также от Весны, которая приводит птиц и зверей. Зима старается помешать, устраивая испытания – игры на ловкость и силу. Победители получают ленты, дающие силу против Зимы.</p>
-    <a href="/scenario/">Читать полный сказ →</a>
+            <div set:html={plotHtml}></div>
+            <a href="/scenario/">Читать полный сказ →</a>
           </div>
         </details>
       </section>
     </FestivalIntro>
     <WorkshopPreview />
+    <div class="home-credit"><a href="/faq/">Вопросы о фестивале</a> · <a href="/sources/">Источники</a> · <a href="/glossary/">Словарь традиций</a></div>
     <footer class="home-credit">Разработано <a href="https://t.me/antiokh" target="_blank" rel="noopener noreferrer">Антон Назаров</a></footer>
   </div>
 </StarlightPage>
