@@ -138,7 +138,9 @@ try {
     }
     await detail.locator('summary').click();
   }
-  const dittyTexts=JSON.parse(readFileSync(new URL('../src/data/ditties.json',import.meta.url),'utf8')).map(x=>x.text);
+  const ownDitties=JSON.parse(readFileSync(new URL('../src/data/ditties.json',import.meta.url),'utf8')).map(x=>x.text);
+  const folkDitties=JSON.parse(readFileSync(new URL('../src/data/ditties-folk.json',import.meta.url),'utf8')).items;
+  const dittyTexts=[...ownDitties,...folkDitties.map(x=>x.text)];
   const dittyLink=page.locator('.home-sections .home-section-heading .home-ditties-link');
   assert.equal(await dittyLink.innerText(),'…частушки?');
   assert.equal(await page.locator('.app-nav a[href="/ditties/"]').count(),0,'Ditties are an easter egg, not a main navigation item');
@@ -146,6 +148,16 @@ try {
   await dittyLink.click();
   await page.waitForURL('**/ditties/');
   assert.deepEqual(await page.locator('.ditty-card p').allTextContents(),dittyTexts,'Preserve original verses and line breaks');
+  assert.equal(await page.locator('.ditty-card .ditty-credit a').count(),folkDitties.length,'Every sourced ditty retains a source');
+  for(const [category,expected] of [['own',ownDitties],['folk',folkDitties.filter(x=>x.category==='folk').map(x=>x.text)],['bawdy',folkDitties.filter(x=>x.category==='bawdy').map(x=>x.text)]]){
+    await page.locator('[data-ditty-filter][data-value="'+category+'"]').click();
+    assert.deepEqual(await page.locator('.ditty-card:not([hidden]) .ditty-text').allTextContents(),expected);
+  }
+  await page.locator('[data-ditty-filter][data-value=""]').click();
+  await page.locator('#catalog-search').fill('неизвестнаячастушка');
+  await page.locator('#catalog-empty').waitFor({state:'visible'});
+  await page.locator('#catalog-search').fill('');
+  assert.equal(await page.locator('.ditty-card:not([hidden])').count(),dittyTexts.length);
   const dittiesManifest=await (await page.request.get('/offline-manifest.json')).json();
   assert.ok(dittiesManifest.entries.some(e=>e.url==='/ditties/'),'Ditties belong to the offline pack');
   await page.locator('.app-nav a[href="/"]').click();
