@@ -2,7 +2,7 @@
 // Astro owns document swaps. This guard is an interception mechanism, not a route stack.
 const KEY='__masljanicaTelegramBackGuard';
 const PEERS=new Set(['/','/songs/','/games/']);
-const SECTIONS=new Set(['songs','games','scenario','workshops','ditties','pancakes','history','offline']);
+const SECTIONS=new Set(['songs','games','scenario','workshops','ditties','pancakes','history']);
 export function normalizedRoute(path){
   const parts=String(path||'/').split('/').filter(Boolean);
   return parts.length?'/'+parts.join('/')+'/':'/';

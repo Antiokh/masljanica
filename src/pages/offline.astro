@@ -1,17 +1,4 @@
 ---
-import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+// Compatibility for existing bookmarks; controls now live in the shared status popover.
+return Astro.redirect('/', 301);
 ---
-<StarlightPage frontmatter={{title:'Офлайн',template:'splash'}}>
-  <p>Скачайте полную копию праздника заранее: страницы, поиск, тексты, игры, расписание, сценарий и все локальные аудиозаписи.</p>
-  <p>При обновлении скачиваются только изменённые файлы. Предыдущая рабочая копия сохраняется до завершения загрузки. Незавершённая загрузка продолжится при повторной попытке той же версии. YouTube и внешние иллюстрации требуют интернета.</p>
-  <label class="offline-preference"><input id="offline-auto" type="checkbox" disabled/> Автоматически скачивать и обновлять офлайн-копию</label>
-  <p class="muted">Выключение автоматического обновления сохраняет уже скачанные материалы. Удаление — отдельное действие.</p>
-  <p id="offline-status" role="status">Проверка локальной копии…</p>
-  <p id="offline-size" class="muted"></p>
-  <section class="telegram-runtime-diagnostics" aria-label="Диагностика Telegram Mini App"><h2>Telegram Mini App</h2><p class="muted">Клиент Telegram может ограничивать сохранение данных или запуск без сети. Полная копия ускоряет работу, если WebView её сохранил.</p><dl><dt>Среда запуска</dt><dd data-runtime-value="environment">—</dd><dt>Telegram SDK</dt><dd data-runtime-value="bridge">—</dd><dt>Режим темы</dt><dd data-runtime-value="themeMode">—</dd><dt>Тема Telegram</dt><dd data-runtime-value="telegramTheme">—</dd><dt>Источник темы</dt><dd data-runtime-value="themeSource">—</dd><dt>Применённая тема</dt><dd data-runtime-value="appliedTheme">—</dd><dt>Палитра</dt><dd data-runtime-value="palette">—</dd><dt>Фон Telegram</dt><dd data-runtime-value="background">—</dd><dt>Service Worker</dt><dd data-runtime-value="sw">—</dd><dt>Cache Storage</dt><dd data-runtime-value="cache">—</dd><dt>После предыдущего запуска</dt><dd data-runtime-value="retention">—</dd></dl></section>
-  <progress id="offline-progress" value="0" max="1" hidden></progress>
-  <div class="offline-actions">
-    <button class="app-button" id="offline-update" disabled>Скачать для офлайна</button>
-    <button class="offline-delete" id="offline-delete" disabled>Удалить копию</button>
-  </div>
-</StarlightPage>

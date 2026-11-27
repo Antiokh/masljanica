@@ -32,7 +32,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
    if(!controller||controller===warmedController||!navigator.onLine||navigator.connection?.saveData||/^(slow-2g|2g)$/.test(navigator.connection?.effectiveType||''))return;
    warmedController=controller;
    const run=async()=>{
-     const routes=['/','/songs/','/games/','/scenario/','/workshops/','/pancakes/','/history/','/offline/'];
+     const routes=['/','/songs/','/games/','/scenario/','/workshops/','/pancakes/','/history/'];
      for(const path of routes){
        if(!navigator.onLine||sw.controller!==controller)return;
        if(location.pathname===path)continue;
@@ -108,24 +108,17 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  document.addEventListener('click',e=>{const button=e.target instanceof Element?e.target.closest('[data-game-filter],[data-ditty-filter]'):null;if(!button)return;for(const item of button.parentElement.querySelectorAll('[data-game-filter],[data-ditty-filter]'))item.setAttribute('aria-pressed',String(item===button));refreshCatalog();});
  document.addEventListener('play',e=>{if(e.target instanceof HTMLAudioElement)document.querySelectorAll('audio').forEach(a=>{if(a!==e.target)a.pause();});},true);
  function render(){
-   const label=document.querySelector('#offline-status'),size=document.querySelector('#offline-size'),button=document.querySelector('#offline-update'),remove=document.querySelector('#offline-delete'),bar=document.querySelector('#offline-progress');
    const busy=!!state.progress,deleting=!!state.deleting,stale=state.ready&&latest&&latest.version!==state.version;
-   const notice=document.querySelector('#pwa-storage-notice'),prompt=document.querySelector('#pwa-offer'),message=document.querySelector('#pwa-offer-message'),action=document.querySelector('#pwa-offer-action'),auto=document.querySelector('#offline-auto'),indicator=document.querySelector('#offline-indicator');
+   const notice=document.querySelector('#pwa-storage-notice'),prompt=document.querySelector('#pwa-offer'),message=document.querySelector('#pwa-offer-message'),action=document.querySelector('#pwa-offer-action');
    if(notice)notice.hidden=accepted()||!sw;
-   if(auto){auto.checked=automatic();auto.disabled=!accepted()||!verified||deleting;}
    if(prompt)prompt.hidden=!accepted()||!offer||busy||deleting;
    if(message&&offer)message.textContent=offer==='install'?'Установите Масляницу на устройство.':(offer==='offline-download'?'Скачайте материалы праздника':'Доступна новая версия материалов')+(latest?' · '+fmt(latest.bytes):'')+'.';
    if(action&&offer)action.textContent=offer==='install'?'Установить':offer==='offline-download'?'Скачать':'Обновить';
-   presentation.render({online:navigator.onLine,standalone:standalone(),launchLabel:environment.launchLabel(),readiness,ready:state.ready,stale:!!stale,busy,deleting,checking,progress:state.progress,automatic:automatic(),canChange:accepted()&&verified&&!deleting,canDelete:verified&&!busy&&!deleting&&(state.ready||state.staging),canDownload:accepted()&&verified&&!busy&&!deleting&&!checking&&navigator.onLine,error});
+   presentation.render({online:navigator.onLine,standalone:standalone(),launchLabel:environment.launchLabel(),readiness,ready:state.ready,stale:!!stale,busy,deleting,checking,progress:state.progress,automatic:automatic(),canChange:accepted()&&verified&&!deleting,canDelete:verified&&!busy&&!deleting&&(state.ready||state.staging),canDownload:accepted()&&verified&&!busy&&!deleting&&!checking&&navigator.onLine,error:error||(registrationFailed?'Не удалось запустить Service Worker.':!sw?'Офлайн-режим не поддерживается.':'')});
 
    environment.observeCopy({verified,ready:state.ready,version:state.version});
    document.documentElement.dataset.offlineReady=String(state.ready);
    document.documentElement.dataset.offlineReadiness=readiness;
-   if(label)label.textContent=error||(!sw?'Офлайн-режим не поддерживается.':registrationFailed?'Не удалось запустить Service Worker.':!sw.controller?'Подключение Service Worker…':busy?'Загрузка: '+state.progress.done+' из '+(state.progress.total||'…')+' файлов':state.ready?(stale?'Доступно обновление. Старая копия сохранена.':'Офлайн-копия готова.'):'Полная копия ещё не скачана.');
-   if(size)size.textContent=latest?'Размер полной копии: '+fmt(latest.bytes):state.ready?'Сохранено: '+fmt(state.bytes):'';
-   if(button){button.disabled=!accepted()||!verified||!sw?.controller||busy||deleting||checking||!navigator.onLine;button.textContent=state.ready?(stale?'Обновить копию':'Проверить и обновить'):'Скачать для офлайна';}
-   if(remove){remove.disabled=busy||deleting||!(state.ready||state.staging)||!verified;}
-   if(bar){bar.hidden=!busy;if(busy){bar.max=state.progress.total||1;bar.value=state.progress.done||0;}}
  }
  async function checkVersion(force=false){
    if(!accepted()||checking||!navigator.onLine||(!force&&Date.now()-lastCheck<60000))return;
@@ -135,9 +128,9 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  document.addEventListener('click',e=>{
    const target=e.target instanceof Element?e.target:null;
    const menu=document.querySelector('.more-menu');if(menu?.open&&target&&!menu.contains(target)&&!target.closest('#festival-pwa-menu'))menu.open=false;
-   if(target?.closest('#offline-update,[data-pwa-download]')&&accepted())startDownload();
+   if(target?.closest('[data-pwa-download]')&&accepted())startDownload();
    if(target?.closest('[data-pwa-auto]')&&accepted()&&verified){set(PREF,automatic()?'disabled':'enabled');autoAttempt=null;error='';resolveOffer();checkVersion(true);render();}
-   if(target?.closest('#offline-delete,[data-pwa-delete]')&&verified&&!state.progress&&!state.deleting&&confirm('Удалить офлайн-данные?')){error='';set(PREF,'disabled');autoAttempt=null;state.deleting=true;send('OFFLINE_DELETE');render();}
+   if(target?.closest('[data-pwa-delete]')&&verified&&!state.progress&&!state.deleting&&confirm('Удалить офлайн-данные?')){error='';set(PREF,'disabled');autoAttempt=null;state.deleting=true;send('OFFLINE_DELETE');render();}
    if(target?.closest('#pwa-storage-accept')){set(KEYS.storageNoticeAck,'1');resolveOffer();checkVersion(true);render();}
    if(target?.closest('#pwa-offer-dismiss')){offer=null;render();}
    if(target?.closest('#pwa-offer-action')){
@@ -160,11 +153,6 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
    noteStandalone();if(!verified)send('OFFLINE_STATUS');resolveOffer();render();warmNavigation();
  }
  document.addEventListener('astro:page-load',pageLoad);
- document.addEventListener('change',e=>{
-   if(e.target?.id==='offline-auto'&&accepted()){
-     set(PREF,e.target.checked?'enabled':'disabled');autoAttempt=null;error='';resolveOffer();checkVersion(true);render();
-   }
- });
  window.addEventListener('online',()=>{autoAttempt=null;error='';render();checkVersion(true);warmNavigation();});
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){send('OFFLINE_STATUS');checkVersion();}});
  window.addEventListener('offline',render);

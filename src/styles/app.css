@@ -361,7 +361,7 @@ progress[data-pwa-bar]:indeterminate::-moz-progress-bar, progress#offline-progre
 @keyframes pwa-progress-indeterminate { from { background-position:100% 0,0 0; } to { background-position:-100% 0,0 0; } }
 @media(prefers-reduced-motion:reduce) { progress[data-pwa-bar]:indeterminate, progress#offline-progress:indeterminate { animation:none; background-position:50% 0,0 0; } }
 .pwa-menu-progress progress { margin-top:.3rem; }
-.pwa-menu-footer { display:flex; align-items:center; justify-content:space-between; gap:.5rem; margin-top:.65rem; padding-top:.55rem; border-top:1px solid var(--sl-color-gray-5); }
+.pwa-menu-footer { display:flex; align-items:center; justify-content:flex-end; gap:.5rem; margin-top:.65rem; padding-top:.55rem; border-top:1px solid var(--sl-color-gray-5); }
 .pwa-menu-footer a,.pwa-text-action { color:var(--sl-color-text-accent); font:inherit; }
 .pwa-text-action { background:none; border:0; padding:.15rem 0; cursor:pointer; }
 .pwa-menu-error { color:var(--sl-color-text-accent); overflow-wrap:anywhere; font-size:.75rem; margin:.5rem 0 0; }
@@ -685,7 +685,10 @@ html.festival-search-open { overflow:hidden; }
 
 /* Telegram-only presentation: preserve header DOM, bottom navigation, popover and dialog. */
 .telegram-menu-tools,.telegram-runtime-diagnostics { display:none; }
-html[data-runtime-environment="telegram"] .telegram-runtime-diagnostics { display:grid; gap:.45rem; margin-block:1rem; padding:.8rem; border:1px solid var(--sl-color-gray-5); border-radius:.65rem; }
+html[data-runtime-environment="telegram"] .telegram-runtime-diagnostics { display:block; margin:.65rem 0 0; padding:.5rem 0 0; border-top:1px solid var(--sl-color-gray-5); }
+.telegram-runtime-diagnostics summary{cursor:pointer;color:var(--sl-color-gray-3);font-size:.75rem}
+.telegram-runtime-diagnostics[open] p{margin:.5rem 0!important}
+.telegram-runtime-diagnostics[open] dl{font-size:.72rem}
 .telegram-runtime-diagnostics h2,.telegram-runtime-diagnostics p { margin:0; }
 .telegram-runtime-diagnostics dl { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.3fr); gap:.35rem .65rem; font-size:.85rem; margin:0; }
 .telegram-runtime-diagnostics dd { margin:0; text-align:right; overflow-wrap:anywhere; }
@@ -883,7 +886,8 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
   .home-dashboard>.home-workshops{grid-area:workshops}
   .home-dashboard>.home-credit{grid-area:credit}
   .home-dashboard #home-title{font-size:clamp(1.65rem,2.5vw,2.5rem)}
-  .home-dashboard .home-section-grid,.home-dashboard .home-workshop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .home-dashboard .home-section-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .home-dashboard .home-workshop-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
   .home-dashboard .home-section-card{min-height:3.75rem}
   .home-dashboard .home-workshop-card{min-height:4rem}
   .song-list.catalog-group,.game-list,.recipe-group{

@@ -9,7 +9,7 @@ const links = [
   {href:'/songs/',title:'Песни',icon:'M9 18V5l12-2v13M9 18a3 3 0 1 1-3-3h3m12 1a3 3 0 1 1-3-3h3'},
   {href:'/games/',title:'Игры',icon:'M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4z M7.5 7.5h.01M16.5 7.5h.01M12 12h.01M7.5 16.5h.01M16.5 16.5h.01'}
 ];
-const more = [{href:'/scenario/',title:'Сказ'},{href:'/workshops/',title:'Мастера'},{href:'/pancakes/',title:'Блины'},{href:'/history/',title:'История'},{href:'/offline/',title:'Офлайн'}];
+const more = [{href:'/scenario/',title:'Сказ'},{href:'/workshops/',title:'Мастера'},{href:'/pancakes/',title:'Блины'},{href:'/history/',title:'История'}];
 const active = (href:string) => href==='/'?path==='/':path.startsWith(href);
 const moreActive = more.some(link=>active(link.href));
 ---
@@ -38,7 +38,7 @@ const moreActive = more.some(link=>active(link.href));
 <div class="pwa-nav-progress" data-pwa-nav-progress hidden><progress max="100" value="0" data-pwa-bar aria-label="Прогресс офлайн-загрузки"></progress></div>
 
 <div class="pwa-notice" id="pwa-storage-notice" hidden role="region" aria-label="Локальное хранилище">
-  <p>Приложение использует локальное хранилище для темы и офлайн-материалов. Полную копию можно скачать и удалить в разделе «Офлайн».</p>
+  <p>Приложение использует локальное хранилище для темы и офлайн-материалов. Полную копию можно скачать и удалить в меню состояния приложения (значок солнца или «Офлайн-копия» в меню «Ещё»).</p>
   <button class="app-button" id="pwa-storage-accept">Понятно</button>
 </div>
 <div class="pwa-notice" id="pwa-offer" hidden role="region" aria-label="Приложение">

@@ -128,6 +128,8 @@ try {
       return {desktop,stack:ordered.slice(1).every((r,i)=>r.top>=ordered[i].bottom-1),widths:ordered.every(r=>Math.abs(r.width-ordered[0].width)<2),iconGap:mapRow.top-root.querySelector('.home-calendar').getBoundingClientRect().bottom,sunWidth:sun.width,aligned:Math.abs(icon.left-map.left)<2};
     });
     assert.ok(width>=960?layout.desktop:layout.stack&&layout.widths,'Home layout follows approved composition at '+width);
+    const workshopColumns=await page.locator('.home-workshop-grid').evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(/\s+/).length);
+    assert.equal(workshopColumns,width>=960?4:2,'Workshop preview columns at '+width);
     assert.ok(layout.iconGap>=-1&&layout.iconGap<=8,'Compact date/location spacing at '+width);
     assert.ok(layout.sunWidth>=63,'Larger sun at '+width);
     assert.ok(layout.aligned,'Aligned calendar and location at '+width);
@@ -555,11 +557,10 @@ try {
   await page.locator('#story-audio').evaluate(a=>a.currentTime=Math.max(0,a.duration-.15));
   await page.waitForFunction(()=>document.querySelector('#story-audio')?.ended);
   assert.equal(await page.locator('#story-audio').getAttribute('src'),beforeEnd,'Cues must not auto-advance');
-  await page.locator('.more-menu summary').click();
-  await page.locator('.more-links a[href="/offline/"]').click();
-  await page.waitForURL('**/offline/');
-  await page.locator('#offline-update:not([disabled])').waitFor();
-  await page.locator('#offline-update').click();
+  assert.equal(await page.locator('.more-links a[href="/offline/"],#festival-pwa-menu a[href="/offline/"]').count(),0,'No standalone offline section');
+  await page.locator('.festival-brand-icon').click();
+  await page.locator('#festival-pwa-menu [data-pwa-download]:not([disabled])').waitFor({state:'visible'});
+  await page.locator('#festival-pwa-menu [data-pwa-download]').click();
   await page.waitForFunction(()=>document.documentElement.dataset.offlineReady==='true',{},{timeout:180000});
   const audio=await page.evaluate(async()=>{
     const data=await (await fetch('/offline-manifest.json')).json();
@@ -568,8 +569,11 @@ try {
   assert.ok(audio,'Local audio must be present in the offline pack');
   await context.setOffline(true);
   await page.reload();
-  await page.locator('#offline-status').waitFor();
   await page.waitForFunction(()=>document.documentElement.dataset.offlineReady==='true');
+  await page.locator('.festival-brand-icon').click();
+  await page.locator('#festival-pwa-menu').waitFor({state:'visible'});
+  assert.equal(await page.locator('#festival-pwa-menu [data-pwa-value="copy"]').innerText(),'Готова');
+  await page.keyboard.press('Escape');
   await assertGlobalSearch();
   await page.locator('.app-nav a[href="/songs/"]').click();
   await page.waitForURL('**/songs/');
@@ -694,8 +698,9 @@ try {
     await tg.waitForURL('**/songs/');
     await tg.waitForFunction(()=>document.documentElement.dataset.runtimeEnvironment==='telegram'&&document.documentElement.dataset.theme==='light');
     await tg.locator('.more-menu > summary').click();
-    await tg.locator('.more-links a[href="/offline/"]').click();
-    await tg.waitForURL('**/offline/');
+    assert.equal(await tg.locator('.more-links a[href="/offline/"]').count(),0);
+    await tg.locator('.pwa-mobile-status [data-pwa-menu-trigger]').click();
+    await tg.locator('.telegram-runtime-diagnostics summary').click();
     await tg.locator('.telegram-runtime-diagnostics').waitFor({state:'visible'});
     assert.match(await tg.locator('[data-runtime-value="environment"]').innerText(),/Telegram Mini App/);
     assert.equal(await tg.locator('[data-runtime-value="themeMode"]').innerText(),'auto');
@@ -706,7 +711,9 @@ try {
     assert.equal(await tg.evaluate(()=>window.__tgReady),1,'One bridge lifecycle across SPA');
     await tg.waitForFunction(()=>window.__tgBackVisible);
     await tg.evaluate(()=>window.__tgBack());
-    await tg.waitForURL('**/songs/');
+    await tg.locator('#festival-pwa-menu').waitFor({state:'hidden'});
+    assert.equal(new URL(tg.url()).pathname,'/songs/','Back closes status without navigating');
+    await tg.evaluate(()=>{if(document.querySelector('.more-menu')?.open)window.__tgBack();});
     await tg.waitForFunction(()=>!window.__tgBackVisible);
     await tg.locator('.app-nav a[href="/games/"]').click();
     await tg.waitForURL('**/games/');
