@@ -1,3 +1,4 @@
+import { installCalendarMenu } from './calendar-menu.mjs';
 import { installStoryBook } from './story-book.mjs';
 import { installWorkshopGallery } from './workshop-gallery.mjs';
 import { installGameList } from './game-list.mjs';
@@ -19,6 +20,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  installStoryBook();
  installExternalEmbeds();
  installHomeSeason();
+ installCalendarMenu();
  installCharacterDialogs();
  installFestivalSearch();
  const sw=environment.serviceWorker;

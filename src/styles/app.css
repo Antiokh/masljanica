@@ -776,3 +776,15 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 .home-admission strong{color:var(--sl-color-text-accent)}
 .home-admission p{font-size:.86rem;margin:.3rem 0 0!important}
 .home-history-links{display:flex;flex-wrap:wrap;gap:.35rem .9rem;margin:0 0 .2rem!important}
+
+/* Calendar provider selection stays in the hero flow (no clipping/popover overflow). */
+.home-calendar-menu{width:fit-content;max-width:100%;border:0;background:transparent;padding:0!important;margin:0!important}
+.home-calendar-menu summary{list-style:none;cursor:pointer}
+.home-calendar-menu summary::-webkit-details-marker,.home-calendar-menu summary::before{display:none}
+.home-calendar-menu[open] .calendar-chevron{transform:rotate(180deg)}
+.home-calendar-providers{display:grid;gap:.2rem;margin:.35rem 0 0!important;padding:.25rem;border:1px solid var(--festival-control-border);border-radius:.6rem;background:var(--sl-color-bg);max-width:100%}
+.home-calendar-providers a{display:flex;align-items:center;gap:.55rem;padding:.45rem .5rem;border-radius:.4rem;color:var(--sl-color-text);font-size:.82rem;line-height:1.25;text-decoration:none;margin:0!important}
+.home-calendar-providers a:hover,.home-calendar-providers a:focus-visible{background:var(--festival-surface)}
+.home-calendar-providers svg{width:1.2rem;height:1.2rem;color:var(--sl-color-text-accent);flex:none}
+.home-calendar-providers a span{display:grid;gap:.15rem;min-width:0}
+.home-calendar-providers small{font-size:.69rem;color:var(--sl-color-gray-3)}

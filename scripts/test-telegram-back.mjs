@@ -13,6 +13,7 @@ assert.equal(isAppRoute('/workshops/example/'),true);
 assert.equal(resolveBackAction({search:true,character:true,popover:true,menu:true,path:'/games/x/'}),'search');
 assert.equal(resolveBackAction({character:true,popover:true,menu:true,path:'/games/x/'}),'character');
 assert.equal(resolveBackAction({popover:true,menu:true,path:'/games/x/'}),'popover');
+assert.equal(resolveBackAction({calendar:true,menu:true,path:'/'}),'calendar');
 assert.equal(resolveBackAction({menu:true,path:'/games/x/'}),'menu');
 assert.equal(resolveBackAction({path:'/games/x/'}),'route');
 assert.equal(resolveBackAction({path:'/songs/'}),null);

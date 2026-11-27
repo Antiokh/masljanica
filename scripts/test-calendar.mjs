@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {asUTC,calendarEvent,googleCalendarUrl} from '../src/lib/event-calendar.mjs';
+import {openCalendarLink} from '../public/calendar-menu.mjs';
+const config={date:'2027-03-14',timezone:'Europe/Belgrade'};
+const event=calendarEvent(config,{address:'Roštilj zona, Ada Ciganlija, Beograd'},[{start:'12:00',end:'16:00'},{start:'11:30',end:'12:00'}]);
+assert.equal(event.start,'20270314T103000Z');assert.equal(event.end,'20270314T150000Z');
+assert.equal(asUTC('2027-07-14','11:30','Europe/Belgrade'),'20270714T093000Z');
+assert.equal(event.uid,'maslyanica-2027-03-14@masljanica.pages.dev');
+const google=new URL(googleCalendarUrl(event));
+assert.equal(google.origin,'https://calendar.google.com');assert.equal(google.searchParams.get('action'),'TEMPLATE');
+assert.equal(google.searchParams.get('dates'),event.start+'/'+event.end);assert.equal(google.searchParams.get('location'),event.location);
+const opened=[];const win={Telegram:{WebApp:{openLink:url=>opened.push(url)}}};
+assert.equal(openCalendarLink(win,'https://masljanica.pages.dev/event.ics'),true);
+assert.equal(openCalendarLink(win,google.href),true);assert.equal(opened.length,2);
+assert.equal(openCalendarLink({},google.href),false);
+assert.equal(openCalendarLink({Telegram:{WebApp:{openLink(){throw Error('bridge unavailable')}}}},google.href),false);
+console.log('Calendar providers, UTC/DST, stable UID and Telegram routing passed.');
