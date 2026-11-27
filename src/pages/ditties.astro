@@ -5,9 +5,9 @@ import ditties from '../data/ditties.json';
 import folklore from '../data/ditties-folk.json';
 const sources=folklore.sources as Record<string,{title:string;collection:string;short:string;url:string}>;
 const own=ditties.map(item=>({...item,category:'own',credit:'Антон Назаров · Белград'}));
-const folk=folklore.items.map(item=>({...item,credit:sources[item.source].short,source:sources[item.source]}));
+const folk=folklore.items.map(item=>({...item,credit:[item.author||'Автор неизвестен',item.performer?'исп. '+item.performer:'',sources[item.source].short].filter(Boolean).join(' · '),source:sources[item.source]}));
 const items=[...own,...folk];
-const filters=[{id:'',label:'Все'},{id:'own',label:'Наши'},{id:'folk',label:'Народные'},{id:'bawdy',label:'Заветные'}];
+const filters=[{id:'',label:'Все'},{id:'own',label:'Наши'},{id:'folk',label:'Народные'},{id:'bawdy',label:'Заветные'},{id:'political',label:'Политические'}];
 ---
 <StarlightPage frontmatter={{title:'Частушки',template:'splash',description:'Авторские и народные частушки, с указанием источников.'}}>
   <div class="ditties-page">
@@ -23,7 +23,7 @@ const filters=[{id:'',label:'Все'},{id:'own',label:'Наши'},{id:'folk',lab
     </div>
     <details class="ditty-sources">
       <summary>О сборниках и источниках</summary>
-      <p>Народные тексты приводятся по фольклорным подборкам. Номера относятся к соответствующим страницам Рунатеки; даты отдельных записей из заветных подборок не установлены.</p>
+      <p>Народные тексты приводятся по фольклорным подборкам. Номера относятся к соответствующим публикациям. Автор, исполнитель и собиратель — разные роли. Даты отдельных записей из собрания Волкова не установлены.</p>
       {Object.values(sources).map(source=><div class="ditty-source"><strong>{source.title}</strong><p>{source.collection}</p><a href={source.url} data-online-only hidden target="_blank" rel="noopener noreferrer">Открыть источник ↗</a></div>)}
     </details>
   </div>

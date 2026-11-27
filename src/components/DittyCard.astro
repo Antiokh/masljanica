@@ -1,7 +1,7 @@
 ---
 const {item}=Astro.props;
 ---
-<article class="ditty-card" data-entry data-category={item.category} data-search={[item.text,item.credit,item.source?.title,item.source?.collection].filter(Boolean).join(' ')}>
+<article class="ditty-card" data-entry data-category={item.category} data-political={item.political?'true':undefined} data-search={[item.text,item.credit,item.source?.title,item.source?.collection].filter(Boolean).join(' ')}>
   <p class="ditty-text">{item.text}</p>
   <footer class="ditty-credit">
     <span>{item.credit}{item.number?' · № '+item.number:''}</span>

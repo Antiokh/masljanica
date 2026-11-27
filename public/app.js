@@ -95,7 +95,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
    const audience=document.querySelector('[data-game-filter="audience"][aria-pressed="true"]')?.dataset.value;
    let count=0;
    document.querySelectorAll('[data-entry]').forEach(el=>{
-     el.hidden=!(el.dataset.search||'').toLocaleLowerCase('ru').includes(search.value.trim().toLocaleLowerCase('ru'))||!!(filter?.value&&el.dataset.category!==filter.value)||!!(category&&el.dataset.category!==category)||!!(audience&&el.dataset.audience!==audience);
+     el.hidden=!(el.dataset.search||'').toLocaleLowerCase('ru').includes(search.value.trim().toLocaleLowerCase('ru'))||!!(filter?.value&&el.dataset.category!==filter.value)||!!(category&&(category==='political'?el.dataset.political!=='true':el.dataset.category!==category))||!!(audience&&el.dataset.audience!==audience);
      if(!el.hidden)count++;
    });
    document.querySelectorAll('.catalog-group').forEach(g=>g.hidden=!g.querySelector('[data-entry]:not([hidden])'));

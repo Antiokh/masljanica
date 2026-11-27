@@ -138,7 +138,8 @@ try {
     }
     await detail.locator('summary').click();
   }
-  const ownDitties=JSON.parse(readFileSync(new URL('../src/data/ditties.json',import.meta.url),'utf8')).map(x=>x.text);
+  const ownDittyItems=JSON.parse(readFileSync(new URL('../src/data/ditties.json',import.meta.url),'utf8'));
+  const ownDitties=ownDittyItems.map(x=>x.text);
   const folkDitties=JSON.parse(readFileSync(new URL('../src/data/ditties-folk.json',import.meta.url),'utf8')).items;
   const dittyTexts=[...ownDitties,...folkDitties.map(x=>x.text)];
   const dittyLink=page.locator('.home-sections .home-section-heading .home-ditties-link');
@@ -149,7 +150,7 @@ try {
   await page.waitForURL('**/ditties/');
   assert.deepEqual(await page.locator('.ditty-card p').allTextContents(),dittyTexts,'Preserve original verses and line breaks');
   assert.equal(await page.locator('.ditty-card .ditty-credit a').count(),folkDitties.length,'Every sourced ditty retains a source');
-  for(const [category,expected] of [['own',ownDitties],['folk',folkDitties.filter(x=>x.category==='folk').map(x=>x.text)],['bawdy',folkDitties.filter(x=>x.category==='bawdy').map(x=>x.text)]]){
+  for(const [category,expected] of [['own',ownDitties],['folk',folkDitties.filter(x=>x.category==='folk').map(x=>x.text)],['bawdy',folkDitties.filter(x=>x.category==='bawdy').map(x=>x.text)],['political',[...ownDittyItems,...folkDitties].filter(x=>x.political).map(x=>x.text)]]){
     await page.locator('[data-ditty-filter][data-value="'+category+'"]').click();
     assert.deepEqual(await page.locator('.ditty-card:not([hidden]) .ditty-text').allTextContents(),expected);
   }
