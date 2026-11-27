@@ -1,7 +1,16 @@
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import sharp from 'sharp';
-import {pages,site,url,ogPath} from '../src/lib/site-content.mjs';
+import {pages,site,url,ogPath,ogEvent} from '../src/lib/site-content.mjs';
+import {renderOgSvg} from './og-layout.mjs';
+const sample=renderOgSvg('Сказ',{date:'14 марта 2027',time:'11:30–16:00',location:'Roštilj zona, Ada Ciganlija, Beograd'});
+for(const text of ['14 марта 2027','11:30–16:00','Roštilj zona, Ada Ciganlija, Beograd'])assert.ok(sample.includes(text),'OG event footer: '+text);
+assert.ok(!renderOgSvg('Сказ',null).includes('11:30'),'No stale event in timeless preview');
+if(ogEvent){
+ const active=renderOgSvg('Сказ',ogEvent);
+ assert.ok(active.includes(ogEvent.date),'OG uses current event date');
+ if(ogEvent.time)assert.ok(active.includes(ogEvent.time),'OG uses current schedule');
+}
 const root='dist';
 const escape=s=>s.replaceAll('&','&amp;').replaceAll('<','&lt;');
 const sitemap='<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+pages.map(p=>'<url><loc>'+escape(url(p.path))+'</loc></url>').join('')+'</urlset>';

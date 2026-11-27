@@ -21,6 +21,12 @@ const period=config.enabled&&config.schedule&&schedule.length?{start:schedule[0]
 const dateLabel=new Intl.DateTimeFormat('ru-RU',{dateStyle:'long',timeZone:'UTC'}).format(new Date(config.date+'T00:00:00Z'));
 const nowDay=new Intl.DateTimeFormat('sv-SE',{timeZone:config.timezone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 export const upcoming=config.enabled&&config.date>=nowDay;
+// Use the same event configuration for every social preview. No expired announcement.
+export const ogEvent=upcoming?{
+ date:dateLabel.replace(/\s*г\.$/u,''),
+ time:period?period.start+'–'+period.end:'',
+ location:event.address
+}:null;
 const eventDescription=config.enabled?'Дата фестиваля: '+dateLabel+(period?', '+period.start+'–'+period.end+' ('+config.timezone+')':'')+'. Место: '+event.address+'. Вход свободный, приветствуется донейшн на блины.': 'Дата ближайшего фестиваля не объявлена.';
 const scheduleText=config.enabled&&config.schedule?['## Программа на '+dateLabel,...schedule.map(x=>'- '+x.start+'–'+x.end+' — '+x.title+(x.games?' · '+link('Игры',url('/games/')):'')+(x.classes?' · '+link('Мастер-классы',url('/workshops/')):''))].join('\n'):'';
 const media=x=>[...(x.audio||[]).map((u,i)=>audio[u]?.path?link('Аудиозапись '+(i+1),site+audio[u].path):''),x.video?link('Видео (внешний источник)',x.video):''].filter(Boolean).join(' · ');
