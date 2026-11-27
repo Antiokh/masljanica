@@ -777,10 +777,12 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 /* Compact event card: artwork only in the title row; facts span the full card. */
 .home-dashboard .home-hero{display:block}
 .home-dashboard .home-hero-copy{width:100%}
-.home-dashboard .home-hero-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:.65rem;margin:0!important}
-.home-dashboard .home-hero-title{min-width:0;margin:0!important}
-.home-dashboard .home-hero-art{width:clamp(4rem,13vw,6.25rem);margin:0!important;align-self:start;justify-self:end}
-.home-dashboard .home-hero-art img{display:block;width:100%;height:auto;margin:0!important}
+.home-dashboard .home-hero-heading{display:block;margin:0!important}
+.home-dashboard .home-hero-copy{--home-sun-size:clamp(4rem,13vw,6.25rem)}
+.home-dashboard .home-hero-title{min-width:0;margin:0!important;padding-inline-end:calc(var(--home-sun-size) + .65rem)}
+.home-dashboard .home-hero-copy>.home-intro{padding-inline-end:calc(var(--home-sun-size) + .65rem)}
+.home-dashboard .home-hero-art{position:absolute;inset-block-start:0;inset-inline-end:0;width:var(--home-sun-size);max-height:100%;margin:0!important;pointer-events:none}
+.home-dashboard .home-hero-art img{display:block;width:100%;height:100%;max-height:100%;object-fit:contain;object-position:top right;margin:0!important}
 .home-dashboard .home-event-meta{display:grid;gap:.15rem;margin:.25rem 0 0!important}
 .home-dashboard .home-event-group{min-width:0;margin:0!important}
 .home-dashboard .home-event-group>*{margin:0!important}
@@ -896,6 +898,9 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
   .home-dashboard .home-admission{grid-area:admission}
   .home-dashboard .home-sections{grid-area:sections}
   .home-dashboard .home-program{grid-area:program}
+  /* The hero already supplies the date; keep the accessible section name. */
+  .home-dashboard .home-program>.home-section-heading{display:none}
+  .home-dashboard .home-hero-copy{--home-sun-size:clamp(4rem,8vw,6.25rem)}
   .home-dashboard>.festival-intro{grid-area:intro}
   .home-dashboard>.home-workshops{grid-area:workshops}
   .home-dashboard>.home-credit{grid-area:credit}

@@ -91,11 +91,11 @@ const sections = [
       </section>
     </div>
     <div class="home-column home-column-right">
+    <HomeProgramme items={items} eventEnd={eventEnd} dateLabel={dateLabel}/>
     {config.enabled && <section class="home-admission" data-home-season="event" data-pagefind-ignore hidden>
       <strong>Мероприятие без билетов.</strong>
       <p>Приветствуется донейшн на <a href="/pancakes/">блины</a> в коробочку у <a href="/scenario/#character-баба-яга">Бабы Яги</a>. Действо проводится на волонтёрских началах.</p>
     </section>}
-    <HomeProgramme items={items} eventEnd={eventEnd} dateLabel={dateLabel}/>
     </div>
     <FestivalIntro home={true}>
       <section class="story-name home-plot" aria-labelledby="home-story-title">

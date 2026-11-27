@@ -125,7 +125,7 @@ try {
       const icon=root.querySelector('.home-calendar .home-event-icon').getBoundingClientRect(),map=root.querySelector('.home-location .home-event-icon').getBoundingClientRect(),mapRow=root.querySelector('.home-location').getBoundingClientRect(),sun=root.querySelector('.home-hero-art').getBoundingClientRect();
       const [hero,intro,program,admission,sections,workshops]=ordered;
       const fullWidth=root.getBoundingClientRect().width;
-      const desktop=Math.abs(hero.top-admission.top)<2&&hero.right<admission.left&&Math.abs(hero.width-admission.width)<2&&Math.abs(hero.left-sections.left)<2&&Math.abs(admission.left-program.left)<2&&sections.top-hero.bottom>=0&&sections.top-hero.bottom<=24&&program.top-admission.bottom>=0&&program.top-admission.bottom<=24&&intro.top>=Math.max(sections.bottom,program.bottom)-1&&Math.abs(intro.width-fullWidth)<2&&workshops.top>=intro.bottom-1&&Math.abs(workshops.width-fullWidth)<2;
+      const desktop=Math.abs(hero.top-program.top)<2&&hero.right<program.left&&Math.abs(hero.width-program.width)<2&&Math.abs(hero.left-sections.left)<2&&Math.abs(admission.left-program.left)<2&&sections.top-hero.bottom>=0&&sections.top-hero.bottom<=24&&admission.top-program.bottom>=0&&admission.top-program.bottom<=24&&intro.top>=Math.max(sections.bottom,admission.bottom)-1&&Math.abs(intro.width-fullWidth)<2&&workshops.top>=intro.bottom-1&&Math.abs(workshops.width-fullWidth)<2;
       return {desktop,stack:ordered.slice(1).every((r,i)=>r.top>=ordered[i].bottom-1),widths:ordered.every(r=>Math.abs(r.width-ordered[0].width)<2),iconGap:mapRow.top-root.querySelector('.home-calendar').getBoundingClientRect().bottom,sunWidth:sun.width,aligned:Math.abs(icon.left-map.left)<2};
     });
     assert.ok(width>=960?layout.desktop:layout.stack&&layout.widths,'Home layout follows approved composition at '+width);
@@ -133,6 +133,16 @@ try {
     assert.equal(workshopColumns,width>=960?4:2,'Workshop preview columns at '+width);
     assert.ok(layout.iconGap>=-1&&layout.iconGap<=8,'Compact date/location spacing at '+width);
     assert.ok(layout.sunWidth>=63,'Larger sun at '+width);
+    assert.equal(await page.locator('.home-program>.home-section-heading').isVisible(),width<960,'Programme heading only on mobile');
+    assert.ok(await page.locator('.home-hero').evaluate(el=>{
+      const sun=el.querySelector('.home-hero-art');
+      const before=el.getBoundingClientRect().height;
+      const original=sun.style.display;
+      sun.style.display='none';
+      const after=el.getBoundingClientRect().height;
+      sun.style.display=original;
+      return getComputedStyle(sun).position==='absolute'&&Math.abs(before-after)<1;
+    }),'Sun must not contribute to hero height');
     assert.ok(layout.aligned,'Aligned calendar and location at '+width);
     const cards=await page.locator('.home-section-card').evaluateAll(els=>els.map(el=>{
       const icon=el.querySelector('svg').getBoundingClientRect(),content=el.querySelector('div').getBoundingClientRect(),card=el.getBoundingClientRect();
@@ -143,7 +153,7 @@ try {
   await page.setViewportSize({width:1440,height:900});
   const introDisclosure=page.locator('.festival-intro details').first();
   const top=selector=>page.locator(selector).evaluate(el=>el.getBoundingClientRect().top);
-  const sectionsBefore=await top('.home-sections'),programBefore=await top('.home-program'),workshopsBefore=await top('.home-workshops');
+  const sectionsBefore=await top('.home-sections'),programBefore=await top('.home-program'),admissionBefore=await top('.home-admission'),workshopsBefore=await top('.home-workshops');
   await introDisclosure.evaluate(el=>el.open=true);
   assert.ok(Math.abs(await top('.home-sections')-sectionsBefore)<2,'Expanding information leaves dashboard unchanged');
   assert.ok(Math.abs(await top('.home-program')-programBefore)<2,'Expanding information leaves programme unchanged');
@@ -151,6 +161,7 @@ try {
   await introDisclosure.evaluate(el=>el.open=false);
   await page.locator('.home-calendar-menu').evaluate(el=>el.open=true);
   assert.ok(Math.abs(await top('.home-program')-programBefore)<2,'Expanding calendar leaves programme position unchanged');
+  assert.ok(Math.abs(await top('.home-admission')-admissionBefore)<2,'Expanding calendar leaves admission position unchanged');
   assert.ok(await top('.home-sections')>sectionsBefore,'Materials follow the expanded hero');
   await page.locator('.home-calendar-menu').evaluate(el=>el.open=false);
   await home.evaluate(el=>{el.dataset.scheduleEnabled='false';window.dispatchEvent(new Event('pageshow'));});
