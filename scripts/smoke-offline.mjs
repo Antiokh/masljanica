@@ -124,7 +124,8 @@ try {
       const ordered=['.home-hero','.festival-intro','.home-program','.home-admission','.home-sections','.home-workshops'].map(s=>root.querySelector(s).getBoundingClientRect());
       const icon=root.querySelector('.home-calendar .home-event-icon').getBoundingClientRect(),map=root.querySelector('.home-location .home-event-icon').getBoundingClientRect(),mapRow=root.querySelector('.home-location').getBoundingClientRect(),sun=root.querySelector('.home-hero-art').getBoundingClientRect();
       const [hero,intro,program,admission,sections,workshops]=ordered;
-      const desktop=Math.abs(hero.top-program.top)<2&&hero.right<program.left&&Math.abs(hero.width-program.width)<2&&Math.abs(hero.left-admission.left)<2&&admission.top>=hero.bottom-1&&Math.abs(intro.top-sections.top)<2&&intro.right<sections.left&&intro.top>=Math.max(admission.bottom,program.bottom)-1&&workshops.top>=Math.max(intro.bottom,sections.bottom)-1&&Math.abs(workshops.width-root.getBoundingClientRect().width)<2;
+      const leftGap=admission.top-hero.bottom,rightGap=program.top-intro.bottom,sectionsGap=sections.top-admission.bottom;
+      const desktop=Math.abs(hero.top-intro.top)<2&&hero.right<intro.left&&Math.abs(hero.width-intro.width)<2&&Math.abs(hero.left-admission.left)<2&&Math.abs(hero.left-sections.left)<2&&Math.abs(intro.left-program.left)<2&&leftGap>=0&&leftGap<=24&&rightGap>=0&&rightGap<=24&&sectionsGap>=0&&sectionsGap<=24&&workshops.top>=Math.max(sections.bottom,program.bottom)-1&&Math.abs(workshops.width-root.getBoundingClientRect().width)<2;
       return {desktop,stack:ordered.slice(1).every((r,i)=>r.top>=ordered[i].bottom-1),widths:ordered.every(r=>Math.abs(r.width-ordered[0].width)<2),iconGap:mapRow.top-root.querySelector('.home-calendar').getBoundingClientRect().bottom,sunWidth:sun.width,aligned:Math.abs(icon.left-map.left)<2};
     });
     assert.ok(width>=960?layout.desktop:layout.stack&&layout.widths,'Home layout follows approved composition at '+width);
@@ -139,6 +140,22 @@ try {
     }));
     assert.ok(cards.every(c=>c.left&&c.center&&c.contained&&c.height<=105),'Compact horizontal home cards at '+width);
   }
+  await page.setViewportSize({width:1440,height:900});
+  const introDisclosure=page.locator('.festival-intro details').first();
+  const leftPosition=()=>page.locator('.home-sections').evaluate(el=>el.getBoundingClientRect().top);
+  const programmePosition=()=>page.locator('.home-program').evaluate(el=>el.getBoundingClientRect().top);
+  const leftBefore=await leftPosition(),programBefore=await programmePosition();
+  await introDisclosure.evaluate(el=>el.open=true);
+  assert.ok(Math.abs(await leftPosition()-leftBefore)<2,'Expanding information does not move left column');
+  assert.ok(await programmePosition()>programBefore,'Programme follows expanded information');
+  await introDisclosure.evaluate(el=>el.open=false);
+  const programTop=await programmePosition();
+  await page.locator('.home-calendar-menu').evaluate(el=>el.open=true);
+  assert.ok(Math.abs(await programmePosition()-programTop)<2,'Expanding calendar does not move programme');
+  await page.locator('.home-calendar-menu').evaluate(el=>el.open=false);
+  await page.locator('.home-program').evaluate(el=>el.hidden=true);
+  assert.ok(Math.abs(await leftPosition()-leftBefore)<2,'Hiding programme does not shift left column');
+  await page.locator('.home-program').evaluate(el=>el.hidden=false);
   assert.equal(await page.locator('.festival-intro details').count(),3);
   for(const [selector,pattern] of [['.story-history-details',/Сырную неделю/],['.story-name-details:not(.home-story-details)',/Дубровский/],['.home-story-details',/Краткая суть сюжета/]]){
     const detail=page.locator('.festival-intro '+selector);
