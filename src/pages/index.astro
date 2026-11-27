@@ -1,5 +1,7 @@
 ---
 import { existsSync } from 'node:fs';
+const storyArt='/media/all-characters.webp';
+const hasStoryArt=existsSync(process.cwd()+'/public'+storyArt);
 const heroLogo = existsSync(process.cwd()+'/public/media/maslenitsa-sun.webp') ? '/media/maslenitsa-sun.webp' : '/icon.svg';
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { frontmatter } from '../data/home.md';
@@ -77,6 +79,7 @@ const sections = [
         <details class="story-name-details home-story-details">
           <summary><span id="home-story-title">Наша масляница</span><GameIcon name="chevron"/></summary>
           <div class="story-name-content">
+            {hasStoryArt && <figure class="home-story-figure"><img src={storyArt} alt="Персонажи нашей Масляницы" width="1536" height="1024" loading="lazy" decoding="async"/></figure>}
             <p>Сюжет нашей масляницы театрализованный, адаптированный к публике, мало знакомой с традицией.</p>
             <h3>Краткая суть сюжета</h3>
     <p>Во время празднования Масляницы весёлый Скоморох устраивает шумное представление, чем тревожит Бабу Ягу. Разгневанная Яга угрожает проклятиями, если гости не знают традиций праздника. Скоморох вместе со зрителями разгадывает её загадку, заслуживая благосклонность колдуньи. Однако за свою дерзость он получает наказание – развлекать народ песнями и играми.</p>

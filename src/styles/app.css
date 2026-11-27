@@ -822,3 +822,7 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 .home-dashboard .home-time-range{line-height:1.35}
 .home-timeline .home-timeline-end strong{color:var(--sl-color-gray-3);font-weight:500}
 .home-timeline .home-timeline-end>div::before{background:var(--sl-color-gray-3)}
+
+/* Ensemble illustration inside the home plot, in its original proportions. */
+.home-story-figure{margin:0 0 .85rem!important;min-width:0}
+.home-story-figure img{display:block;width:100%;height:auto;border-radius:.7rem;margin:0!important}

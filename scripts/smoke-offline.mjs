@@ -105,6 +105,17 @@ try {
     const detail=page.locator('.festival-intro '+selector);
     await detail.locator('summary').click();
     assert.match(await detail.innerText(),pattern);
+    if(selector==='.home-story-details'){
+      const manifest=await (await page.request.get('/offline-manifest.json')).json();
+      const asset=manifest.entries.find(e=>e.url==='/media/all-characters.webp');
+      const figure=detail.locator('.home-story-figure');
+      assert.equal(await figure.count(),asset?1:0,'Ensemble illustration matches the local offline asset');
+      if(asset){
+        assert.ok(await figure.evaluate(el=>el===el.parentElement.firstElementChild),'Illustration precedes plot text');
+        const image=figure.locator('img');await image.evaluate(el=>el.decode());
+        assert.equal(await image.evaluate(el=>el.naturalWidth/el.naturalHeight),1.5,'Uncropped original proportions');
+      }
+    }
     await detail.locator('summary').click();
   }
   const previews=page.locator('.home-workshop-card');
