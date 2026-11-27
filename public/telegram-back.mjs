@@ -20,11 +20,12 @@ export function parentRoute(path,lastPeer='/'){
   if(parts.length>1)return '/'+parts.slice(0,-1).join('/')+'/';
   return isPeerRoute(lastPeer)?normalizedRoute(lastPeer):'/';
 }
-export function resolveBackAction({search=false,character=false,popover=false,calendar=false,menu=false,path='/',lastPeer='/'}={}){
+export function resolveBackAction({search=false,character=false,popover=false,calendar=false,toc=false,menu=false,path='/',lastPeer='/'}={}){
   if(search)return 'search';
   if(character)return 'character';
   if(popover)return 'popover';
   if(calendar)return 'calendar';
+  if(toc)return 'toc';
   if(menu)return 'menu';
   return parentRoute(path,lastPeer)?'route':null;
 }
@@ -38,7 +39,7 @@ export function setupTelegramBackNavigation(win,webApp){
   const popover=()=>{try{return q('#festival-pwa-menu:popover-open');}catch{return null;}};
   const route=()=>normalizedRoute(win.location.pathname);
   function state(){
-    return {search:!!q('#festival-search-dialog[open]'),character:!!q('dialog[data-character-dialog][open]'),popover:!!popover(),calendar:!!q('[data-calendar-menu][open]'),menu:!!q('.more-menu[open]'),path:route(),lastPeer};
+    return {search:!!q('#festival-search-dialog[open]'),character:!!q('dialog[data-character-dialog][open]'),popover:!!popover(),calendar:!!q('[data-calendar-menu][open]'),toc:!!q('#starlight__mobile-toc[open]'),menu:!!q('.more-menu[open]'),path:route(),lastPeer};
   }
   function syncNative(){
     if(!native?.show||!native?.hide)return;
@@ -86,6 +87,7 @@ export function setupTelegramBackNavigation(win,webApp){
         break;
       }
       case 'calendar': {const menu=q('[data-calendar-menu][open]');if(menu){menu.open=false;menu.querySelector('summary')?.focus({preventScroll:true});}break;}
+      case 'toc': {const toc=q('#starlight__mobile-toc[open]');if(toc){toc.open=false;toc.querySelector('summary')?.focus({preventScroll:true});}break;}
       case 'menu': {const menu=q('.more-menu[open]');if(menu){menu.open=false;menu.querySelector('summary')?.focus({preventScroll:true});}break;}
       case 'route': return navigateParent();
       default:return false;

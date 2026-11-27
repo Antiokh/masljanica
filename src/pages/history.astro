@@ -2,21 +2,25 @@
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import HistoryChapter from '../components/HistoryChapter.astro';
 import chapters from '../data/history-chapters.json';
+const headings=[...chapters.map(chapter=>({depth:2,slug:chapter.id,text:chapter.title})),{depth:2,slug:'sources',text:'Источники'}];
 ---
-<StarlightPage frontmatter={{title:'История',template:'splash',description:'Масляница в старинных книгах, фотографиях, песнях и играх.'}}>
+<StarlightPage hasSidebar={false} headings={headings} frontmatter={{title:'История',template:'doc',tableOfContents:{minHeadingLevel:2,maxHeadingLevel:2},description:'Масляница в старинных книгах, фотографиях, песнях и играх.'}}>
   <div class="history-book story-book" data-story-book>
     <p class="history-lead">Как встречали и провожали Масляницу? Листаем старинные книги, слушаем песни, смотрим на народные гулянья и знакомимся с обычаями.</p>
-    <nav class="history-toc" aria-label="Главы">{chapters.map((chapter,i)=><a href={'#'+chapter.id}>{i+1}. {chapter.title}</a>)}</nav>
     <audio id="story-audio" hidden preload="none"></audio>
     {chapters.map((chapter,i)=><HistoryChapter chapter={chapter} number={i+1}/>)}
-    <section class="history-bibliography"><h2>Источники</h2><p>Н. Дубровский. «Масляница». Москва, типография С. Селивановского, 1870.</p><p>И. Н. Божерянов. «Как праздновал и празднует народ русский Рождество Христово, Новый год, Крещение и Масляницу». Издание М. Ледерле и Ко, 1894.</p><p>«Лучшие московские блины, или Практические наставления, как печь блины и оладьи». Москва, типография Александра Семена, 1854.</p><p>Словарь В. И. Даля, статья «Масло». Современные аудиозаписи и игры — материалы нашего фестиваля.</p></section>
+    <section class="history-bibliography"><h2 id="sources">Источники</h2><p>Н. Дубровский. «Масляница». Москва, типография С. Селивановского, 1870.</p><p>И. Н. Божерянов. «Как праздновал и празднует народ русский Рождество Христово, Новый год, Крещение и Масляницу». Издание М. Ледерле и Ко, 1894.</p><p>«Лучшие московские блины, или Практические наставления, как печь блины и оладьи». Москва, типография Александра Семена, 1854.</p><p>Словарь В. И. Даля, статья «Масло». Современные аудиозаписи и игры — материалы нашего фестиваля.</p></section>
   </div>
 </StarlightPage>
 <style>
-.history-book{display:grid;gap:.7rem;min-width:0}.history-lead{margin:0!important;color:var(--sl-color-gray-2)}.history-toc{display:flex;flex-wrap:wrap;gap:.35rem;margin:0!important}.history-toc a{font-size:.77rem;color:var(--sl-color-text-accent);border:1px solid var(--sl-color-gray-5);border-radius:.5rem;padding:.35rem .5rem;margin:0!important;text-decoration:none}.history-bibliography{font-size:.82rem;color:var(--sl-color-gray-3);padding:.5rem 0}.history-bibliography h2{font-size:1.1rem;color:var(--sl-color-text)}.history-bibliography p{margin:.35rem 0!important}
+.history-book{display:grid;gap:.7rem;min-width:0}.history-lead{margin:0!important;color:var(--sl-color-gray-2)}.history-bibliography{font-size:.82rem;color:var(--sl-color-gray-3);padding:.5rem 0}.history-bibliography h2{font-size:1.1rem;color:var(--sl-color-text)}.history-bibliography p{margin:.35rem 0!important}
 </style>
 <script>
-function openChapter(){let id;try{id=decodeURIComponent(location.hash.slice(1));}catch{return;}const el=document.getElementById(id);if(el?.matches('.history-chapter')){(el as HTMLDetailsElement).open=true;requestAnimationFrame(()=>el.scrollIntoView({block:'start'}));}}
+function chapterHeading(hash:string){try{const el=document.getElementById(decodeURIComponent(hash.slice(1)));return el?.closest('.history-chapter')?el:null;}catch{return null;}}
+function openChapter(){if(!document.querySelector('.history-book'))return;const el=chapterHeading(location.hash);if(el){(el.closest('.history-chapter') as HTMLDetailsElement).open=true;requestAnimationFrame(()=>el.scrollIntoView({block:'start'}));}}
+// Open before the native fragment jump, including repeated selection of the same hash.
+document.addEventListener('click',event=>{const link=(event.target as Element)?.closest?.('mobile-starlight-toc a[href^="#"], starlight-toc a[href^="#"]');if(!link||!document.querySelector('.history-book'))return;const el=chapterHeading((link as HTMLAnchorElement).hash);if(el)(el.closest('.history-chapter') as HTMLDetailsElement).open=true;},true);
 document.addEventListener('astro:page-load',openChapter);
 window.addEventListener('hashchange',openChapter);
+openChapter();
 </script>

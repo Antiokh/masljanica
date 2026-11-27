@@ -17,8 +17,8 @@ const musical=(chapter.songs||[]).map((slug:string)=>{
 const playful=(chapter.games||[]).map((slug:string)=>{const game=games.find(x=>x.slug===slug);if(!game)throw Error('Unknown history game '+slug);return game;});
 const pictures=(chapter.images||[]).map((id:string)=>{const img=media.find(x=>x.id===id);if(!img)throw Error('Unknown history image '+id);return img;});
 ---
-<details class="history-chapter story-part" id={chapter.id} open={number===1}>
-  <summary><span class="story-part-number">{number}</span><strong>{chapter.title}</strong><GameIcon name="chevron" class="story-chevron"/></summary>
+<details class="history-chapter story-part" open={number===1}>
+  <summary><span class="story-part-number">{number}</span><h2 id={chapter.id} class="history-chapter-title">{chapter.title}</h2><GameIcon name="chevron" class="story-chevron"/></summary>
   <div class="history-chapter-body">
     {chapter.paragraphs.map((paragraph:string)=><p>{paragraph}</p>)}
     {pictures.map(item=><HistoryFigure item={item}/>)}
@@ -29,6 +29,6 @@ const pictures=(chapter.images||[]).map((id:string)=>{const img=media.find(x=>x.
   </div>
 </details>
 <style>
-.history-chapter{scroll-margin-top:5rem;margin:0!important}
+.history-chapter{scroll-margin-top:0;margin:0!important}.history-chapter-title{font-size:inherit!important;line-height:1.35;font-weight:650;margin:0!important;scroll-margin-top:0}
 .history-chapter-body{display:grid;gap:.75rem;padding:.25rem .85rem 1rem;min-width:0}.history-chapter-body p{margin:0!important;line-height:1.65}.history-chapter-body :global(.story-music){margin:0!important}.history-links{display:flex;flex-wrap:wrap;gap:.4rem;margin:0!important}.history-links span{flex-basis:100%;font-size:.8rem;font-weight:600;color:var(--sl-color-gray-3)}.history-links a,.history-related{color:var(--sl-color-text-accent);font-size:.85rem;overflow-wrap:anywhere;margin:0!important}.history-links a{padding:.35rem .5rem;border:1px solid var(--sl-color-gray-5);border-radius:.45rem;text-decoration:none}.history-source{color:var(--sl-color-gray-3);font-size:.75rem;line-height:1.45}
 </style>

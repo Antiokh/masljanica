@@ -50,3 +50,6 @@ assert.equal(stopped,true);assert.equal(menuOpen,false);assert.equal(location.pa
 stack.pop();changeUrl('https://example.test/');events.popstate({state:base,stopImmediatePropagation(){}});
 assert.equal(closes,1);assert.equal(stack.length,2);
 console.log('Telegram Back route hierarchy, overlays, single history guard and peer roots passed.');
+
+assert.equal(resolveBackAction({toc:true,path:'/history/'}),'toc');
+assert.equal(resolveBackAction({search:true,toc:true,path:'/history/'}),'search');

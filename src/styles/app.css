@@ -840,3 +840,16 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 
 /* The map pin is an inline pictogram, not a separate button. Keep the shared icon column. */
 .home-dashboard :is(.home-location,.home-location-offline) .home-event-icon{border:0;border-radius:0;background:transparent;box-shadow:none}
+
+/* Native Starlight TOC on custom pages without a global sidebar. */
+@media(min-width:72rem){
+  html[data-has-toc]:not([data-has-sidebar]) .right-sidebar-container{width:var(--sl-sidebar-width);flex:0 0 var(--sl-sidebar-width)}
+  html[data-has-toc]:not([data-has-sidebar]) .right-sidebar{width:var(--sl-sidebar-width)}
+  html[data-has-toc]:not([data-has-sidebar]) .right-sidebar-panel .sl-container{max-width:none;width:auto}
+  html[data-has-toc]:not([data-has-sidebar]) .main-pane{width:calc(100% - var(--sl-sidebar-width));min-width:0}
+}
+@media(max-width:60rem){
+  html[data-runtime-environment="telegram"][data-has-toc] .main-frame{padding-top:calc(var(--sl-nav-height) + var(--sl-mobile-toc-height))}
+  html[data-runtime-environment="telegram"][data-has-toc]{scroll-padding-top:calc(var(--sl-nav-height) + var(--sl-mobile-toc-height) + .75rem)}
+  html[data-runtime-environment="telegram"] mobile-starlight-toc nav{top:var(--sl-nav-height);inset-inline:max(0px,var(--telegram-content-left,0px)) max(0px,var(--telegram-content-right,0px))}
+}
