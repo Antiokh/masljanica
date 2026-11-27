@@ -30,7 +30,7 @@ const filters=[{id:'',label:'Все'},{id:'own',label:'Наши'},{id:'folk',lab
 </StarlightPage>
 <style>
   .ditties-page { display:grid; gap:.65rem; min-width:0; }
-  .ditties-page [hidden] { display:none!important; }
+  .ditties-page :global([hidden]) { display:none!important; }
   .ditties-intro { color:var(--sl-color-gray-3); font-size:.9rem; margin:0!important; }
   .ditties-page .catalog-tools { margin:0!important; }
   .ditty-filters { display:flex; flex-wrap:wrap; gap:.4rem; margin:0!important; }
