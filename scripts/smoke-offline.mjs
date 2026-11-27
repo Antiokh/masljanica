@@ -124,8 +124,8 @@ try {
       const ordered=['.home-hero','.festival-intro','.home-program','.home-admission','.home-sections','.home-workshops'].map(s=>root.querySelector(s).getBoundingClientRect());
       const icon=root.querySelector('.home-calendar .home-event-icon').getBoundingClientRect(),map=root.querySelector('.home-location .home-event-icon').getBoundingClientRect(),mapRow=root.querySelector('.home-location').getBoundingClientRect(),sun=root.querySelector('.home-hero-art').getBoundingClientRect();
       const [hero,intro,program,admission,sections,workshops]=ordered;
-      const leftGap=admission.top-hero.bottom,rightGap=program.top-intro.bottom,sectionsGap=sections.top-admission.bottom;
-      const desktop=Math.abs(hero.top-intro.top)<2&&hero.right<intro.left&&Math.abs(hero.width-intro.width)<2&&Math.abs(hero.left-admission.left)<2&&Math.abs(hero.left-sections.left)<2&&Math.abs(intro.left-program.left)<2&&leftGap>=0&&leftGap<=24&&rightGap>=0&&rightGap<=24&&sectionsGap>=0&&sectionsGap<=24&&workshops.top>=Math.max(sections.bottom,program.bottom)-1&&Math.abs(workshops.width-root.getBoundingClientRect().width)<2;
+      const fullWidth=root.getBoundingClientRect().width;
+      const desktop=Math.abs(hero.top-admission.top)<2&&hero.right<admission.left&&Math.abs(hero.width-admission.width)<2&&Math.abs(hero.bottom-admission.bottom)<2&&Math.abs(hero.left-sections.left)<2&&Math.abs(admission.left-program.left)<2&&Math.abs(sections.top-program.top)<2&&sections.top>=hero.bottom&&intro.top>=Math.max(sections.bottom,program.bottom)-1&&Math.abs(intro.width-fullWidth)<2&&workshops.top>=intro.bottom-1&&Math.abs(workshops.width-fullWidth)<2;
       return {desktop,stack:ordered.slice(1).every((r,i)=>r.top>=ordered[i].bottom-1),widths:ordered.every(r=>Math.abs(r.width-ordered[0].width)<2),iconGap:mapRow.top-root.querySelector('.home-calendar').getBoundingClientRect().bottom,sunWidth:sun.width,aligned:Math.abs(icon.left-map.left)<2};
     });
     assert.ok(width>=960?layout.desktop:layout.stack&&layout.widths,'Home layout follows approved composition at '+width);
@@ -142,20 +142,24 @@ try {
   }
   await page.setViewportSize({width:1440,height:900});
   const introDisclosure=page.locator('.festival-intro details').first();
-  const leftPosition=()=>page.locator('.home-sections').evaluate(el=>el.getBoundingClientRect().top);
-  const programmePosition=()=>page.locator('.home-program').evaluate(el=>el.getBoundingClientRect().top);
-  const leftBefore=await leftPosition(),programBefore=await programmePosition();
+  const top=selector=>page.locator(selector).evaluate(el=>el.getBoundingClientRect().top);
+  const sectionsBefore=await top('.home-sections'),programBefore=await top('.home-program'),workshopsBefore=await top('.home-workshops');
   await introDisclosure.evaluate(el=>el.open=true);
-  assert.ok(Math.abs(await leftPosition()-leftBefore)<2,'Expanding information does not move left column');
-  assert.ok(await programmePosition()>programBefore,'Programme follows expanded information');
+  assert.ok(Math.abs(await top('.home-sections')-sectionsBefore)<2,'Expanding information leaves dashboard unchanged');
+  assert.ok(Math.abs(await top('.home-program')-programBefore)<2,'Expanding information leaves programme unchanged');
+  assert.ok(await top('.home-workshops')>workshopsBefore,'Full-width introduction expands below the dashboard');
   await introDisclosure.evaluate(el=>el.open=false);
-  const programTop=await programmePosition();
   await page.locator('.home-calendar-menu').evaluate(el=>el.open=true);
-  assert.ok(Math.abs(await programmePosition()-programTop)<2,'Expanding calendar does not move programme');
+  assert.ok(Math.abs(await top('.home-sections')-await top('.home-program'))<2,'Both section headings stay aligned when calendar expands');
   await page.locator('.home-calendar-menu').evaluate(el=>el.open=false);
-  await page.locator('.home-program').evaluate(el=>el.hidden=true);
-  assert.ok(Math.abs(await leftPosition()-leftBefore)<2,'Hiding programme does not shift left column');
-  await page.locator('.home-program').evaluate(el=>el.hidden=false);
+  await home.evaluate(el=>{el.dataset.scheduleEnabled='false';window.dispatchEvent(new Event('pageshow'));});
+  await page.locator('.home-program').waitFor({state:'hidden'});
+  assert.ok(await home.evaluate(el=>Math.abs(el.querySelector('.home-sections').getBoundingClientRect().width-el.getBoundingClientRect().width)<2),'Without programme the materials span the full row');
+  await home.evaluate(el=>{el.dataset.eventDate='2000-01-01';window.dispatchEvent(new Event('pageshow'));});
+  await page.locator('.home-admission').waitFor({state:'hidden'});
+  assert.ok(await home.evaluate(el=>{const hero=el.querySelector('.home-hero').getBoundingClientRect(),sections=el.querySelector('.home-sections').getBoundingClientRect();return Math.abs(hero.top-sections.top)<2&&hero.right<sections.left;}),'Out of season hero and materials occupy the first row');
+  await home.evaluate(el=>{el.dataset.eventDate='2099-12-31';el.dataset.scheduleEnabled='true';window.dispatchEvent(new Event('pageshow'));});
+  await page.locator('.home-program').waitFor({state:'visible'});
   assert.equal(await page.locator('.festival-intro details').count(),3);
   for(const [selector,pattern] of [['.story-history-details',/Сырную неделю/],['.story-name-details:not(.home-story-details)',/Дубровский/],['.home-story-details',/Краткая суть сюжета/]]){
     const detail=page.locator('.festival-intro '+selector);

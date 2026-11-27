@@ -859,25 +859,30 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 }
 
 
-/* Two independent stacks. No row-height coupling between disclosures and event data.
-   On mobile unwrap the columns and retain the original editorial order. */
-.home-dashboard .home-column{display:contents}
-.home-dashboard{reading-flow:grid-rows}
-.home-dashboard :is(.home-column-left,.home-column-right)>*{min-width:0;margin:0!important}
-@media(max-width:59.999rem){
-  .home-dashboard .home-hero{order:1}
-  .home-dashboard .festival-intro{order:2}
-  .home-dashboard .home-program{order:3}
-  .home-dashboard .home-admission{order:4}
-  .home-dashboard .home-sections{order:5}
-  .home-dashboard .home-workshops{order:6}
-  .home-dashboard .home-credit{order:7}
-}
+/* Desktop: align the two section headings, keep expandable editorial content
+   outside the dashboard rows. Use original mobile source order. */
 @media(min-width:60rem){
-  .home-dashboard{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;align-content:start;gap:1rem;reading-flow:normal}
-  .home-dashboard .home-column{display:flex;flex-direction:column;gap:1rem;min-width:0;align-items:stretch;margin:0!important}
-  .home-dashboard .home-hero{padding:1.15rem}
-  .home-dashboard>.home-workshops,.home-dashboard>.home-credit{grid-column:1/-1}
+  .home-dashboard{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-areas:"hero sections" "intro intro" "workshops workshops" "credit credit";
+    align-items:start;align-content:start;gap:1rem;reading-flow:grid-rows;
+  }
+  .home-dashboard:has(>.home-admission:not([hidden])){
+    grid-template-areas:"hero admission" "sections sections" "intro intro" "workshops workshops" "credit credit";
+  }
+  .home-dashboard:has(>.home-program:not([hidden])){
+    grid-template-areas:"hero hero" "sections program" "intro intro" "workshops workshops" "credit credit";
+  }
+  .home-dashboard:has(>.home-admission:not([hidden])):has(>.home-program:not([hidden])){
+    grid-template-areas:"hero admission" "sections program" "intro intro" "workshops workshops" "credit credit";
+  }
+  .home-dashboard>.home-hero{grid-area:hero;padding:1.15rem;align-self:stretch}
+  .home-dashboard>.home-admission{grid-area:admission;align-self:stretch;display:flex;flex-direction:column;justify-content:center;padding:1.15rem}
+  .home-dashboard>.home-sections{grid-area:sections}
+  .home-dashboard>.home-program{grid-area:program}
+  .home-dashboard>.festival-intro{grid-area:intro}
+  .home-dashboard>.home-workshops{grid-area:workshops}
+  .home-dashboard>.home-credit{grid-area:credit}
   .home-dashboard #home-title{font-size:clamp(1.65rem,2.5vw,2.5rem)}
   .home-dashboard .home-section-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .home-dashboard .home-workshop-grid{grid-template-columns:repeat(4,minmax(0,1fr))}

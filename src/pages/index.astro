@@ -37,7 +37,6 @@ const sections = [
 ---
 <StarlightPage frontmatter={{title:frontmatter.title,template:'splash',description:'Масляница в Белграде: программа, песни, игры и народные традиции.'}}>
   <div class="home-dashboard" data-home-dashboard data-event-enabled={String(config.enabled)} data-event-date={config.date} data-event-timezone={config.timezone} data-schedule-enabled={String(config.schedule)}>
-    <div class="home-column home-column-left">
     <section class="home-hero" aria-labelledby="home-title">
       <div class="home-hero-copy">
         <div class="home-hero-heading">
@@ -80,21 +79,6 @@ const sections = [
         </div>
       </div>
     </section>
-    {config.enabled && <section class="home-admission" data-home-season="event" data-pagefind-ignore hidden>
-      <strong>Мероприятие без билетов.</strong>
-      <p>Приветствуется донейшн на блины в коробочку у Бабы Яги. Действо проводится на волонтёрских началах.</p>
-    </section>}
-    <section class="home-sections" aria-label="Материалы праздника">
-        <div class="home-section-heading"><h2>В нашей избушке</h2><a class="home-ditties-link" href="/ditties/" data-astro-prefetch="hover">…частушки?</a></div>
-        <div class="home-section-grid">
-          {sections.map(item=><a class="home-section-card" href={item.href} data-astro-prefetch="hover">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={item.icon}/></svg>
-            <div><strong>{item.title}</strong><small>{item.description}</small></div>
-          </a>)}
-        </div>
-      </section>
-    </div>
-    <div class="home-column home-column-right">
     <FestivalIntro home={true}>
       <section class="story-name home-plot" aria-labelledby="home-story-title">
         <details class="story-name-details home-story-details">
@@ -113,7 +97,19 @@ const sections = [
       </section>
     </FestivalIntro>
     <HomeProgramme items={items} eventEnd={eventEnd} dateLabel={dateLabel}/>
-    </div>
+    {config.enabled && <section class="home-admission" data-home-season="event" data-pagefind-ignore hidden>
+      <strong>Мероприятие без билетов.</strong>
+      <p>Приветствуется донейшн на блины в коробочку у Бабы Яги. Действо проводится на волонтёрских началах.</p>
+    </section>}
+    <section class="home-sections" aria-label="Материалы праздника">
+        <div class="home-section-heading"><h2>В нашей избушке</h2><a class="home-ditties-link" href="/ditties/" data-astro-prefetch="hover">…частушки?</a></div>
+        <div class="home-section-grid">
+          {sections.map(item=><a class="home-section-card" href={item.href} data-astro-prefetch="hover">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={item.icon}/></svg>
+            <div><strong>{item.title}</strong><small>{item.description}</small></div>
+          </a>)}
+        </div>
+      </section>
     <WorkshopPreview />
     <footer class="home-credit">Разработано <a href="https://t.me/antiokh" target="_blank" rel="noopener noreferrer">Антон Назаров</a></footer>
   </div>
