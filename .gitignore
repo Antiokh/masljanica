@@ -8,3 +8,14 @@ legacy/
 
 # Rendered from tracked workshop SVG sources
 /public/media/workshops/*.webp
+
+# Generated discovery assets (single source: festival sun and src/data)
+/public/og/
+/public/_llms-txt/
+/public/llms*.txt
+/public/robots.txt
+/public/favicon.ico
+/public/favicon-96x96.png
+/public/apple-touch-icon.png
+/public/web-app-manifest-*.png
+/public/maskable-512x512.png

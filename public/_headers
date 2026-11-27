@@ -11,3 +11,12 @@
 /event.ics
   Content-Type: text/calendar; charset=utf-8
   Cache-Control: no-cache
+
+/llms*.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: no-cache
+/_llms-txt/*
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: no-cache
+/og/*
+  Cache-Control: public, max-age=3600
