@@ -560,6 +560,25 @@ try {
   assert.equal(await page.locator('.more-menu a[href="/characters/"]').count(),0,'Characters no longer have a menu item');
   assert.deepEqual(await page.locator('#story-characters [data-character-open]').evaluateAll(els=>els.map(el=>el.dataset.characterOpen)),allActors.map(a=>a.slug),'All actors including legacy Show=false');
   assert.equal(await page.locator('.story-characters .home-character-card').count(),allActors.length);
+  const galleryViewport=page.viewportSize();
+  const galleryCards=page.locator('#story-characters .home-character-card');
+  const galleryToggle=page.locator('[data-character-toggle]');
+  await page.setViewportSize({width:1440,height:900});
+  await galleryToggle.waitFor({state:'visible'});
+  assert.equal(await galleryCards.filter({visible:true}).count(),5,'Only one desktop row initially');
+  assert.equal(await galleryToggle.getAttribute('aria-expanded'),'false');
+  await galleryToggle.click();
+  assert.equal(await galleryCards.filter({visible:true}).count(),allActors.length);
+  await galleryCards.last().click();
+  await page.locator('dialog[data-character-dialog][open]').waitFor({state:'visible'});
+  await page.keyboard.press('Escape');
+  await page.locator('dialog[data-character-dialog][open]').waitFor({state:'hidden'});
+  await galleryToggle.click();
+  assert.equal(await galleryCards.filter({visible:true}).count(),5);
+  await page.setViewportSize({width:390,height:844});
+  await galleryToggle.waitFor({state:'hidden'});
+  assert.equal(await galleryCards.filter({visible:true}).count(),allActors.length,'Mobile shows all actors');
+  if(galleryViewport)await page.setViewportSize(galleryViewport);
   const dialogIds=await page.locator('dialog[data-character-dialog]').evaluateAll(els=>els.map(el=>el.id));
   assert.deepEqual([...dialogIds].sort(),allActors.map(a=>'character-'+a.slug).sort(),'Exactly one dialog for every character');
   assert.ok(await page.locator('.story-characters').evaluate(el=>!!(el.compareDocumentPosition(document.querySelector('.story-scenario')) & Node.DOCUMENT_POSITION_FOLLOWING)));
@@ -662,6 +681,11 @@ try {
   assert.deepEqual(await page.locator('.ditty-card p').allTextContents(),dittyTexts,'Ditties are readable on cold offline load');
   await page.goto(origin+'/scenario/');
   assert.deepEqual(await page.locator('#story-characters [data-character-open]').evaluateAll(els=>els.map(el=>el.dataset.characterOpen)),allActors.map(a=>a.slug));
+  await page.setViewportSize({width:1440,height:900});
+  const offlineToggle=page.locator('[data-character-toggle]');
+  await offlineToggle.waitFor({state:'visible'});
+  await offlineToggle.click();
+  assert.equal(await page.locator('#story-characters .home-character-card:visible').count(),allActors.length,'Desktop gallery expands offline');
   for(const actor of allActors){
     const card=page.locator('#story-characters [data-character-open]').filter({has:page.getByText(actor.title,{exact:true})});
     await card.locator('img').evaluate(el=>el.decode());
@@ -672,6 +696,7 @@ try {
     assert.equal(await dialog.locator('h2').innerText(),actor.title);
     await dialog.locator('[data-character-close]').click();
   }
+  await page.setViewportSize({width:390,height:844});
   await page.goto(origin+'/games/');
   assert.deepEqual((await page.locator('.game-card').evaluateAll(els=>els.map(el=>el.id))).sort(),allGames.map(g=>g.slug).sort(),'All games available on cold offline load');
   const offlineRequests=providerRequests;

@@ -95,3 +95,16 @@
 .story-characters{min-width:0;margin:0!important}
 .story-characters>h2{font-size:1.28rem;margin:0 0 .65rem!important}
 .story-characters .home-character-grid{margin:0!important}
+
+/* Desktop-only progressive disclosure; mobile always shows the complete gallery. */
+.story-characters .character-gallery-disclosure{min-width:0;margin:0!important}
+.story-characters .character-gallery-toggle{display:none}
+@media(min-width:60rem){
+ .story-characters .home-character-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+ .character-gallery-disclosure[data-character-expanded="false"] .home-character-grid>.home-character-card:nth-child(n+6){display:none}
+ .story-characters .character-gallery-toggle:not([hidden]){display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;margin:.65rem 0 0!important;padding:.45rem .7rem;border:1px solid var(--sl-color-gray-5);border-radius:.55rem;background:var(--sl-color-bg);color:var(--sl-color-text-accent);font:inherit;font-size:.85rem;cursor:pointer}
+ .character-gallery-toggle:hover{border-color:var(--sl-color-accent)}
+ .character-gallery-toggle:focus-visible{outline:2px solid var(--sl-color-accent);outline-offset:2px}
+ .character-gallery-toggle svg{width:1rem;height:1rem;flex:none;margin:0!important}
+ .character-gallery-toggle[aria-expanded="true"] svg{transform:rotate(180deg)}
+}
