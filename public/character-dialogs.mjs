@@ -21,5 +21,18 @@ export function installCharacterDialogs(){
   document.addEventListener('close',event=>{
     if(event.target.matches?.('[data-character-dialog]')){if(opener?.isConnected)opener.focus({preventScroll:true});opener=null;}
   },true);
+  function openFromHash(){
+    if(!/^\/scenario\/?$/.test(location.pathname))return;
+    let id;try{id=decodeURIComponent(location.hash.slice(1));}catch{return;}
+    if(!id.startsWith('character-'))return;
+    const d=document.getElementById(id);
+    if(!d?.matches('dialog[data-character-dialog]')||d.open)return;
+    const gallery=d.closest('[data-character-gallery]');
+    const button=[...gallery?.querySelectorAll('[data-character-open]')||[]].find(el=>el.getAttribute('aria-controls')===id);
+    if(button){button.scrollIntoView({block:'center'});open(button);}
+  }
+  document.addEventListener('astro:page-load',openFromHash);
+  window.addEventListener('hashchange',openFromHash);
   document.addEventListener('astro:before-swap',()=>{closeOpen();opener=null;});
+  openFromHash();
 }

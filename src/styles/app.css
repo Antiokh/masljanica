@@ -859,27 +859,43 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 }
 
 
-/* Desktop: align the two section headings, keep expandable editorial content
-   outside the dashboard rows. Use original mobile source order. */
+/* Independent top columns when programme is visible; seasonal fallback uses
+   ordinary grid items. The three editorial disclosures always span both columns. */
+.home-dashboard .home-column{display:contents}
+.home-dashboard .home-column>*{min-width:0;margin:0!important}
+.home-dashboard .home-admission a{color:var(--sl-color-text-accent);text-decoration:underline;text-underline-offset:.15em}
+.home-dashboard .home-admission a:hover{color:var(--sl-color-text)}
+@media(max-width:59.999rem){
+  .home-dashboard{reading-flow:grid-rows}
+  .home-dashboard .home-hero{order:1}
+  .home-dashboard .festival-intro{order:2}
+  .home-dashboard .home-program{order:3}
+  .home-dashboard .home-admission{order:4}
+  .home-dashboard .home-sections{order:5}
+  .home-dashboard .home-workshops{order:6}
+  .home-dashboard .home-credit{order:7}
+}
 @media(min-width:60rem){
   .home-dashboard{
     grid-template-columns:repeat(2,minmax(0,1fr));
     grid-template-areas:"hero sections" "intro intro" "workshops workshops" "credit credit";
     align-items:start;align-content:start;gap:1rem;reading-flow:grid-rows;
   }
-  .home-dashboard:has(>.home-admission:not([hidden])){
+  .home-dashboard:has(.home-admission:not([hidden])){
     grid-template-areas:"hero admission" "sections sections" "intro intro" "workshops workshops" "credit credit";
   }
-  .home-dashboard:has(>.home-program:not([hidden])){
-    grid-template-areas:"hero hero" "sections program" "intro intro" "workshops workshops" "credit credit";
+  .home-dashboard:has(.home-program:not([hidden])){
+    grid-template-areas:"left right" "intro intro" "workshops workshops" "credit credit";
   }
-  .home-dashboard:has(>.home-admission:not([hidden])):has(>.home-program:not([hidden])){
-    grid-template-areas:"hero admission" "sections program" "intro intro" "workshops workshops" "credit credit";
+  .home-dashboard:has(.home-program:not([hidden]))>.home-column{
+    display:flex;flex-direction:column;align-items:stretch;gap:1rem;min-width:0;margin:0!important;reading-flow:normal;
   }
-  .home-dashboard>.home-hero{grid-area:hero;padding:1.15rem;align-self:stretch}
-  .home-dashboard>.home-admission{grid-area:admission;align-self:stretch;display:flex;flex-direction:column;justify-content:center;padding:1.15rem}
-  .home-dashboard>.home-sections{grid-area:sections}
-  .home-dashboard>.home-program{grid-area:program}
+  .home-column-left{grid-area:left}
+  .home-column-right{grid-area:right}
+  .home-dashboard .home-hero{grid-area:hero;padding:1.15rem}
+  .home-dashboard .home-admission{grid-area:admission}
+  .home-dashboard .home-sections{grid-area:sections}
+  .home-dashboard .home-program{grid-area:program}
   .home-dashboard>.festival-intro{grid-area:intro}
   .home-dashboard>.home-workshops{grid-area:workshops}
   .home-dashboard>.home-credit{grid-area:credit}

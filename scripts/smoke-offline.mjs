@@ -125,7 +125,7 @@ try {
       const icon=root.querySelector('.home-calendar .home-event-icon').getBoundingClientRect(),map=root.querySelector('.home-location .home-event-icon').getBoundingClientRect(),mapRow=root.querySelector('.home-location').getBoundingClientRect(),sun=root.querySelector('.home-hero-art').getBoundingClientRect();
       const [hero,intro,program,admission,sections,workshops]=ordered;
       const fullWidth=root.getBoundingClientRect().width;
-      const desktop=Math.abs(hero.top-admission.top)<2&&hero.right<admission.left&&Math.abs(hero.width-admission.width)<2&&Math.abs(hero.bottom-admission.bottom)<2&&Math.abs(hero.left-sections.left)<2&&Math.abs(admission.left-program.left)<2&&Math.abs(sections.top-program.top)<2&&sections.top>=hero.bottom&&intro.top>=Math.max(sections.bottom,program.bottom)-1&&Math.abs(intro.width-fullWidth)<2&&workshops.top>=intro.bottom-1&&Math.abs(workshops.width-fullWidth)<2;
+      const desktop=Math.abs(hero.top-admission.top)<2&&hero.right<admission.left&&Math.abs(hero.width-admission.width)<2&&Math.abs(hero.left-sections.left)<2&&Math.abs(admission.left-program.left)<2&&sections.top-hero.bottom>=0&&sections.top-hero.bottom<=24&&program.top-admission.bottom>=0&&program.top-admission.bottom<=24&&intro.top>=Math.max(sections.bottom,program.bottom)-1&&Math.abs(intro.width-fullWidth)<2&&workshops.top>=intro.bottom-1&&Math.abs(workshops.width-fullWidth)<2;
       return {desktop,stack:ordered.slice(1).every((r,i)=>r.top>=ordered[i].bottom-1),widths:ordered.every(r=>Math.abs(r.width-ordered[0].width)<2),iconGap:mapRow.top-root.querySelector('.home-calendar').getBoundingClientRect().bottom,sunWidth:sun.width,aligned:Math.abs(icon.left-map.left)<2};
     });
     assert.ok(width>=960?layout.desktop:layout.stack&&layout.widths,'Home layout follows approved composition at '+width);
@@ -150,7 +150,8 @@ try {
   assert.ok(await top('.home-workshops')>workshopsBefore,'Full-width introduction expands below the dashboard');
   await introDisclosure.evaluate(el=>el.open=false);
   await page.locator('.home-calendar-menu').evaluate(el=>el.open=true);
-  assert.ok(Math.abs(await top('.home-sections')-await top('.home-program'))<2,'Both section headings stay aligned when calendar expands');
+  assert.ok(Math.abs(await top('.home-program')-programBefore)<2,'Expanding calendar leaves programme position unchanged');
+  assert.ok(await top('.home-sections')>sectionsBefore,'Materials follow the expanded hero');
   await page.locator('.home-calendar-menu').evaluate(el=>el.open=false);
   await home.evaluate(el=>{el.dataset.scheduleEnabled='false';window.dispatchEvent(new Event('pageshow'));});
   await page.locator('.home-program').waitFor({state:'hidden'});
@@ -159,6 +160,18 @@ try {
   await page.locator('.home-admission').waitFor({state:'hidden'});
   assert.ok(await home.evaluate(el=>{const hero=el.querySelector('.home-hero').getBoundingClientRect(),sections=el.querySelector('.home-sections').getBoundingClientRect();return Math.abs(hero.top-sections.top)<2&&hero.right<sections.left;}),'Out of season hero and materials occupy the first row');
   await home.evaluate(el=>{el.dataset.eventDate='2099-12-31';el.dataset.scheduleEnabled='true';window.dispatchEvent(new Event('pageshow'));});
+  await page.locator('.home-program').waitFor({state:'visible'});
+  assert.equal(await page.locator('.home-admission a',{hasText:'блины'}).getAttribute('href'),'/pancakes/');
+  const witchLink=page.locator('.home-admission a',{hasText:'Бабы Яги'});
+  assert.equal(decodeURIComponent(await witchLink.getAttribute('href')),'/scenario/#character-баба-яга');
+  await witchLink.click();
+  await page.waitForURL(url=>url.pathname==='/scenario/'&&decodeURIComponent(url.hash)==='#character-баба-яга');
+  await page.locator('dialog[id="character-баба-яга"][open]').waitFor({state:'visible'});
+  assert.equal(await page.locator('dialog[id="character-баба-яга"] h2').innerText(),'Баба Яга');
+  await page.locator('dialog[id="character-баба-яга"] [data-character-close]').click();
+  await page.locator('.app-nav a[href="/"]').click();
+  await page.waitForURL(url=>url.pathname==='/'&&!url.hash);
+  await home.evaluate(el=>{el.dataset.eventEnabled='true';el.dataset.eventDate='2099-12-31';el.dataset.scheduleEnabled='true';window.dispatchEvent(new Event('pageshow'));});
   await page.locator('.home-program').waitFor({state:'visible'});
   assert.equal(await page.locator('.festival-intro details').count(),3);
   for(const [selector,pattern] of [['.story-history-details',/Сырную неделю/],['.story-name-details:not(.home-story-details)',/Дубровский/],['.home-story-details',/Краткая суть сюжета/]]){
