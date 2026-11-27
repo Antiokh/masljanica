@@ -73,6 +73,10 @@ try {
   assert.ok(Math.abs(eventGeometry.mapRowRight-eventGeometry.metaRight)<2,'Full width event facts');
   assert.match(await page.locator('.home-location').getAttribute('href'),/^https:\/\/www\.google\.com\/maps\?q=/);
   assert.equal(await page.locator('.home-location .home-event-address').evaluate(el=>el.closest('a')?.classList.contains('home-location')),true,'Entire address belongs to the map link');
+  await page.locator('.home-location').hover();
+  const pinStyle=await page.locator('.home-location .home-event-icon').evaluate(el=>{const s=getComputedStyle(el);return {border:parseFloat(s.borderTopWidth),background:s.backgroundColor};});
+  assert.equal(pinStyle.border,0,'Map pin has no button border');
+  assert.equal(pinStyle.background,'rgba(0, 0, 0, 0)','Map pin remains transparent on hover');
   await page.locator('.home-location').evaluate(el=>el.hidden=true);
   await page.locator('.home-location-offline').waitFor({state:'visible'});
   assert.equal(await page.locator('.home-location-offline a').count(),0,'Offline address remains readable without external navigation');
