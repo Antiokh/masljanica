@@ -4,7 +4,7 @@ import StoryMusic from './StoryMusic.astro';
 const {row,actor,song,tracks,stage,segments}=Astro.props;
 ---
 <article id={'replica-'+row.order} data-story-line={row.order} data-role={actor.slug} class:list={['story-line',{'story-stage':stage,'story-song':!!song}]}>
-  {stage && <div class="story-stage-label"><GameIcon name="game"/><span>Ремарка · {actor.title}</span></div>}
+  {stage && <div class="story-stage-label"><GameIcon name="balalaika" class="story-stage-instrument"/><span>Ремарка · {actor.title}</span></div>}
   {stage && <p class="story-original">{row.text}</p>}
   {!stage && <div class="story-portrait">
     <button type="button" class="story-portrait-button" data-character-open={actor.slug} aria-haspopup="dialog" aria-controls={'character-'+actor.slug} aria-label={'О персонаже: '+actor.title}>
