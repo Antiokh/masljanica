@@ -4,6 +4,9 @@ import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { assertSongLayout } from './assert-song-layout.mjs';
 import { assertCatalogColumns } from './assert-catalog-columns.mjs';
+const readData=name=>JSON.parse(readFileSync(new URL('../src/data/'+name+'.json',import.meta.url),'utf8'));
+const allActors=readData('characters'),allGames=readData('games');
+const portraitArchive=readData('character-archive').files,gameAudioArchive=readData('audio-archive').files;
 const origin='http://localhost:4321';
 const server=spawn('npm',['run','preview','--','--host','localhost','--port','4321'],{stdio:'inherit'});
 let browser;
@@ -494,7 +497,8 @@ try {
   await page.waitForURL('**/games/');
   await page.locator('.game-card').first().waitFor();
   const gameCount=await page.locator('.game-card').count();
-  assert.ok(gameCount>=31,'Original game catalog retained');
+  assert.equal(gameCount,allGames.length,'Every game is displayed');
+  assert.deepEqual((await page.locator('.game-card').evaluateAll(els=>els.map(el=>el.id))).sort(),allGames.map(g=>g.slug).sort());
   await assertCatalogColumns(page,'.game-list','.game-card');
   await page.locator('[data-game-filter="category"][data-value="historical"]').click();
   await page.locator('[data-game-filter="audience"][data-value="children"]').click();
@@ -550,10 +554,10 @@ try {
   await page.waitForURL('**/scenario/');
   assert.equal(await page.locator('.story-part').count(),3);
   assert.equal(await page.locator('.more-menu a[href="/characters/"]').count(),0,'Characters no longer have a menu item');
-  assert.equal(await page.locator('#story-characters .home-character-card').count(),5);
-  assert.equal(await page.locator('.story-characters .home-character-card').count(),5);
+  assert.deepEqual(await page.locator('#story-characters [data-character-open]').evaluateAll(els=>els.map(el=>el.dataset.characterOpen)),allActors.map(a=>a.slug),'All actors including legacy Show=false');
+  assert.equal(await page.locator('.story-characters .home-character-card').count(),allActors.length);
   const dialogIds=await page.locator('dialog[data-character-dialog]').evaluateAll(els=>els.map(el=>el.id));
-  assert.equal(new Set(dialogIds).size,dialogIds.length,'Exactly one dialog for each character');
+  assert.deepEqual([...dialogIds].sort(),allActors.map(a=>'character-'+a.slug).sort(),'Exactly one dialog for every character');
   assert.ok(await page.locator('.story-characters').evaluate(el=>!!(el.compareDocumentPosition(document.querySelector('.story-scenario')) & Node.DOCUMENT_POSITION_FOLLOWING)));
   const character=page.locator('.story-characters [data-character-open]').first();
   const urlBefore=page.url();
@@ -564,6 +568,7 @@ try {
   await page.locator('dialog[data-character-dialog][open]').waitFor({state:'hidden'});
   assert.equal(await page.locator('.story-characters [data-character-open]').first().evaluate(el=>document.activeElement===el),true,'Dialog restores focus');
   const localPortraits=page.locator('.story-characters .home-character-art img');
+  assert.equal(await localPortraits.count(),allActors.length);
   for(const img of await localPortraits.all()){
     assert.match(await img.getAttribute('src'),/^\/media\/characters\/[a-f0-9]+\.webp$/);
     await img.evaluate(el=>el.decode());
@@ -618,6 +623,11 @@ try {
     return data.entries.find(e=>e.url.endsWith('.mp3'))?.url;
   });
   assert.ok(audio,'Local audio must be present in the offline pack');
+  const packManifest=await (await page.request.get('/offline-manifest.json')).json();
+  const packUrls=new Set(packManifest.entries.map(e=>e.url));
+  for(const url of ['/scenario/','/games/',...allActors.map(a=>portraitArchive[a.image].path),...allGames.flatMap(g=>g.audio.map(u=>gameAudioArchive[u].path))]){
+    assert.ok(packUrls.has(url),'Offline pack includes '+url);
+  }
   await context.setOffline(true);
   await page.reload();
   await page.waitForFunction(()=>document.documentElement.dataset.offlineReady==='true');
@@ -646,6 +656,20 @@ try {
   assert.ok(await page.locator('[data-story-music]').count()>=4);
   await page.goto(origin+'/ditties/');
   assert.deepEqual(await page.locator('.ditty-card p').allTextContents(),dittyTexts,'Ditties are readable on cold offline load');
+  await page.goto(origin+'/scenario/');
+  assert.deepEqual(await page.locator('#story-characters [data-character-open]').evaluateAll(els=>els.map(el=>el.dataset.characterOpen)),allActors.map(a=>a.slug));
+  for(const actor of allActors){
+    const card=page.locator('#story-characters [data-character-open]').filter({has:page.getByText(actor.title,{exact:true})});
+    await card.locator('img').evaluate(el=>el.decode());
+    await card.click();
+    const dialog=page.locator('dialog[id="character-'+actor.slug+'"][open]');
+    await dialog.waitFor({state:'visible'});
+    await dialog.locator('img').evaluate(el=>el.decode());
+    assert.equal(await dialog.locator('h2').innerText(),actor.title);
+    await dialog.locator('[data-character-close]').click();
+  }
+  await page.goto(origin+'/games/');
+  assert.deepEqual((await page.locator('.game-card').evaluateAll(els=>els.map(el=>el.id))).sort(),allGames.map(g=>g.slug).sort(),'All games available on cold offline load');
   const offlineRequests=providerRequests;
   await page.goto(origin+'/games/'+encodeURIComponent('дударь')+'/');
   await page.locator('[data-external-embed]').waitFor({state:'attached'});

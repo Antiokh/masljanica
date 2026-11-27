@@ -4,7 +4,7 @@ import archive from '../data/character-archive.json';
 import { existsSync } from 'node:fs';
 type Archived={path:string; width:number; height:number};
 const files=archive.files as Record<string,Archived>;
-const people=characters.filter(x=>x.show).map(x=>{
+const people=characters.map(x=>{
   const file=files[x.image];
   const src=file?.path && /^\/media\/characters\/[a-f0-9]+\.webp$/.test(file.path) && existsSync(process.cwd()+'/public'+file.path) ? file.path : '';
   return {...x,src};

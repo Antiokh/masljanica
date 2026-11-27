@@ -46,6 +46,6 @@ const prepared=ordered.map(row=>{const actor=actors.get(row.actor),song=row.song
       </details>)}
     </div>
   </section>
-  {people.filter(x=>x.show||ordered.some(row=>row.actor===x.id)).map(x=><CharacterDialog person={x}/>)}
+  {people.map(x=><CharacterDialog person={x}/>)}
  </div>
 </StarlightPage>
