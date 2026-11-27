@@ -100,6 +100,10 @@ try {
   await page.locator('.home-program').waitFor({state:'visible'});
   assert.deepEqual(await page.locator('.home-timeline time').allTextContents(),['11:30','12:00','12:20','13:40','14:00','16:00'],'Each contiguous programme transition appears once');
   assert.equal(await page.locator('.home-timeline-end').innerText().then(s=>s.includes('Завершение праздника')),true);
+  const interactiveStage=page.locator('.home-timeline li').filter({has:page.locator('time',{hasText:/^12:20$/})});
+  assert.deepEqual(await interactiveStage.locator('a').allTextContents(),['Игры','Мастер-классы']);
+  assert.equal(await interactiveStage.locator('a',{hasText:'Игры'}).getAttribute('href'),'/games/');
+  assert.equal(await page.locator('.home-timeline a[href="/games/"]').count(),1);
   await page.locator('[data-header-event-date]').waitFor({state:'visible'});
   await page.setViewportSize({width:1440,height:900});
   for(const width of [320,390,1440]){

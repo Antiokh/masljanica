@@ -8,6 +8,9 @@ const {row}=Astro.props;
   </span>
   <div>
     <strong>{row.title}</strong>
-    {row.classes && <a href="/workshops/">Мастер-классы</a>}
+    {(row.games || row.classes) && <nav class="home-stage-links" aria-label={'Материалы: '+row.title}>
+      {row.games && <a href="/games/">Игры</a>}
+      {row.classes && <a href="/workshops/">Мастер-классы</a>}
+    </nav>}
   </div>
 </li>

@@ -18,7 +18,8 @@
     "title": "Игры, конкурсы, выступления",
     "start": "12:20",
     "end": "13:40",
-    "classes": true
+    "classes": true,
+    "games": true
   },
   {
     "slug": "проводы-масленицы",
