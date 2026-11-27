@@ -15,7 +15,8 @@ export default defineConfig({
       { tag: 'link', attrs: { rel: 'manifest', href: '/manifest.webmanifest' } },
       { tag: 'link', attrs: { rel: 'icon', href: '/favicon.ico', sizes: 'any' } },
       { tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/apple-touch-icon.png', sizes: '180x180' } },
-      { tag: 'meta', attrs: { name: 'theme-color', content: '#FFFFFF' } },
+      { tag: 'meta', attrs: { name: 'theme-color', content: '#101827' } },
+      { tag: 'meta', attrs: { name: 'apple-mobile-web-app-title', content: 'Масляница' } },
       { tag: 'script', attrs: { src: '/app.js', type: 'module' } }
     ],
     pagination: false,

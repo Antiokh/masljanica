@@ -338,9 +338,11 @@ try {
   await themeSwitch.press('Home');
   await page.waitForFunction(()=>document.documentElement.dataset.theme==='light' && localStorage.getItem('starlight-theme')==='light');
   await assertProgressTheme();
+  await page.waitForFunction(()=>document.querySelector('meta[name="theme-color"]')?.content.toUpperCase()==='#FFFFFF');
   await themeSwitch.press('End');
   await page.waitForFunction(()=>document.documentElement.dataset.theme==='dark' && localStorage.getItem('starlight-theme')==='dark');
   await assertProgressTheme();
+  await page.waitForFunction(()=>document.querySelector('meta[name="theme-color"]')?.content.toUpperCase()==='#101827');
   await themeSwitch.press('ArrowLeft');
   await page.waitForFunction(()=>document.querySelector('[data-theme-switch]')?.getAttribute('data-theme-mode')==='auto');
   await page.setViewportSize({width:390,height:844});

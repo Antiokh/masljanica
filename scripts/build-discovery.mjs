@@ -7,8 +7,8 @@ const png=async(size,inner=size,bg={r:0,g:0,b:0,alpha:0})=>{
  const art=await sharp(sun).resize(inner,inner,{fit:'contain',background:{r:0,g:0,b:0,alpha:0}}).png().toBuffer();
  return sharp({create:{width:size,height:size,channels:4,background:bg}}).composite([{input:art,gravity:'centre'}]).png().toBuffer();
 };
-const warm='#FFF1E8';
-for(const [name,size,inner,bg] of [['favicon-96x96.png',96,96],['apple-touch-icon.png',180,150,warm],['web-app-manifest-192x192.png',192,192],['web-app-manifest-512x512.png',512,512],['maskable-512x512.png',512,392,warm]])await writeFile(out+'/'+name,await png(size,inner,bg));
+const iconBackground='#101827';
+for(const [name,size,inner,bg] of [['favicon-96x96.png',96,96],['apple-touch-icon.png',180,150,iconBackground],['web-app-manifest-192x192.png',192,192],['web-app-manifest-512x512.png',512,512],['maskable-512x512.png',512,392,iconBackground]])await writeFile(out+'/'+name,await png(size,inner,bg));
 // ICO with PNG-encoded 16/32/48 pixel entries; browsers can choose the appropriate size.
 const sizes=[16,32,48],icons=await Promise.all(sizes.map(s=>png(s)));
 const ico=Buffer.alloc(6+16*sizes.length);ico.writeUInt16LE(1,2);ico.writeUInt16LE(sizes.length,4);let offset=ico.length;

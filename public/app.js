@@ -89,8 +89,17 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
 
  const fmt=n=>((n||0)/1e6).toFixed(1).replace('.',',')+' МБ';
  const send=type=>sw?.controller?.postMessage({type});
- const syncTheme=()=>{const root=document.documentElement,meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=root.dataset.telegramPalette==='active'?root.style.getPropertyValue('--masljanica-tg-bg-color'):(root.dataset.theme==='light'?'#FFFFFF':'#101827');};
+ // Telegram owns its native chrome and meta theme-color in runtime-environment.
+ // In browsers/PWA read the resolved CSS token, including future palette changes.
+ const syncTheme=()=>{
+   if(environment.isTelegram)return;
+   const root=document.documentElement,meta=document.querySelector('meta[name="theme-color"]');
+   const color=getComputedStyle(root).getPropertyValue('--sl-color-bg').trim()||(root.dataset.theme==='light'?'#FFFFFF':'#101827');
+   if(meta&&meta.content!==color)meta.content=color;
+ };
  new MutationObserver(syncTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+ window.matchMedia('(prefers-color-scheme: light)').addEventListener?.('change',()=>requestAnimationFrame(syncTheme));
+ window.addEventListener('pageshow',syncTheme);
  function refreshCatalog(){
    const search=document.querySelector('#catalog-search'),filter=document.querySelector('#catalog-filter');if(!search)return;
    const category=document.querySelector('[data-game-filter="category"][aria-pressed="true"],[data-ditty-filter][aria-pressed="true"]')?.dataset.value;

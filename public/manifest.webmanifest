@@ -1,12 +1,12 @@
 {
-  "name": "Масляница · Белград",
+  "name": "Масляница",
   "short_name": "Масляница",
   "lang": "ru",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#FFFFFF",
-  "theme_color": "#FFFFFF",
+  "background_color": "#101827",
+  "theme_color": "#101827",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

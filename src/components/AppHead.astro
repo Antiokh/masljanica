@@ -61,6 +61,20 @@ const json=(value:unknown)=>JSON.stringify(value).replace(/</g,'\\u003c');
   })();
 </script>
 <Head />
+<!-- Dark launch fallback; apply the saved/system/Telegram theme before the first paint. -->
+<script is:inline>
+  (() => {
+    const root=document.documentElement;
+    const meta=document.querySelector('meta[name="theme-color"]');
+    if(!meta)return;
+    let mode='auto';try{mode=localStorage.getItem('starlight-theme')||'auto';}catch{}
+    const launch=window.__masljanicaTelegramLaunch;
+    const explicit=mode==='light'||mode==='dark';
+    const theme=explicit?mode:(launch?.theme||root.dataset.theme||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'));
+    const bg=!explicit&&launch?.colors?.bg_color;
+    meta.content=bg|| (theme==='light'?'#FFFFFF':'#101827');
+  })();
+</script>
 {page && <script type="application/ld+json" id="masljanica-schema" set:html={json(structuredData(page))} />}
 {page?.path==='/' && <script type="application/ld+json" id="masljanica-llmld" set:html={json(llmLd)} />}
 <ClientRouter fallback="swap" />
