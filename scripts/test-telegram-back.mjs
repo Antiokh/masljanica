@@ -7,7 +7,7 @@ assert.equal(parentRoute('/songs/квашня/'),'/songs/');
 assert.equal(parentRoute('/scenario/2/','/games/'),'/scenario/');
 assert.equal(parentRoute('/scenario/','/games/'),'/games/');
 assert.equal(parentRoute('/offline/'),'/');
-assert.equal(parentRoute('/characters/','/not-a-peer/'),'/');
+assert.equal(isAppRoute('/characters/'),false,'Legacy character URL is no longer an app section');
 assert.equal(isAppRoute('/media/audio/test.mp3'),false);
 assert.equal(isAppRoute('/workshops/example/'),true);
 assert.equal(isAppRoute('/ditties/'),true);

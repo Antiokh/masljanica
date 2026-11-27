@@ -30,9 +30,9 @@ const prepared=ordered.map(row=>{const actor=actors.get(row.actor),song=row.song
 <StarlightPage frontmatter={{title:'Сказ',template:'splash',description:'История Масляницы и театральный сказ нашего праздника.'}}>
  <div class="story-book" data-character-gallery data-story-book>
   <FestivalIntro />
-  <section class="story-characters" aria-labelledby="story-characters-title">
+  <section id="story-characters" class="story-characters" aria-labelledby="story-characters-title">
     <h2 id="story-characters-title">Герои нашего сказа</h2>
-    <CharacterGallery embedded={true}/>
+    <CharacterGallery />
   </section>
   <section class="story-scenario" aria-labelledby="story-scenario-title">
     <h2 id="story-scenario-title">Наш масляничный сказ</h2>

@@ -56,6 +56,12 @@ try {
   await page.locator('.home-program').waitFor({state:'hidden'});
   await page.locator('[data-header-event-date]').waitFor({state:'hidden'});
   await page.locator('.home-section-card').first().waitFor({state:'visible'});
+  const legacy=await context.newPage();
+  try {
+    await legacy.goto(origin+'/characters/');
+    await legacy.waitForURL(url=>url.pathname==='/scenario/'&&url.hash==='#story-characters');
+    await legacy.locator('#story-characters .home-character-card').first().waitFor({state:'visible'});
+  } finally { await legacy.close(); }
   await home.evaluate(el=>{el.dataset.eventEnabled='true';el.dataset.eventDate='2099-12-31';el.dataset.scheduleEnabled='false';window.dispatchEvent(new Event('pageshow'));});
   await page.locator('.home-event-meta').waitFor({state:'visible'});
   assert.equal(await page.locator('.home-event-when .home-event-date').count(),1);
@@ -442,6 +448,8 @@ try {
   await page.locator('.more-links a[href="/scenario/"]').click();
   await page.waitForURL('**/scenario/');
   assert.equal(await page.locator('.story-part').count(),3);
+  assert.equal(await page.locator('.more-menu a[href="/characters/"]').count(),0,'Characters no longer have a menu item');
+  assert.equal(await page.locator('#story-characters .home-character-card').count(),5);
   assert.equal(await page.locator('.story-characters .home-character-card').count(),5);
   const dialogIds=await page.locator('dialog[data-character-dialog]').evaluateAll(els=>els.map(el=>el.id));
   assert.equal(new Set(dialogIds).size,dialogIds.length,'Exactly one dialog for each character');
