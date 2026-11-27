@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { assertSongLayout } from './assert-song-layout.mjs';
@@ -137,6 +138,18 @@ try {
     }
     await detail.locator('summary').click();
   }
+  const dittyTexts=JSON.parse(readFileSync(new URL('../src/data/ditties.json',import.meta.url),'utf8')).map(x=>x.text);
+  const dittyLink=page.locator('.home-sections .home-section-heading .home-ditties-link');
+  assert.equal(await dittyLink.innerText(),'…частушки?');
+  assert.equal(await page.locator('.app-nav a[href="/ditties/"]').count(),0,'Ditties are an easter egg, not a main navigation item');
+  assert.equal(await page.locator('.home-section-card[href="/ditties/"]').count(),0);
+  await dittyLink.click();
+  await page.waitForURL('**/ditties/');
+  assert.deepEqual(await page.locator('.ditty-card p').allTextContents(),dittyTexts,'Preserve original verses and line breaks');
+  const dittiesManifest=await (await page.request.get('/offline-manifest.json')).json();
+  assert.ok(dittiesManifest.entries.some(e=>e.url==='/ditties/'),'Ditties belong to the offline pack');
+  await page.locator('.app-nav a[href="/"]').click();
+  await page.waitForURL(url=>url.pathname==='/');
   const previews=page.locator('.home-workshop-card');
   for(const preview of await previews.all()){
     assert.match(await preview.getAttribute('href'),/^\/workshops\/#/);
@@ -486,6 +499,8 @@ try {
   await coldRow.locator('.song-play').click();
   await page.waitForFunction(()=>{const a=document.querySelector('#song-player-audio');return a&&!a.paused&&a.currentTime>0.25&&a.readyState>=2&&a.getAttribute('src').startsWith('/media/audio/');},{},{timeout:20000});
   await coldRow.locator('.song-play').click();
+  await page.goto(origin+'/ditties/');
+  assert.deepEqual(await page.locator('.ditty-card p').allTextContents(),dittyTexts,'Ditties are readable on cold offline load');
   const offlineRequests=providerRequests;
   await page.goto(origin+'/games/'+encodeURIComponent('дударь')+'/');
   await page.locator('[data-external-embed]').waitFor({state:'attached'});
@@ -521,6 +536,12 @@ try {
     await tg.waitForFunction(()=>history.state?.__masljanicaTelegramBackGuard?.role==='top');
     assert.equal(await tg.evaluate(()=>window.__tgBackVisible),false,'Native Back hidden on root');
     const initialHistory=await tg.evaluate(()=>history.length);
+    await tg.locator('.home-ditties-link').click();
+    await tg.waitForURL('**/ditties/');
+    await tg.waitForFunction(()=>window.__tgBackVisible);
+    await tg.evaluate(()=>window.__tgBack());
+    await tg.waitForURL(url=>url.pathname==='/');
+    await tg.waitForFunction(()=>!window.__tgBackVisible);
     await tg.locator('.more-menu > summary').click();
     await tg.waitForFunction(()=>window.__tgBackVisible);
     await tg.evaluate(()=>window.__tgBack());
