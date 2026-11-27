@@ -12,7 +12,7 @@ const nameHistory=nameSource.trim();
   <section class="story-history" aria-labelledby="story-history-title">
     <details class="story-history-details">
       <summary><span id="story-history-title">Что такое Масляница?</span><GameIcon name="chevron"/></summary>
-      {history && <div class="story-history-content"><div set:html={md.render(history)}></div>{home && <p><a href="https://rslive.ru/masljanica/" data-online-only hidden target="_blank" rel="noopener noreferrer">Страница в «Инструкции по Сербии» ↗</a></p>}</div>}
+      {history && <div class="story-history-content"><div set:html={md.render(history)}></div><p><a href="/history/">История Масляницы, песни и обычаи →</a></p>{home && <p><a href="https://rslive.ru/masljanica/" data-online-only hidden target="_blank" rel="noopener noreferrer">Страница в «Инструкции по Сербии» ↗</a></p>}</div>}
       {!history && <p class="story-history-content">История праздника и народные традиции. Текст готовится.</p>}
     </details>
   </section>

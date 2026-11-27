@@ -12,9 +12,14 @@ export function installExternalEmbeds(){
   function mount(root){
     if(!navigator.onLine||root.hidden)return;
     const surface=root.querySelector('[data-embed-surface]');
-    if(!surface||surface.querySelector('iframe'))return;
+    if(!surface||surface.querySelector('iframe,img'))return;
     let url;
     try{url=new URL(root.dataset.embedSrc);}catch{return;}
+    if(root.dataset.embedKind==='image'){
+      if(url.protocol!=='https:'||!['tile.loc.gov','upload.wikimedia.org'].includes(url.hostname))return;
+      const img=document.createElement('img');img.alt=root.dataset.embedAlt||'';img.loading='lazy';img.decoding='async';img.src=url.href;
+      img.addEventListener('error',()=>reset(root),{once:true});surface.replaceChildren(img);surface.hidden=false;const button=root.querySelector('[data-embed-load]');if(button)button.hidden=true;return;
+    }
     if(url.protocol!=='https:'||url.hostname!=='www.youtube-nocookie.com'||!/^\/embed\/[\w-]{11}$/.test(url.pathname))return;
     const frame=document.createElement('iframe');
     frame.className='video';

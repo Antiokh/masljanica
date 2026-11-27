@@ -32,7 +32,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
    if(!controller||controller===warmedController||!navigator.onLine||navigator.connection?.saveData||/^(slow-2g|2g)$/.test(navigator.connection?.effectiveType||''))return;
    warmedController=controller;
    const run=async()=>{
-     const routes=['/','/songs/','/games/','/scenario/','/workshops/','/pancakes/','/offline/'];
+     const routes=['/','/songs/','/games/','/scenario/','/workshops/','/pancakes/','/history/','/offline/'];
      for(const path of routes){
        if(!navigator.onLine||sw.controller!==controller)return;
        if(location.pathname===path)continue;

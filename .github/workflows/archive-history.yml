@@ -1,0 +1,38 @@
+name: Archive historical illustrations
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/archive-history.yml'
+      - 'scripts/archive-history.py'
+      - 'src/data/history-media.json'
+permissions:
+  contents: write
+concurrency:
+  group: archive-history-main
+  cancel-in-progress: false
+jobs:
+  archive:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install Pillow==11.3.0
+      - run: python scripts/archive-history.py
+      - name: Commit local historical illustrations
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/media/history
+          if ! git diff --cached --quiet; then
+            git commit -m "Archive historical illustrations as WebP"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi

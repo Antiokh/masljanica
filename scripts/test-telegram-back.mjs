@@ -12,6 +12,8 @@ assert.equal(isAppRoute('/media/audio/test.mp3'),false);
 assert.equal(isAppRoute('/workshops/example/'),true);
 assert.equal(isAppRoute('/ditties/'),true);
 assert.equal(isAppRoute('/pancakes/'),true);
+assert.equal(isAppRoute('/history/'),true);
+assert.equal(parentRoute('/history/'),'/');
 assert.equal(parentRoute('/pancakes/'),'/');
 assert.equal(resolveBackAction({path:'/pancakes/'}),'route');
 assert.equal(isPeerRoute('/ditties/'),false);

@@ -9,7 +9,7 @@ const links = [
   {href:'/songs/',title:'Песни',icon:'M9 18V5l12-2v13M9 18a3 3 0 1 1-3-3h3m12 1a3 3 0 1 1-3-3h3'},
   {href:'/games/',title:'Игры',icon:'M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4z M7.5 7.5h.01M16.5 7.5h.01M12 12h.01M7.5 16.5h.01M16.5 16.5h.01'}
 ];
-const more = [{href:'/scenario/',title:'Сказ'},{href:'/workshops/',title:'Мастера'},{href:'/offline/',title:'Офлайн'}];
+const more = [{href:'/scenario/',title:'Сказ'},{href:'/workshops/',title:'Мастера'},{href:'/pancakes/',title:'Блины'},{href:'/history/',title:'История'},{href:'/offline/',title:'Офлайн'}];
 const active = (href:string) => href==='/'?path==='/':path.startsWith(href);
 const moreActive = more.some(link=>active(link.href));
 ---
