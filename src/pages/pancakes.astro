@@ -1,5 +1,8 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import recipes from '../data/pancake-recipes.json';
+import RecipeCard from '../components/RecipeCard.astro';
+const groups=['Блины','Оладьи'].map(title=>({title,items:recipes.filter(r=>r.category===title)}));
 ---
 <StarlightPage frontmatter={{title:'Блины',template:'splash',description:'Печём блины вместе: угощение на Маслянице и рецепты домашних блинов.'}}>
   <div class="pancakes-page">
@@ -10,7 +13,9 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
     </section>
     <section class="pancakes-recipes" aria-labelledby="pancake-recipes">
       <h2 id="pancake-recipes">Рецепты блинов</h2>
-      <p>Здесь появятся рецепты из старой поваренной книги.</p>
+      <p>«Лучшие московские блины, или Практические наставления, как печь блины и оладьи, состоящие из 24 правил». Москва, 1854. Все 24 правила в современном изложении, с номерами и страницами оригинала.</p>
+      <details class="recipe-measures"><summary>Как читать старинные меры</summary><p>Фунт — около 409,5 г; полфунта — около 205 г; штоф — около 1,23 л, полуштоф — около 615 мл. Бутылки, рюмки и чашки оставлены в исходных мерах: объём мог различаться. «По пропорции» означает, что точного количества книга не указывает. Коринка — мелкий сушёный виноград; чухонское масло — старое название сливочного масла. Исторические рецепты не апробированы на современной кухне; яйца и начинки доводите до готовности.</p></details>
+      {groups.map(group=><section class="recipe-group"><h3>{group.title} · {group.items.length}</h3>{group.items.map(recipe=><RecipeCard recipe={recipe}/>)}</section>)}
     </section>
   </div>
 </StarlightPage>
@@ -21,4 +26,5 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
   .pancakes-invitation p { margin:.45rem 0 0!important; }
   .pancakes-recipes h2 { font-size:1.12rem; margin:0 0 .5rem!important; }
   .pancakes-recipes p { color:var(--sl-color-gray-3); margin:0!important; }
+.recipe-group{display:grid;gap:.45rem;margin-block:1rem!important}.recipe-group h3{font-size:1rem;margin:0!important}.recipe-measures{margin-top:.7rem!important;padding:.6rem .8rem;border:1px solid var(--sl-color-gray-5);border-radius:.7rem}.recipe-measures summary{cursor:pointer;color:var(--sl-color-text-accent);font-weight:600}.recipe-measures p{margin:.5rem 0!important}
 </style>
