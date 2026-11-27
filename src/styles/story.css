@@ -91,3 +91,7 @@
 .festival-intro :is(.story-history-content,.story-name-content)>:last-child,.festival-intro .story-history-content div > :last-child{margin-bottom:0!important}
 .festival-intro [hidden]{display:none!important}
 @media(max-width:420px){.festival-intro{--story-inset:.85rem}}
+
+.story-characters{min-width:0;margin:0!important}
+.story-characters>h2{font-size:1.28rem;margin:0 0 .65rem!important}
+.story-characters .home-character-grid{margin:0!important}

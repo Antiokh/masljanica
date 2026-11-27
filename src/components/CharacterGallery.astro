@@ -3,6 +3,7 @@ import CharacterDialog from './CharacterDialog.astro';
 import characters from '../data/characters.json';
 import archive from '../data/character-archive.json';
 import { existsSync } from 'node:fs';
+const {embedded=false}=Astro.props;
 type Archived={path:string; width:number; height:number};
 const files=archive.files as Record<string,Archived>;
 const people=characters.filter(x=>x.show).map(x=>{
@@ -11,10 +12,10 @@ const people=characters.filter(x=>x.show).map(x=>{
   return {...x,src};
 });
 ---
-<div class="home-character-grid" data-character-gallery>
+<div class="home-character-grid" data-character-gallery={embedded?undefined:""}>
   {people.map(x=><button type="button" class="home-character-card" data-character-open={x.slug} aria-haspopup="dialog" aria-controls={'character-'+x.slug}>
     <span class="home-character-art" aria-hidden="true">{x.src?<img src={x.src} alt="" width={files[x.image]?.width||640} height={files[x.image]?.height||640} decoding="async"/>:<span>{x.title.slice(0,1)}</span>}</span>
     <strong>{x.title}</strong>
   </button>)}
-  {people.map(x=><CharacterDialog person={x}/>)}
+  {!embedded && people.map(x=><CharacterDialog person={x}/>)}
 </div>

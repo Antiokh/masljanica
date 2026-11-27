@@ -40,7 +40,8 @@ try {
   assert.match(await page.locator('.festival-brand-subtitle').innerText(),/^Белград/);
   await page.waitForFunction(()=>document.querySelector('.home-dashboard .home-section-card') && document.querySelector('.home-dashboard [data-home-season="event"]')?.hidden === (document.querySelector('.home-dashboard').dataset.eventEnabled!=='true'||document.querySelector('.home-dashboard').dataset.eventDate < new Intl.DateTimeFormat('sv-SE',{timeZone:document.querySelector('.home-dashboard').dataset.eventTimezone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())));
   assert.equal(await page.locator('.home-section-card').count(),4);
-  assert.equal(await page.locator('.home-character-card').count(),5);
+  assert.equal(await page.locator('.home-character-card').count(),0);
+  assert.equal(await page.locator('.home-workshop-card').count(),6);
   const home=page.locator('[data-home-dashboard]');
   await home.evaluate(el=>{el.dataset.eventDate='2000-01-01';window.dispatchEvent(new Event('pageshow'));});
   await page.locator('.home-program').waitFor({state:'hidden'});
@@ -83,7 +84,7 @@ try {
   for(const width of [320,390,1440]){
     await page.setViewportSize({width,height:900});
     const layout=await page.locator('[data-home-dashboard]').evaluate(root=>{
-      const ordered=['.home-hero','.festival-intro','.home-program','.home-admission','.home-sections','.home-characters'].map(s=>root.querySelector(s).getBoundingClientRect());
+      const ordered=['.home-hero','.festival-intro','.home-program','.home-admission','.home-sections','.home-workshops'].map(s=>root.querySelector(s).getBoundingClientRect());
       const icon=root.querySelector('.home-calendar .home-event-icon').getBoundingClientRect(),map=root.querySelector('.home-location').getBoundingClientRect(),sun=root.querySelector('.home-hero-art').getBoundingClientRect();
       return {stack:ordered.slice(1).every((r,i)=>r.top>=ordered[i].bottom-1),widths:ordered.every(r=>Math.abs(r.width-ordered[0].width)<2),iconGap:map.top-icon.bottom,sunWidth:sun.width,aligned:Math.abs(icon.right-map.right)<2};
     });
@@ -104,19 +105,17 @@ try {
     assert.match(await detail.innerText(),pattern);
     await detail.locator('summary').click();
   }
-  const character=page.locator('[data-character-open]').first();
-  const urlBefore=page.url();
-  await character.click();
-  await page.locator('dialog[data-character-dialog][open]').waitFor({state:'visible'});
-  assert.equal(page.url(),urlBefore,'Opening a character must not navigate');
-  await page.keyboard.press('Escape');
-  await page.locator('dialog[data-character-dialog][open]').waitFor({state:'hidden'});
-  assert.equal(await page.locator('[data-character-open]').first().evaluate(el=>document.activeElement===el),true,'Dialog restores focus');
-  const localPortraits=page.locator('.home-character-art img');
-  for(const img of await localPortraits.all()){
-    assert.match(await img.getAttribute('src'),/^\/media\/characters\/[a-f0-9]+\.webp$/);
-    await img.evaluate(el=>el.decode());
+  const previews=page.locator('.home-workshop-card');
+  for(const preview of await previews.all()){
+    assert.match(await preview.getAttribute('href'),/^\/workshops\/#/);
+    await preview.locator('img').evaluate(el=>el.decode());
   }
+  await previews.first().click();
+  await page.waitForURL(url=>url.pathname==='/workshops/'&&!!url.hash);
+  const target=decodeURIComponent(new URL(page.url()).hash.slice(1));
+  await page.locator('[data-workshop-panel="'+target+'"]').waitFor({state:'visible'});
+  await page.locator('.app-nav a[href="/"]').click();
+  await page.waitForURL(url=>url.pathname==='/'&&!url.hash);
 
   await page.reload();
   await page.setViewportSize({width:1440,height:900});
@@ -372,6 +371,24 @@ try {
   await page.locator('.more-links a[href="/scenario/"]').click();
   await page.waitForURL('**/scenario/');
   assert.equal(await page.locator('.story-part').count(),3);
+  assert.equal(await page.locator('.story-characters .home-character-card').count(),5);
+  const dialogIds=await page.locator('dialog[data-character-dialog]').evaluateAll(els=>els.map(el=>el.id));
+  assert.equal(new Set(dialogIds).size,dialogIds.length,'Exactly one dialog for each character');
+  assert.ok(await page.locator('.story-characters').evaluate(el=>!!(el.compareDocumentPosition(document.querySelector('.story-scenario')) & Node.DOCUMENT_POSITION_FOLLOWING)));
+  const character=page.locator('.story-characters [data-character-open]').first();
+  const urlBefore=page.url();
+  await character.click();
+  await page.locator('dialog[data-character-dialog][open]').waitFor({state:'visible'});
+  assert.equal(page.url(),urlBefore,'Opening a character must not navigate');
+  await page.keyboard.press('Escape');
+  await page.locator('dialog[data-character-dialog][open]').waitFor({state:'hidden'});
+  assert.equal(await page.locator('.story-characters [data-character-open]').first().evaluate(el=>document.activeElement===el),true,'Dialog restores focus');
+  const localPortraits=page.locator('.story-characters .home-character-art img');
+  for(const img of await localPortraits.all()){
+    assert.match(await img.getAttribute('src'),/^\/media\/characters\/[a-f0-9]+\.webp$/);
+    await img.evaluate(el=>el.decode());
+  }
+
   assert.equal(await page.locator('[data-story-line]').count(),49);
   assert.equal(await page.locator('[data-story-music]').count(),3);
   await page.locator('.story-history').waitFor({state:'visible'});
@@ -476,11 +493,16 @@ try {
     await tg.waitForFunction(()=>window.__tgBackVisible);
     await tg.evaluate(()=>window.__tgBack());
     await tg.waitForFunction(()=>!document.querySelector('.more-menu').open&&!window.__tgBackVisible);
-    const firstCharacter=tg.locator('[data-character-open]').first();
+    await tg.locator('.home-section-card[href="/scenario/"]').click();
+    await tg.waitForURL('**/scenario/');
+    const firstCharacter=tg.locator('.story-characters [data-character-open]').first();
     await firstCharacter.click();
     await tg.waitForFunction(()=>window.__tgBackVisible);
     await tg.evaluate(()=>history.back());
     await tg.locator('dialog[data-character-dialog][open]').waitFor({state:'hidden'});
+    assert.equal(new URL(tg.url()).pathname,'/scenario/','Back closes the dialog before leaving story');
+    await tg.evaluate(()=>window.__tgBack());
+    await tg.waitForURL(url=>url.pathname==='/');
     await tg.waitForFunction(()=>!window.__tgBackVisible);
     assert.equal(await tg.evaluate(()=>window.__tgClosed),0,'System Back closes overlay, not app');
     assert.equal(await tg.evaluate(()=>matchMedia('(prefers-color-scheme: light)').matches),true,'Telegram dark launch must override light OS and uninitialized bridge');

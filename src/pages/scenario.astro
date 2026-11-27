@@ -1,6 +1,7 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import StoryLine from '../components/StoryLine.astro';
+import CharacterGallery from '../components/CharacterGallery.astro';
 import CharacterDialog from '../components/CharacterDialog.astro';
 import GameIcon from '../components/GameIcon.astro';
 import characters from '../data/characters.json';
@@ -29,6 +30,10 @@ const prepared=ordered.map(row=>{const actor=actors.get(row.actor),song=row.song
 <StarlightPage frontmatter={{title:'Сказ',template:'splash',description:'История Масляницы и театральный сказ нашего праздника.'}}>
  <div class="story-book" data-character-gallery data-story-book>
   <FestivalIntro />
+  <section class="story-characters" aria-labelledby="story-characters-title">
+    <h2 id="story-characters-title">Герои нашего сказа</h2>
+    <CharacterGallery embedded={true}/>
+  </section>
   <section class="story-scenario" aria-labelledby="story-scenario-title">
     <h2 id="story-scenario-title">Наш масляничный сказ</h2>
     <audio id="story-audio" hidden preload="none"></audio>
@@ -41,6 +46,6 @@ const prepared=ordered.map(row=>{const actor=actors.get(row.actor),song=row.song
       </details>)}
     </div>
   </section>
-  {people.filter(x=>ordered.some(row=>row.actor===x.id)).map(x=><CharacterDialog person={x}/>)}
+  {people.filter(x=>x.show||ordered.some(row=>row.actor===x.id)).map(x=><CharacterDialog person={x}/>)}
  </div>
 </StarlightPage>

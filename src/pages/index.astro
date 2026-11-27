@@ -8,7 +8,7 @@ import schedule from '../data/schedule.json';
 import { calendarEvent, googleCalendarUrl } from '../lib/event-calendar.mjs';
 import FestivalIntro from '../components/FestivalIntro.astro';
 import GameIcon from '../components/GameIcon.astro';
-import CharacterGallery from '../components/CharacterGallery.astro';
+import WorkshopPreview from '../components/WorkshopPreview.astro';
 import songs from '../data/songs.json';
 import games from '../data/games.json';
 import { validEventDate, calendarDay } from '../../public/home-season.mjs';
@@ -106,10 +106,7 @@ const sections = [
           </a>)}
         </div>
       </section>
-    <section class="home-characters" aria-labelledby="home-characters-title">
-      <div class="home-section-heading"><h2 id="home-characters-title">Герои нашего сказа</h2></div>
-      <CharacterGallery />
-    </section>
+    <WorkshopPreview />
     <footer class="home-credit">Разработано Anton Nazarov</footer>
   </div>
 </StarlightPage>

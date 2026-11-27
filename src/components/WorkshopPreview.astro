@@ -1,0 +1,20 @@
+---
+import workshops from '../data/workshops.json';
+import details from '../data/workshop-details.json';
+import GameIcon from './GameIcon.astro';
+const meta=details as Record<string,{art:string;age_min?:number;age_max?:number}>;
+const items=workshops.filter(x=>x.enabled);
+---
+{items.length>0 && <section class="home-workshops" aria-labelledby="home-workshops-title" data-pagefind-ignore>
+  <div class="home-section-heading">
+    <h2 id="home-workshops-title">Мастер-классы</h2>
+    <a href="/workshops/">Все мастер-классы →</a>
+  </div>
+  <div class="home-workshop-grid">
+    {items.map(item=><a class="home-workshop-card" href={'/workshops/#'+encodeURIComponent(item.slug)} data-astro-prefetch="hover">
+      <picture><source srcset={'/media/workshops/'+meta[item.slug].art+'.webp'} type="image/webp"/><img src={'/media/workshops/'+meta[item.slug].art+'.svg'} alt="" width="640" height="480" loading="lazy" decoding="async"/></picture>
+      <span class="home-workshop-info"><strong>{item.title}</strong><small>{item.host}</small></span>
+      <GameIcon name="chevron" class="home-workshop-chevron"/>
+    </a>)}
+  </div>
+</section>}
