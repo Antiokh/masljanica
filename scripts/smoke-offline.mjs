@@ -470,7 +470,7 @@ try {
 
   assert.equal(await page.locator('[data-story-line]').count(),49);
   assert.equal(await page.locator('.story-stage-label .story-stage-instrument').count(),5,'All stage directions use the balalaika icon');
-  assert.equal(await page.locator('.story-stage-label .story-stage-instrument path').first().getAttribute('d'),"M3 21 5 8l11 11L3 21Z M10.5 13.5 19 5 M17.5 3.5 20.5 6.5 22 5 19 2z M7.5 16.5h.01");
+  assert.equal(await page.locator('.story-stage-label .story-stage-instrument path').first().getAttribute('d'),"M2.5 12 13 11 12 21.5Z M13 11 18.5 5.5 M17.5 4.5 19.8 2.2 21.8 4.2 19.5 6.5Z M10 15.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 1 0 3 0");
   assert.equal(await page.locator('[data-story-music]').count(),3);
   await page.locator('.story-history').waitFor({state:'visible'});
   assert.equal(await page.locator('.story-history-art').count(),0,'No oversized decorative history panel');
