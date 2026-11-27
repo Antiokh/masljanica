@@ -3,6 +3,7 @@ import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {asUTC} from './event-calendar.mjs';
 import {sources,sourceText,terms,glossaryText,questions,faqText} from './knowledge-content.mjs';
+import {localizedFestivalPages} from './festival-locales.mjs';
 export const site='https://masljanica.pages.dev';
 export const brand='Масляница · Белград';
 // Astro bundles server-side modules into dist before prerendering; resolve data from the project root.
@@ -73,6 +74,9 @@ const details=[
  ...workshops.map(x=>section('/workshops/'+x.slug+'/',x.title,(x.enabled?'Мастер-класс Масляницы. ':'Мастер-класс пока не подтверждён. ')+excerpt(x.description),workshopBody(x))),
  ...parts.map(p=>section('/scenario/'+p.number+'/',p.title,'Театральный сказ Масляницы, часть '+p.number+'.',partBody(p)))
 ];
+export const localizedPages=localizedFestivalPages({upcoming,date:config.date,time:ogEvent?.time,location:ogEvent?.location,mapUrl:event.mapUrl,schedule,showSchedule:config.schedule});
+export const languageAlternates=[{lang:'ru',path:'/'},{lang:'sr-Latn',path:'/sr/'},{lang:'en',path:'/en/'},{lang:'x-default',path:'/'}];
+sections.push(...localizedPages);
 export const pages=[...sections,...details,...editorialPages.filter(p=>!referenceSections.includes(p))];
 export const pageFor=path=>pages.find(p=>p.path===canonicalPath(path));
 export const ogPath=(path,format='landscape')=>{
@@ -80,10 +84,10 @@ export const ogPath=(path,format='landscape')=>{
  return dir+(canonicalPath(path)==='/'?'index':createHash('sha256').update(canonicalPath(path)).digest('hex').slice(0,20))+'.png';
 };
 const id=site+'/#website';
-export const website={'@type':'WebSite','@id':id,name:brand,alternateName:['Масленица в Белграде','Масленица в Сербии','Masljanica','Maslenica u Beogradu','Maslenitsa in Belgrade'],url:site+'/',inLanguage:'ru',description:sections[0].description,sameAs:socials.map(s=>s.href)};
+export const website={'@type':'WebSite','@id':id,name:brand,alternateName:['Масленица в Белграде','Масленица в Сербии','Masljanica','Maslenica u Beogradu','Maslenitsa in Belgrade'],url:site+'/',inLanguage:['ru','sr-Latn','en'],description:sections[0].description,sameAs:socials.map(s=>s.href)};
 export function structuredData(p){
  const pageUrl=url(p.path),parent=sections.find(s=>s.path!=='/'&&p.path.startsWith(s.path)),crumb=p.path==='/'?null:{'@type':'BreadcrumbList','@id':pageUrl+'#breadcrumb',itemListElement:[sections[0],...(parent&&parent!==p?[parent]:[]),p].map((x,i)=>({'@type':'ListItem',position:i+1,name:x.title,item:url(x.path)}))};
- const page={'@type':p.path==='/'?'WebPage':details.includes(p)?'WebPage':['/history/'].includes(p.path)?'WebPage':'CollectionPage','@id':pageUrl+'#webpage',url:pageUrl,name:p.title,description:p.description,inLanguage:'ru',isPartOf:{'@id':id},primaryImageOfPage:{'@type':'ImageObject',url:site+ogPath(p.path),width:1200,height:630},...(crumb?{breadcrumb:{'@id':crumb['@id']}}:{})};
+ const page={'@type':p.path==='/'||p.kind==='LocalizedFestival'||details.includes(p)||editorialPages.includes(p)?'WebPage':['/history/'].includes(p.path)?'WebPage':'CollectionPage','@id':pageUrl+'#webpage',url:pageUrl,name:p.title,description:p.description,inLanguage:p.lang||'ru',isPartOf:{'@id':id},primaryImageOfPage:{'@type':'ImageObject',url:site+ogPath(p.path),width:1200,height:630},...(crumb?{breadcrumb:{'@id':crumb['@id']}}:{})};
  const graph=[website,page];if(crumb)graph.push(crumb);
  if(p.path==='/'&&upcoming&&period){
   const iso=t=>asUTC(config.date,t,config.timezone).replace(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/,'$1-$2-$3T$4:$5:$6Z');
@@ -91,6 +95,7 @@ export function structuredData(p){
   const e={'@type':'Event','@id':site+'/#festival-'+config.date,name:'Масляница в Белграде',url:site+'/',description:eventDescription,startDate:iso(period.start),endDate:iso(period.end),eventAttendanceMode:'https://schema.org/OfflineEventAttendanceMode',location:{'@type':'Place',name:event.address,address:{'@type':'PostalAddress',streetAddress:event.address,addressLocality:event.city,addressCountry:event.countryCode},geo:{'@type':'GeoCoordinates',latitude,longitude}},image:[site+ogPath('/'),site+ogPath('/','square')],eventStatus:'https://schema.org/EventScheduled',isAccessibleForFree:true,offers:{'@type':'Offer',price:0,priceCurrency:'RSD',url:site+'/'}};
   graph.push(e);page.mainEntity={'@id':e['@id']};
  }
+ if(p.kind==='LocalizedFestival'&&upcoming&&period)page.about={'@id':site+'/#festival-'+config.date};
  if(p.path==='/pancakes/')graph.push({'@type':'ItemList',itemListElement:recipes.map((x,i)=>({'@type':'ListItem',position:i+1,name:x.title,url:anchor('/pancakes/',x.id)}))});
  const entityId=pageUrl+'#content';
  const add=entity=>{graph.push({'@id':entityId,url:pageUrl,name:p.title,inLanguage:'ru',...entity});page.mainEntity={'@id':entityId};};
@@ -107,5 +112,5 @@ export function structuredData(p){
 }
 export const festivalData={name:'Масляница',alternateName:'Масленица',url:site+'/',upcoming,date:upcoming?config.date:null,timezone:config.timezone,start:ogEvent&&period?period.start:null,end:ogEvent&&period?period.end:null,location:upcoming?{name:event.venue,city:event.city,country:event.country,countryCode:event.countryCode,coordinates:event.coords,mapUrl:event.mapUrl}:null,freeAdmission:upcoming?true:null,programme:upcoming&&config.schedule?schedule:[],socials:socials.map(({name,href})=>({name,url:href}))};
 export function knowledgeGraph(){const byId=new Map(),anonymous=[];for(const p of pages)for(const n of structuredData(p)['@graph']){if(n['@id'])byId.set(n['@id'],n);else anonymous.push(n);}return {'@context':'https://schema.org','@graph':[...byId.values(),...anonymous]};}
-export const llmLd={'@context':['https://schema.org','https://llmld.org/v1'],'@type':'llmld:AIWebsite',name:brand,url:site+'/',inLanguage:'ru',description:sections[0].description,sameAs:socials.map(s=>s.href),keywords:['Масляница','Масленица','Белград','народные традиции','Maslenitsa','Belgrade','Serbia'],'llmld:summary':{one_liner:sections[0].description,key_facts:[eventDescription,'Дату мероприятия проверяйте по главной странице. Неподтверждённые мастер-классы не являются частью программы.','Исторические гипотезы и современные практики различаются; сохраняйте ссылки на источники.','Доступность материалов не означает общую открытую лицензию.']},'llmld:actions':{primary:[{name:'LLM index',url:site+'/llms.txt'},{name:'Full text',url:site+'/llms-full.txt'},{name:'Compact text',url:site+'/llms-small.txt'}]}};
-export const aiIntro='# '+brand+'\n\n> '+sections[0].description+'\n\nОсновной язык — русский. Используйте канонические ссылки на конкретные страницы. '+eventDescription+' Сверяйте дату и статус программы перед рекомендацией посещения. Для исторических утверждений сохраняйте атрибуцию и ссылки; общая лицензия на сторонние записи, изображения и тексты не заявлена.\n';
+export const llmLd={'@context':['https://schema.org','https://llmld.org/v1'],'@type':'llmld:AIWebsite',name:brand,url:site+'/',inLanguage:['ru','sr-Latn','en'],description:sections[0].description,sameAs:socials.map(s=>s.href),keywords:['Масляница','Масленица','Белград','народные традиции','Maslenitsa','Belgrade','Serbia'],'llmld:summary':{one_liner:sections[0].description,key_facts:[eventDescription,'Дату мероприятия проверяйте по главной странице. Неподтверждённые мастер-классы не являются частью программы.','Исторические гипотезы и современные практики различаются; сохраняйте ссылки на источники.','Доступность материалов не означает общую открытую лицензию.']},'llmld:actions':{primary:[{name:'LLM index',url:site+'/llms.txt'},{name:'Full text',url:site+'/llms-full.txt'},{name:'Compact text',url:site+'/llms-small.txt'},{name:'Festival data',url:site+'/festival.json'},{name:'Knowledge graph',url:site+'/knowledge.jsonld'}]}};
+export const aiIntro='# '+brand+'\n\n> '+sections[0].description+'\n\nОсновной язык — русский. Краткие версии фестиваля: /sr/ (сербский), /en/ (английский). Используйте канонические ссылки на конкретные страницы. '+eventDescription+' Сверяйте дату и статус программы перед рекомендацией посещения. Для исторических утверждений сохраняйте атрибуцию и ссылки; общая лицензия на сторонние записи, изображения и тексты не заявлена.\n';

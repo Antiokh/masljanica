@@ -83,3 +83,6 @@ Telegram BackButton: [контракт навигации](docs/LAYOUT.md#telegr
 ## Сказ
 
 [STORY.md](docs/STORY.md) — живая книга, история праздника отдельно, театральные реплики, локальные портреты и музыкальные вставки.
+
+## SEO / AI discovery
+[AGENTS.md](AGENTS.md) — точка входа для нового AI-чата. [DISCOVERY.md](docs/DISCOVERY.md) — контракты метаданных, OG, индексируемых статей, многоязычных посадочных и AI-экспорта. Публичные машинные данные: /festival.json, /knowledge.jsonld, /llms.txt. /sr/ и /en/ — локализованные афиши; библиотека остаётся на русском.

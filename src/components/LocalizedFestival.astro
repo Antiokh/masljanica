@@ -1,0 +1,61 @@
+---
+import {site,url,ogPath,structuredData,languageAlternates} from '../lib/site-content.mjs';
+import {libraryPaths} from '../lib/festival-locales.mjs';
+const {page}=Astro.props;
+const landscape=site+ogPath(page.path),square=site+ogPath(page.path,'square');
+const schema=JSON.stringify(structuredData(page)).replace(/</g,'\\u003c');
+---
+<!doctype html>
+<html lang={page.lang}>
+ <head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{page.seoTitle}</title>
+  <meta name="description" content={page.description}/>
+  <meta name="theme-color" content="#101827"/>
+  <link rel="canonical" href={url(page.path)}/>
+  {languageAlternates.map(a=><link rel="alternate" hreflang={a.lang} href={url(a.path)}/>)}
+  <link rel="icon" type="image/png" href="/favicon-96x96.png"/>
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+  <meta property="og:title" content={page.title}/>
+  <meta property="og:description" content={page.description}/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content={url(page.path)}/>
+  <meta property="og:site_name" content="Masljanica"/>
+  <meta property="og:locale" content={page.locale}/>
+  <meta property="og:image" content={landscape}/>
+  <meta property="og:image:type" content="image/png"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
+  <meta property="og:image:alt" content={page.title}/>
+  <meta property="og:image" content={square}/>
+  <meta property="og:image:type" content="image/png"/>
+  <meta property="og:image:width" content="1080"/>
+  <meta property="og:image:height" content="1080"/>
+  <meta property="og:image:alt" content={page.title}/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content={page.title}/>
+  <meta name="twitter:description" content={page.description}/>
+  <meta name="twitter:image" content={landscape}/>
+  <script type="application/ld+json" id="masljanica-schema" set:html={schema}/>
+  <script is:inline>
+   (()=>{let mode='auto';try{mode=localStorage.getItem('starlight-theme')||'auto';}catch{}const root=document.documentElement;root.dataset.theme=mode==='light'||mode==='dark'?mode:matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=root.dataset.theme==='light'?'#FFFFFF':'#101827';})();
+  </script>
+ </head>
+ <body>
+  <main>
+   <nav aria-label={page.code==='sr'?'Jezik':'Language'}><a href="/" lang="ru">Русский</a> · <a href="/sr/" lang="sr-Latn" aria-current={page.code==='sr'?'page':undefined}>Srpski</a> · <a href="/en/" lang="en" aria-current={page.code==='en'?'page':undefined}>English</a></nav>
+   <header><div><p class="kicker">{page.brand}</p><h1>{page.title}</h1><p>{page.intro}</p></div><img src="/media/maslyanica-sun.webp" width="160" height="160" alt=""/></header>
+   <section><h2>{page.dateHeading}</h2><p class="event">{page.dateLine}</p>{page.upcoming&&<><p>{page.free}</p><p><a href={page.mapUrl}>{page.map} ↗</a></p></>}</section>
+   {page.programme.length>0&&<section><h2>{page.programmeHeading}</h2><ul class="programme">{page.programme.map(x=><li><time>{x.start}–{x.end}</time><span>{x.title}</span></li>)}</ul></section>}
+   <section><h2>{page.aboutHeading}</h2><p>{page.about}</p></section>
+   <section><h2>{page.libraryHeading}</h2><p>{page.libraryIntro}</p><ul class="library">{page.links.map((title,i)=><li><a href={libraryPaths[i]}>{title} →</a></li>)}</ul></section>
+   <footer><a href="/">{page.main} →</a></footer>
+  </main>
+ </body>
+</html>
+<style>
+ :global(html){color-scheme:dark;background:#101827;color:#E2E8F0;font-family:system-ui,sans-serif;line-height:1.65}
+ :global(html[data-theme=light]){color-scheme:light;background:#fff;color:#243344}
+ :global(body){margin:0}main{max-width:56rem;margin:auto;padding:clamp(1rem,4vw,2.5rem)}a{color:#F9A04B;text-underline-offset:.2em}:global(html[data-theme=light]) a{color:#C34D21}nav{font-size:.9rem;text-align:right}nav a[aria-current]{font-weight:700;text-decoration:none}header{display:grid;grid-template-columns:1fr minmax(5rem,10rem);align-items:center;gap:1rem;padding-block:1.4rem;border-bottom:1px solid #71849E}header img{width:100%;height:auto}h1{font-size:clamp(1.9rem,5vw,3rem);line-height:1.1;margin:.2rem 0 .7rem}h2{font-size:1.35rem;margin:0 0 .5rem}p{margin:.35rem 0 .65rem}.kicker{font-size:.75rem;font-weight:700;letter-spacing:.06em;color:#F9A04B}:global(html[data-theme=light]) .kicker{color:#C34D21}section{margin-top:1.5rem}.event{font-size:1.1rem;font-weight:700}.programme,.library{list-style:none;padding:0;margin:0}.programme li{display:grid;grid-template-columns:7rem 1fr;gap:.65rem;border-bottom:1px solid #71849E55;padding:.5rem 0}.programme time{font-variant-numeric:tabular-nums;white-space:nowrap}.library{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:.5rem}.library a{display:block;padding:.5rem .7rem;border:1px solid #71849E66;border-radius:.5rem}footer{margin-top:2rem;padding-top:1rem;border-top:1px solid #71849E55}@media(max-width:420px){header{grid-template-columns:1fr 5rem;align-items:start}.programme li{grid-template-columns:6.5rem 1fr}}
+</style>

@@ -1,0 +1,6 @@
+---
+import LocalizedFestival from '../components/LocalizedFestival.astro';
+import {localizedPages} from '../lib/site-content.mjs';
+const page=localizedPages.find(p=>p.code==='en');
+---
+<LocalizedFestival page={page}/>

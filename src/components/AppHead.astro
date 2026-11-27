@@ -1,7 +1,7 @@
 ---
 import Head from '@astrojs/starlight/components/Head.astro';
 import { ClientRouter } from 'astro:transitions';
-import { site,brand,pageFor,ogPath,structuredData,llmLd,url } from '../lib/site-content.mjs';
+import { site,brand,pageFor,ogPath,structuredData,llmLd,url,languageAlternates } from '../lib/site-content.mjs';
 const page=pageFor(Astro.url.pathname);
 const head=Astro.locals.starlightRoute.head;
 const setMeta=(key:string,name:string,content:string)=>{
@@ -9,6 +9,10 @@ const setMeta=(key:string,name:string,content:string)=>{
   head.push({tag:'meta',attrs:{[key]:name,content}});
 };
 if(page){
+  if(page.path==='/'){
+    for(let i=head.length-1;i>=0;i--){const t=head[i];if(t.tag==='link'&&t.attrs?.rel==='alternate'&&'hreflang' in (t.attrs||{}))head.splice(i,1);}
+    for(const a of languageAlternates)head.push({tag:'link',attrs:{rel:'alternate',hreflang:a.lang,href:url(a.path)}});
+  }
   const image=site+ogPath(page.path),title=page.path==='/'?page.title:page.title+' · '+brand;
   const titleTag=head.find(t=>t.tag==='title');if(titleTag)titleTag.content=page.seoTitle||title;
   setMeta('name','description',page.description);

@@ -22,9 +22,9 @@ function limited(s,max,limit){
 const text=(s,x,y,size,fill,weight=400)=>'<text x="'+x+'" y="'+y+'" font-size="'+size+'" font-weight="'+weight+'" fill="'+fill+'">'+esc(s)+'</text>';
 function fit(s,width,size,min,count){let lines=wrap(s,width/size);while(lines.length>count&&size>min){size-=2;lines=wrap(s,width/size);}return {size,lines:limited(s,width/size,count)};}
 const ink='#8D3618',accent='#C34D21',secondary='#536477';
-function header(event,square){
+function header(event,square,brandLabel){
  const x=64,y=45,w=square?952:550;
- const brand=text('МАСЛЯНИЦА · БЕЛГРАД',x,y+28,27,ink,700);
+ const brand=text(brandLabel,x,y+28,27,ink,700);
  if(!event)return brand+'<path d="M64 94h190" stroke="'+accent+'" stroke-width="5" stroke-linecap="round"/>';
  const when=[event.date,event.time].filter(Boolean).join(' · ');
  const d=fit(when,w-52,square?39:31,21,1),place=fit(event.location,w-52,square?30:24,18,2);
@@ -32,7 +32,7 @@ function header(event,square){
  const pin='<g transform="translate('+x+' 157)" fill="none" stroke="'+accent+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10c0 6-9 14-9 14S4 16 4 10a9 9 0 1 1 18 0Z"/><circle cx="13" cy="10" r="3"/></g>';
  return brand+cal+text(d.lines.join(' '),x+38,139,d.size,ink,700)+pin+place.lines.map((line,i)=>text(line,x+38,182+i*place.size*1.1,place.size,secondary,500)).join('');
 }
-export function renderOgSvg(title,event,description='',format='landscape'){
+export function renderOgSvg(title,event,description='',format='landscape',brandLabel='МАСЛЯНИЦА · БЕЛГРАД'){
  const layout=ogFormats[format];if(!layout)throw Error('Unknown OG format '+format);
  const square=format==='square',w=square?930:535,x=64;
  const h=fit(title,w,square?79:75,square?38:34,3),step=h.size*1.1;
@@ -41,5 +41,5 @@ export function renderOgSvg(title,event,description='',format='landscape'){
  const descSize=square?32:30,descY=top+h.size*.82+(h.lines.length-1)*step+descSize+25;
  const room=Math.max(1,Math.floor(((square?1020:565)-descY)/(descSize*1.24))+1);
  const desc=limited(description,w/descSize,Math.min(square?3:4,room)).map((line,i)=>text(line,x,descY+i*descSize*1.24,descSize,secondary,500)).join('');
- return '<svg xmlns="http://www.w3.org/2000/svg" width="'+layout.width+'" height="'+layout.height+'" viewBox="0 0 '+layout.width+' '+layout.height+'"><rect width="'+layout.width+'" height="'+layout.height+'" fill="#FFF1E8"/><rect x="22" y="22" width="'+(layout.width-44)+'" height="'+(layout.height-44)+'" rx="24" fill="none" stroke="#E9B44C" stroke-width="3"/><g font-family="DejaVu Sans, Noto Sans, sans-serif">'+header(event,square)+heading+desc+'</g></svg>';
+ return '<svg xmlns="http://www.w3.org/2000/svg" width="'+layout.width+'" height="'+layout.height+'" viewBox="0 0 '+layout.width+' '+layout.height+'"><rect width="'+layout.width+'" height="'+layout.height+'" fill="#FFF1E8"/><rect x="22" y="22" width="'+(layout.width-44)+'" height="'+(layout.height-44)+'" rx="24" fill="none" stroke="#E9B44C" stroke-width="3"/><g font-family="DejaVu Sans, Noto Sans, sans-serif">'+header(event,square,brandLabel)+heading+desc+'</g></svg>';
 }

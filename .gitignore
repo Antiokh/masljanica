@@ -20,3 +20,6 @@ legacy/
 /public/apple-touch-icon.png
 /public/web-app-manifest-*.png
 /public/maskable-512x512.png
+
+/public/festival.json
+/public/knowledge.jsonld

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import sharp from 'sharp';
-import {pages,site,url,ogPath,ogEvent} from '../src/lib/site-content.mjs';
+import {pages,site,url,ogPath,ogEvent,festivalData,languageAlternates} from '../src/lib/site-content.mjs';
 import {renderOgSvg,ogFormats} from './og-layout.mjs';
 for(const [format,layout] of Object.entries(ogFormats)){
  const sample=renderOgSvg('Сказ',{date:'14 марта 2027',time:'11:30–16:00',location:'Roštilj zona, Ada Ciganlija, Beograd'},'Герои, сценарий праздника и музыкальное сопровождение.',format);
@@ -26,6 +26,11 @@ for(const p of pages){
  const file=candidates.find(existsSync);assert.ok(file,'Canonical page missing: '+p.path);
  const html=readFileSync(file,'utf8');
  for(const marker of ['og:image','twitter:card','masljanica-schema','rel="canonical"',site+ogPath(p.path)])assert.ok(html.includes(marker),p.path+' missing '+marker);
+ if(p.seoTitle)assert.ok(html.includes(p.seoTitle.replaceAll('&','&amp;')),p.path+' SEO title');
+ if(p.kind==='LocalizedFestival'||p.path==='/'){
+  for(const a of languageAlternates)assert.ok(html.includes('hreflang="'+a.lang+'"'),p.path+' hreflang '+a.lang);
+  if(p.lang)assert.ok(html.includes('<html lang="'+p.lang+'"'),p.path+' HTML language');
+ }
  const images=[...html.matchAll(/<meta\b[^>]*property="og:image"[^>]*content="([^"]+)"/g)].map(m=>m[1]);
  assert.deepEqual(images,[site+ogPath(p.path),site+ogPath(p.path,'square')],p.path+' ordered OG alternatives');
  for(const [format,layout] of Object.entries(ogFormats)){
@@ -47,5 +52,10 @@ const home=readFileSync(root+'/index.html','utf8');
 assert.match(home,/<meta\b[^>]*name="theme-color"[^>]*content="#101827"/);
 assert.ok(home.includes('apple-mobile-web-app-title'));
 for(const name of ['llms.txt','llms-small.txt','llms-full.txt','robots.txt'])assert.ok(readFileSync(root+'/'+name,'utf8').includes(site),name);
+assert.equal(new Set(pages.map(p=>p.path)).size,pages.length,'Unique canonical pages');
+const festival=JSON.parse(readFileSync(root+'/festival.json','utf8'));assert.deepEqual(festival,festivalData);
+if(festival.upcoming){assert.equal(festival.location.countryCode,'RS');assert.ok(ogEvent.location.includes(festival.location.country));}
+const graph=JSON.parse(readFileSync(root+'/knowledge.jsonld','utf8'))['@graph'];
+for(const type of ['WebSite','Article','Recipe','MusicComposition','FAQPage','DefinedTermSet','Book'])assert.ok(graph.some(n=>n['@type']===type),'Graph type '+type);
 const full=readFileSync(root+'/llms-full.txt','utf8');for(const p of pages)assert.ok(full.includes(p.title),p.title+' absent from AI corpus');
 console.log('Canonical routes, PNG previews, icons, sitemap and AI corpus verified.');

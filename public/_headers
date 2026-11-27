@@ -23,3 +23,9 @@
 
 /og-square/*
   Cache-Control: public, max-age=3600
+
+/festival.json
+  Cache-Control: no-cache
+/knowledge.jsonld
+  Content-Type: application/ld+json; charset=utf-8
+  Cache-Control: no-cache
