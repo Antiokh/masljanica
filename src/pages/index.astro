@@ -34,11 +34,8 @@ const sections = [
         <h2 id="home-title">Масляница<span data-home-season="event" data-pagefind-ignore hidden> {year}</span></h2>
         <p class="home-intro" data-home-timeless>Песни, игры, сказ и народные традиции.</p>
         <div class="home-event-meta" data-home-season="event" data-pagefind-ignore hidden>
+          <div class="home-event-group home-event-when">
           <p class="home-event-date"><time datetime={config.date}>{dateLabel}</time>{timeLabel && <span> · {timeLabel}</span>}</p>
-          <p class="home-event-address">{event.address}</p>
-          <a class="home-location" data-online-only hidden href={'https://www.google.com/maps?q='+encodeURIComponent(event.coords)} target="_blank" rel="noopener noreferrer">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg> Место проведения
-          </a>
           {items.length>0 && <details class="home-calendar-menu" data-calendar-menu>
             <summary class="home-calendar" aria-controls="home-calendar-providers">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18m-9 3v5m-2.5-2.5h5"/></svg>
@@ -56,6 +53,13 @@ const sections = [
               </a>
             </div>
           </details>}
+          </div>
+          <div class="home-event-group home-event-where">
+          <p class="home-event-address">{event.address}</p>
+          <a class="home-location" data-online-only hidden href={'https://www.google.com/maps?q='+encodeURIComponent(event.coords)} target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg> Место проведения
+          </a>
+          </div>
         </div>
       </div>
       <div class="home-hero-art" aria-hidden="true"><img src={heroLogo} alt="" width="112" height="112"/></div>

@@ -1,21 +1,6 @@
-/* The history is an independent warm bookplate; theatrical text follows the app theme. */
-.story-book{--story-warm:#F9F0DC;--story-ink:#794831;display:grid;gap:1.1rem}
+/* The two introductory articles share the ordinary story accordion style. */
+.story-book{display:grid;gap:.85rem;--story-inset:1rem}
 .story-book [hidden]{display:none!important}
-.story-history{position:relative;overflow:hidden;border:1px solid #D5B78E;border-radius:1rem;padding:1rem 1.1rem;color:var(--story-ink);background:var(--story-warm);text-align:center;margin:0!important}
-.story-history::before,.story-history::after{content:"";display:block;height:5px;background:repeating-linear-gradient(135deg,transparent 0 5px,#B5232C 5px 8px,transparent 8px 13px);opacity:.65}
-.story-history::before{margin-bottom:.5rem}.story-history::after{margin-top:.85rem}
-.story-history-art{width:4.25rem;margin:.3rem auto!important}
-.story-history-art img{width:100%;height:auto}
-.story-history h2{font-size:1.4rem;color:var(--story-ink);margin:.3rem 0!important}
-.story-history-placeholder{font-size:.9rem;margin:.5rem 0!important}
-.story-history-details{border:0;background:transparent;padding:0;margin:.65rem 0 0!important;color:var(--story-ink)}
-.story-history-details summary{display:flex;align-items:center;justify-content:center;gap:.5rem;cursor:pointer;color:#B5232C;list-style:none;font-weight:600}
-.story-history-details summary::before,.story-history-details summary::-webkit-details-marker{display:none}
-.story-history-details summary svg{width:1.15rem;height:1.15rem}
-.story-history-details[open] summary svg{transform:rotate(180deg)}
-.story-history-content{text-align:left;border-top:1px solid #D5B78E;padding-top:.75rem;line-height:1.6}
-.story-history-content :is(h1,h2,h3,h4,p,li){color:var(--story-ink)}
-.story-history-content a{color:#9A282A}
 .story-scenario{margin:0!important}
 .story-scenario>h2{font-size:1.28rem;margin:0 0 .65rem!important}
 .story-parts{display:grid;gap:.65rem;margin:0!important}
@@ -80,11 +65,19 @@
 @media(max-width:420px){.story-lines{padding-inline:.6rem}.story-line{grid-template-columns:2.3rem minmax(0,1fr);gap:.5rem}.story-portrait-button{width:2.3rem;height:2.3rem}.story-original{font-size:.95rem}}
 @media(prefers-reduced-motion:reduce){.story-chevron{transition:none}}
 
-.story-name{border:1px solid var(--sl-color-gray-5);border-radius:.8rem;background:var(--festival-surface);scroll-margin-top:5rem;margin:0!important;overflow:hidden}
-.story-name-details{padding:0!important;border:0;background:transparent;margin:0!important}
-.story-name-details summary{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.75rem .85rem;list-style:none;color:var(--sl-color-text-accent);font-weight:650;cursor:pointer}
-.story-name-details summary::before,.story-name-details summary::-webkit-details-marker{display:none}
-.story-name-details summary svg{width:1.2rem;height:1.2rem;flex:none}
-.story-name-details[open] summary svg{transform:rotate(180deg)}
-.story-name-content{padding:0 .85rem 1rem;line-height:1.6}
-.story-name-content blockquote{border-inline-start:3px solid var(--sl-color-accent);padding-inline-start:.8rem}
+
+.story-book :is(.story-history,.story-name){border:1px solid var(--sl-color-gray-5);border-radius:.85rem;background:var(--festival-surface);scroll-margin-top:5rem;margin:0!important;overflow:hidden}
+.story-book :is(.story-history-details,.story-name-details){padding:0!important;border:0;background:transparent;margin:0!important}
+.story-book :is(.story-history-details,.story-name-details)>summary{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.9rem var(--story-inset)!important;min-height:3.25rem;box-sizing:border-box;list-style:none;color:var(--sl-color-text-accent);font-weight:650;line-height:1.4;cursor:pointer;margin:0!important}
+.story-book :is(.story-history-details,.story-name-details)>summary::before,.story-book :is(.story-history-details,.story-name-details)>summary::-webkit-details-marker{display:none}
+.story-book :is(.story-history-details,.story-name-details)>summary svg{width:1.2rem;height:1.2rem;flex:none;margin:0!important}
+.story-book :is(.story-history-details,.story-name-details)[open]>summary svg{transform:rotate(180deg)}
+.story-book :is(.story-history-content,.story-name-content){padding:.15rem var(--story-inset) var(--story-inset)!important;line-height:1.6;margin:0!important;overflow-wrap:anywhere}
+.story-book :is(.story-history-content,.story-name-content)>:first-child{margin-top:0!important}
+.story-book :is(.story-history-content,.story-name-content)>:last-child{margin-bottom:0!important}
+.story-book :is(.story-history-content,.story-name-content) blockquote{border-inline-start:3px solid var(--sl-color-accent);padding-inline-start:.8rem}
+.story-book .story-part>summary{padding:.85rem var(--story-inset)!important;box-sizing:border-box}
+.story-book .story-lines{padding:.5rem var(--story-inset) 1.15rem!important;gap:1rem}
+.story-book .story-line{padding:.2rem 0}
+.story-book .story-stage{padding:.65rem .75rem}
+@media(max-width:420px){.story-book{--story-inset:.85rem}}

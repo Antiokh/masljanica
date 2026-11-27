@@ -48,6 +48,10 @@ try {
   await page.locator('.home-section-card').first().waitFor({state:'visible'});
   await home.evaluate(el=>{el.dataset.eventEnabled='true';el.dataset.eventDate='2099-12-31';el.dataset.scheduleEnabled='false';window.dispatchEvent(new Event('pageshow'));});
   await page.locator('.home-event-meta').waitFor({state:'visible'});
+  assert.equal(await page.locator('.home-event-when .home-event-date').count(),1);
+  assert.equal(await page.locator('.home-event-when [data-calendar-menu]').count(),1);
+  assert.equal(await page.locator('.home-event-where .home-event-address').count(),1);
+  assert.equal(await page.locator('.home-event-where .home-location').count(),1);
   await page.locator('[data-calendar-menu] summary').click();
   await page.locator('[data-calendar-provider="apple"]').waitFor({state:'visible'});
   await page.locator('[data-calendar-provider="google"]').waitFor({state:'visible'});
@@ -342,6 +346,12 @@ try {
   assert.equal(await page.locator('[data-story-line]').count(),49);
   assert.equal(await page.locator('[data-story-music]').count(),3);
   await page.locator('.story-history').waitFor({state:'visible'});
+  assert.equal(await page.locator('.story-history-art').count(),0,'No oversized decorative history panel');
+  for(const selector of ['.story-history-details summary','.story-name-details summary','.story-part>summary','.story-lines']){
+    const el=page.locator(selector).first();
+    const padding=await el.evaluate(node=>{const s=getComputedStyle(node);return [parseFloat(s.paddingLeft),parseFloat(s.paddingRight)];});
+    assert.ok(padding.every(n=>n>=12),selector+' horizontal inset');
+  }
   await page.locator('.story-history-details summary').click();
   assert.match(await page.locator('.story-history-content').innerText(),/Сырную неделю/);
   await page.locator('.story-name-details summary').click();

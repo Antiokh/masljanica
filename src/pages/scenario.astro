@@ -34,9 +34,11 @@ const prepared=ordered.map(row=>{const actor=actors.get(row.actor),song=row.song
 <StarlightPage frontmatter={{title:'Сказ',template:'splash',description:'История Масляницы и театральный сказ нашего праздника.'}}>
  <div class="story-book" data-character-gallery data-story-book>
   <section class="story-history" aria-labelledby="story-history-title">
-    <div class="story-history-art" aria-hidden="true"><img src="/media/story-sun.svg" width="64" height="64" alt=""/></div>
-    <h2 id="story-history-title">Что такое Масляница?</h2>
-    {history?<details class="story-history-details"><summary>История праздника и народные традиции <GameIcon name="chevron"/></summary><div class="story-history-content" set:html={md.render(history)}></div></details>:<p class="story-history-placeholder">История праздника и народные традиции. Текст готовится.</p>}
+    <details class="story-history-details">
+      <summary><span id="story-history-title">Что такое Масляница?</span><GameIcon name="chevron"/></summary>
+      {history && <div class="story-history-content" set:html={md.render(history)}></div>}
+      {!history && <p class="story-history-content">История праздника и народные традиции. Текст готовится.</p>}
+    </details>
   </section>
   <section class="story-name" id="why-maslyanica" aria-labelledby="story-name-title">
     <details class="story-name-details">

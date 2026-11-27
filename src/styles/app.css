@@ -788,3 +788,11 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 .home-calendar-providers svg{width:1.2rem;height:1.2rem;color:var(--sl-color-text-accent);flex:none}
 .home-calendar-providers a span{display:grid;gap:.15rem;min-width:0}
 .home-calendar-providers small{font-size:.69rem;color:var(--sl-color-gray-3)}
+
+/* Keep each event fact with its corresponding action. */
+.home-dashboard .home-event-meta{gap:.85rem}
+.home-dashboard .home-event-group{display:grid;gap:.3rem;justify-items:start;min-width:0;margin:0!important}
+.home-dashboard .home-event-group>*{margin:0!important}
+.home-dashboard .home-event-address{line-height:1.45}
+.home-dashboard .home-event-group .home-calendar{margin:0!important}
+.home-dashboard .home-event-group .home-location{margin:0!important}
