@@ -1,0 +1,13 @@
+---
+const {row}=Astro.props;
+---
+<li>
+  <span class="home-time-range">
+    <time>{row.start}</time>
+    {row.showEnd && <time class="home-stage-end" aria-label={'Окончание: '+row.end}>до {row.end}</time>}
+  </span>
+  <div>
+    <strong>{row.title}</strong>
+    {row.classes && <a href="/workshops/">Мастер-классы</a>}
+  </div>
+</li>

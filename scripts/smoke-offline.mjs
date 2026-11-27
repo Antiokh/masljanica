@@ -109,7 +109,8 @@ try {
       const manifest=await (await page.request.get('/offline-manifest.json')).json();
       const asset=manifest.entries.find(e=>e.url==='/media/all-characters.webp');
       const figure=detail.locator('.home-story-figure');
-      assert.equal(await figure.count(),asset?1:0,'Ensemble illustration matches the local offline asset');
+      assert.ok(asset,'Ensemble illustration is required in offline manifest');
+      assert.equal(await figure.count(),1,'Ensemble illustration is required on home');
       if(asset){
         assert.ok(await figure.evaluate(el=>el===el.parentElement.firstElementChild),'Illustration precedes plot text');
         const image=figure.locator('img');await image.evaluate(el=>el.decode());

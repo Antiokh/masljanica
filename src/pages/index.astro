@@ -1,13 +1,14 @@
 ---
 import { existsSync } from 'node:fs';
 const storyArt='/media/all-characters.webp';
-const hasStoryArt=existsSync(process.cwd()+'/public'+storyArt);
+if(!existsSync(process.cwd()+'/public'+storyArt))throw Error('Missing ensemble illustration: '+storyArt);
 const heroLogo = existsSync(process.cwd()+'/public/media/maslenitsa-sun.webp') ? '/media/maslenitsa-sun.webp' : '/icon.svg';
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { frontmatter } from '../data/home.md';
 import event from '../data/event.json';
 import schedule from '../data/schedule.json';
 import { calendarEvent, googleCalendarUrl } from '../lib/event-calendar.mjs';
+import HomeProgramme from '../components/HomeProgramme.astro';
 import FestivalIntro from '../components/FestivalIntro.astro';
 import GameIcon from '../components/GameIcon.astro';
 import WorkshopPreview from '../components/WorkshopPreview.astro';
@@ -79,7 +80,7 @@ const sections = [
         <details class="story-name-details home-story-details">
           <summary><span id="home-story-title">Наша масляница</span><GameIcon name="chevron"/></summary>
           <div class="story-name-content">
-            {hasStoryArt && <figure class="home-story-figure"><img src={storyArt} alt="Персонажи нашей Масляницы" width="1536" height="1024" loading="lazy" decoding="async"/></figure>}
+            <figure class="home-story-figure"><img src={storyArt} alt="Персонажи нашей Масляницы" width="1536" height="1024" loading="lazy" decoding="async"/></figure>
             <p>Сюжет нашей масляницы театрализованный, адаптированный к публике, мало знакомой с традицией.</p>
             <h3>Краткая суть сюжета</h3>
     <p>Во время празднования Масляницы весёлый Скоморох устраивает шумное представление, чем тревожит Бабу Ягу. Разгневанная Яга угрожает проклятиями, если гости не знают традиций праздника. Скоморох вместе со зрителями разгадывает её загадку, заслуживая благосклонность колдуньи. Однако за свою дерзость он получает наказание – развлекать народ песнями и играми.</p>
@@ -91,13 +92,7 @@ const sections = [
         </details>
       </section>
     </FestivalIntro>
-    {items.length>0 && <section class="home-program" aria-labelledby="home-program-title" data-home-season="schedule" data-pagefind-ignore hidden>
-        <div class="home-section-heading"><h2 id="home-program-title">Программа праздника</h2><span>{dateLabel}</span></div>
-        <div class="home-program-body"><ol class="home-timeline">
-          {items.map((item,i)=><li><span class="home-time-range"><time>{item.start}</time>{i<items.length-1 && item.end!==items[i+1].start && <time class="home-stage-end" aria-label={'Окончание: '+item.end}>до {item.end}</time>}</span><div><strong>{item.title}</strong>{item.classes && <a href="/workshops/">Мастер-классы</a>}</div></li>)}
-          <li class="home-timeline-end"><time>{eventEnd}</time><div><strong>Завершение праздника</strong></div></li>
-        </ol></div>
-      </section>}
+    <HomeProgramme items={items} eventEnd={eventEnd} dateLabel={dateLabel}/>
     {config.enabled && <section class="home-admission" data-home-season="event" data-pagefind-ignore hidden>
       <strong>Мероприятие без билетов.</strong>
       <p>Приветствуется донейшн на блины в коробочку у Бабы Яги. Действо проводится на волонтёрских началах.</p>
