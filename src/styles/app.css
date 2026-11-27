@@ -867,6 +867,11 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 .home-dashboard .home-column>*{min-width:0;margin:0!important}
 .home-dashboard .home-admission a{color:var(--sl-color-text-accent);text-decoration:underline;text-underline-offset:.15em}
 .home-dashboard .home-admission a:hover{color:var(--sl-color-text)}
+.home-dashboard .home-socials{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.65rem;min-width:0;margin:0!important}
+.home-dashboard .home-social-link{display:flex;align-items:center;justify-content:center;gap:.45rem;min-width:0;padding:.65rem .35rem;border:1px solid var(--sl-color-gray-5);border-radius:.7rem;background:var(--festival-surface);color:var(--sl-color-text);font-size:.85rem;font-weight:600;line-height:1.3;margin:0!important;text-decoration:none}
+.home-dashboard .home-social-link svg{width:1.3rem;height:1.3rem;flex:none;color:var(--sl-color-text-accent);margin:0!important}
+.home-dashboard .home-social-link:hover{border-color:var(--sl-color-accent);color:var(--sl-color-text-accent)}
+@media(max-width:420px){.home-dashboard .home-social-link{flex-direction:column;gap:.3rem;font-size:.78rem}}
 @media(max-width:59.999rem){
   .home-dashboard{reading-flow:grid-rows}
   .home-dashboard .home-hero{order:1}
@@ -874,8 +879,9 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
   .home-dashboard .home-program{order:3}
   .home-dashboard .home-admission{order:4}
   .home-dashboard .home-sections{order:5}
-  .home-dashboard .home-workshops{order:6}
-  .home-dashboard .home-credit{order:7}
+  .home-dashboard .home-socials{order:6}
+  .home-dashboard .home-workshops{order:7}
+  .home-dashboard .home-credit{order:8}
 }
 @media(min-width:60rem){
   .home-dashboard{
@@ -885,6 +891,12 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
   }
   .home-dashboard:has(.home-admission:not([hidden])){
     grid-template-areas:"hero admission" "sections sections" "intro intro" "workshops workshops" "credit credit";
+  }
+  .home-dashboard:has(.home-socials:not([hidden])):not(:has(.home-program:not([hidden]))){
+    grid-template-areas:"hero sections" "socials socials" "intro intro" "workshops workshops" "credit credit";
+  }
+  .home-dashboard:has(.home-admission:not([hidden])):has(.home-socials:not([hidden])):not(:has(.home-program:not([hidden]))){
+    grid-template-areas:"hero admission" "sections sections" "socials socials" "intro intro" "workshops workshops" "credit credit";
   }
   .home-dashboard:has(.home-program:not([hidden])){
     grid-template-areas:"left right" "intro intro" "workshops workshops" "credit credit";
@@ -898,6 +910,7 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
   .home-dashboard .home-admission{grid-area:admission}
   .home-dashboard .home-sections{grid-area:sections}
   .home-dashboard .home-program{grid-area:program}
+  .home-dashboard .home-socials{grid-area:socials}
   /* The hero already supplies the date; keep the accessible section name. */
   .home-dashboard .home-program>.home-section-heading{display:none}
   .home-dashboard .home-hero-copy{--home-sun-size:clamp(4rem,8vw,6.25rem)}

@@ -84,7 +84,10 @@ try {
   assert.ok(Math.abs(eventGeometry.calendarLeft-eventGeometry.mapLeft)<2,'Calendar and map icons align');
   assert.ok(Math.abs(eventGeometry.sunTop-eventGeometry.headingTop)<2&&Math.abs(eventGeometry.sunRight-eventGeometry.headingRight)<2,'Sun at top right of heading');
   assert.ok(Math.abs(eventGeometry.mapRowRight-eventGeometry.metaRight)<2,'Full width event facts');
-  assert.match(await page.locator('.home-location').getAttribute('href'),/^https:\/\/www\.google\.com\/maps\?q=/);
+  assert.equal(await page.locator('.home-location').getAttribute('href'),"https://www.google.com/maps/d/u/0/viewer?ll=44.789937681706746%2C20.40512529814756&z=19&mid=1FieSC0jWzlWoK4-wNDwlf8DwNyKWE18");
+  assert.deepEqual(await page.locator('.home-social-link').evaluateAll(els=>els.map(el=>el.getAttribute('href'))),["https://t.me/masljanica","https://www.facebook.com/masljanica","https://instagram.com/masljanica"]);
+  await page.locator('.home-socials').waitFor({state:'visible'});
+
   assert.equal(await page.locator('.home-location .home-event-address').evaluate(el=>el.closest('a')?.classList.contains('home-location')),true,'Entire address belongs to the map link');
   await page.locator('.home-location').hover();
   const pinStyle=await page.locator('.home-location .home-event-icon').evaluate(el=>{const s=getComputedStyle(el);return {border:parseFloat(s.borderTopWidth),background:s.backgroundColor};});
@@ -124,11 +127,14 @@ try {
       const ordered=['.home-hero','.festival-intro','.home-program','.home-admission','.home-sections','.home-workshops'].map(s=>root.querySelector(s).getBoundingClientRect());
       const icon=root.querySelector('.home-calendar .home-event-icon').getBoundingClientRect(),map=root.querySelector('.home-location .home-event-icon').getBoundingClientRect(),mapRow=root.querySelector('.home-location').getBoundingClientRect(),sun=root.querySelector('.home-hero-art').getBoundingClientRect();
       const [hero,intro,program,admission,sections,workshops]=ordered;
+      const socials=root.querySelector('.home-socials').getBoundingClientRect();
       const fullWidth=root.getBoundingClientRect().width;
-      const desktop=Math.abs(hero.top-program.top)<2&&hero.right<program.left&&Math.abs(hero.width-program.width)<2&&Math.abs(hero.left-sections.left)<2&&Math.abs(admission.left-program.left)<2&&sections.top-hero.bottom>=0&&sections.top-hero.bottom<=24&&admission.top-program.bottom>=0&&admission.top-program.bottom<=24&&intro.top>=Math.max(sections.bottom,admission.bottom)-1&&Math.abs(intro.width-fullWidth)<2&&workshops.top>=intro.bottom-1&&Math.abs(workshops.width-fullWidth)<2;
+      const desktop=Math.abs(hero.top-program.top)<2&&hero.right<program.left&&Math.abs(hero.width-program.width)<2&&Math.abs(hero.left-sections.left)<2&&Math.abs(admission.left-program.left)<2&&sections.top-hero.bottom>=0&&sections.top-hero.bottom<=24&&admission.top-program.bottom>=0&&admission.top-program.bottom<=24&&Math.abs(socials.left-admission.left)<2&&Math.abs(socials.width-admission.width)<2&&socials.top-admission.bottom>=0&&socials.top-admission.bottom<=24&&intro.top>=Math.max(sections.bottom,socials.bottom)-1&&Math.abs(intro.width-fullWidth)<2&&workshops.top>=intro.bottom-1&&Math.abs(workshops.width-fullWidth)<2;
       return {desktop,stack:ordered.slice(1).every((r,i)=>r.top>=ordered[i].bottom-1),widths:ordered.every(r=>Math.abs(r.width-ordered[0].width)<2),iconGap:mapRow.top-root.querySelector('.home-calendar').getBoundingClientRect().bottom,sunWidth:sun.width,aligned:Math.abs(icon.left-map.left)<2};
     });
     assert.ok(width>=960?layout.desktop:layout.stack&&layout.widths,'Home layout follows approved composition at '+width);
+    const socialLayout=await page.locator('.home-socials').evaluate(el=>{const cards=[...el.querySelectorAll('a')].map(a=>a.getBoundingClientRect());return cards.length===3&&cards.every(c=>Math.abs(c.top-cards[0].top)<2&&c.right<=el.getBoundingClientRect().right+1)&&el.scrollWidth<=el.clientWidth+1;});
+    assert.ok(socialLayout,'Three social links fit one row at '+width);
     const workshopColumns=await page.locator('.home-workshop-grid').evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(/\s+/).length);
     assert.equal(workshopColumns,width>=960?4:2,'Workshop preview columns at '+width);
     assert.ok(layout.iconGap>=-1&&layout.iconGap<=8,'Compact date/location spacing at '+width);

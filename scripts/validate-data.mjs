@@ -10,6 +10,11 @@ for(const name of ['songs','games','characters','scenario','parts','ditties','sc
 const actors=read('characters'),songs=read('songs'),parts=read('parts');
 for(const row of read('scenario')) {assert(actors.some(x=>x.id===row.actor),'Actor '+row.order);assert(parts.some(x=>x.number===row.part),'Part '+row.order);if(row.song)assert(songs.some(x=>x.id===row.song),'Song '+row.order);}
 const event=read('event');
+const map=new URL(event.mapUrl);
+assert(map.protocol==='https:'&&map.hostname==='www.google.com'&&map.pathname.startsWith('/maps/d/')&&map.searchParams.has('mid'),'Event site map');
+const socials=read('socials');
+assert(socials.length===3&&new Set(socials.map(x=>x.name)).size===3,'Festival social links');
+for(const social of socials){const url=new URL(social.href);assert(url.protocol==='https:'&&['t.me','www.facebook.com','instagram.com'].includes(url.hostname)&&social.path,'Social link and local icon');}
 assert(typeof event.address==='string'&&event.address.trim(),'Event address');
 assert(typeof event.coords==='string'&&/^-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?$/.test(event.coords),'Event coordinates');
 for(const item of read('schedule')){
