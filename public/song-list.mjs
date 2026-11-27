@@ -161,7 +161,7 @@ export function installSongList(){
     const row=document.getElementById(id);
     if(!row?.matches('.song-row'))return;
     const details=row.querySelector('details');if(details)details.open=true;
-    requestAnimationFrame(()=>row.scrollIntoView({block:'start'}));
+    if(!matchMedia('(min-width:60rem)').matches)requestAnimationFrame(()=>row.scrollIntoView({block:'start'}));
   }
   document.addEventListener('astro:before-swap',()=>{if(audio){attempt++;audio.pause();}});
   document.addEventListener('astro:page-load',()=>{bind();openHash();});

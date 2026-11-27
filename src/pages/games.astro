@@ -34,6 +34,9 @@ const sorted=[...games].sort((a,b)=>a.title.localeCompare(b.title,'ru'));
   <p id="catalog-empty" hidden>Ничего не найдено.</p>
   <audio id="game-audio" preload="none" hidden></audio>
   <p id="game-audio-error" role="status" hidden></p>
+  <div class="catalog-master" data-catalog-master="games">
+    <nav class="catalog-master-nav" data-master-nav aria-label="Список игр" hidden></nav>
+    <div class="catalog-master-content" data-master-content>
   {['historical','entertainment'].map(category=><section class="catalog-group game-group" data-group={category}>
    <h2>{category==='historical'?'Исторические':'Развлекательные'}</h2>
    <div class="game-list">
@@ -69,5 +72,7 @@ const sorted=[...games].sort((a,b)=>a.title.localeCompare(b.title,'ru'));
     })}
    </div>
   </section>)}
+    </div>
+  </div>
  </div>
 </StarlightPage>

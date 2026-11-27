@@ -634,7 +634,7 @@ progress[data-pwa-bar]:indeterminate::-moz-progress-bar, progress#offline-progre
   .sl-markdown-content > .catalog-tools:first-child { margin-block:0 .6rem; }
   .catalog-tools input,.catalog-tools select { padding:.5rem .65rem; }
   .sl-markdown-content > .playlist-panel { margin-block:.5rem .65rem; }
-  .sl-markdown-content > .playlist-panel + .song-list { margin-top:.65rem; }
+  .sl-markdown-content > .playlist-panel + .catalog-master { margin-top:.65rem; }
   .sl-markdown-content > :last-child { margin-bottom:0; }
 }
 
@@ -920,12 +920,37 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
   .home-dashboard .home-workshop-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
   .home-dashboard .home-section-card{min-height:3.75rem}
   .home-dashboard .home-workshop-card{min-height:4rem}
-  .song-list.catalog-group,.game-list,.recipe-group{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    align-items:start;
-    gap:.65rem;
-  }
-  .song-list .song-row,.game-list>.game-card,.recipe-group>.recipe-card{min-width:0;align-self:start}
-  .recipe-group>h3{grid-column:1/-1}
+
+}
+
+/* Desktop master/detail uses original cards, never cloned content or audio. */
+.catalog-master,.catalog-master-content{min-width:0}
+.catalog-master-nav[hidden]{display:none!important}
+@media(min-width:60rem){
+ .catalog-master[data-master-active]{display:grid;grid-template-columns:minmax(15rem,2fr) minmax(0,3fr);align-items:start;gap:1rem;margin-block:1rem!important}
+ .catalog-master[data-master-active]>.catalog-master-nav,.catalog-master[data-master-active]>.catalog-master-content{min-width:0;max-height:max(18rem,calc(100dvh - var(--sl-nav-height,3.5rem) - 2rem));overflow:auto;overscroll-behavior:contain;margin:0!important;scrollbar-gutter:stable}
+ .catalog-master[data-master-active][data-catalog-master="songs"]>.catalog-master-nav,.catalog-master[data-master-active][data-catalog-master="songs"]>.catalog-master-content{max-height:max(18rem,calc(100dvh - var(--sl-nav-height,3.5rem) - 10rem))}
+ .catalog-master-nav{display:grid;align-content:start;gap:.35rem;padding:.1rem .25rem .2rem .1rem}
+ .catalog-master-nav .master-group-title{font-size:.8rem;font-weight:650;color:var(--sl-color-gray-3);margin:.65rem 0 .15rem!important}
+ .catalog-master-nav .master-group-title:first-child{margin-top:0!important}
+ .catalog-master-nav .master-choice{display:flex;align-items:stretch;min-width:0;border:1px solid var(--sl-color-gray-5);border-radius:.65rem;background:var(--sl-color-bg);margin:0!important;overflow:hidden}
+ .catalog-master-nav [hidden]{display:none!important}
+ .catalog-master-nav .master-choice:has([aria-pressed=true]){border-color:var(--sl-color-accent);background:var(--festival-surface)}
+ .catalog-master-nav .master-choice:has([data-playing=true]){border-color:var(--festival-selected)}
+ .catalog-master-nav .master-select{display:grid;align-content:center;gap:.18rem;flex:1;min-width:0;min-height:3rem;padding:.5rem .65rem;border:0;background:transparent;color:var(--sl-color-text);text-align:left;font:inherit;cursor:pointer;margin:0!important}
+ .catalog-master-nav .master-select[aria-pressed=true]{color:var(--sl-color-text-accent)}
+ .catalog-master-nav .master-select:hover{background:var(--festival-surface)}
+ .catalog-master-nav .master-select strong{font-size:.88rem;line-height:1.3;overflow-wrap:anywhere;margin:0!important}
+ .catalog-master-nav .master-select small{font-size:.72rem;line-height:1.3;color:var(--sl-color-gray-3);margin:0!important}
+ .catalog-master-nav .master-play{display:grid;place-items:center;align-self:center;flex:none;width:2rem;height:2rem;margin:0 0 0 .4rem!important;border:0;border-radius:50%;background:var(--festival-selected);color:var(--festival-selected-text);cursor:pointer;font:inherit;font-size:.9rem;padding:0}
+ .catalog-master-nav button:focus-visible{outline:2px solid var(--sl-color-text-accent);outline-offset:-2px}
+ .catalog-master[data-master-active] :is(.song-row,.game-card,.recipe-card):not([data-master-selected]){display:none!important}
+ .catalog-master[data-master-active] :is(.game-group,.recipe-group):not(:has([data-master-selected])){display:none!important}
+ .catalog-master[data-master-active] .catalog-master-content :is(.game-group,.recipe-group,.song-list,.game-list){display:block;margin:0!important;min-width:0}
+ .catalog-master[data-master-active] .catalog-master-content :is(.game-group>h2,.recipe-group>h3,.song-chevron,.game-chevron,.recipe-card summary>svg){display:none!important}
+ .catalog-master[data-master-active] .song-details>summary{grid-template-columns:minmax(0,1fr);cursor:default}
+ .catalog-master[data-master-active] .game-card summary{grid-template-columns:2.6rem minmax(0,1fr) auto;cursor:default}
+ .catalog-master[data-master-active] .recipe-card summary{grid-template-columns:1.6rem minmax(0,1fr);cursor:default}
+ .catalog-master[data-master-active] .catalog-master-content [data-master-selected]{margin:0!important;min-width:0}
+ .catalog-master[data-master-active]:not(:has([data-master-selected])){display:none}
 }

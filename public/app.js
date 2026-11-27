@@ -2,6 +2,7 @@ import { installCalendarMenu } from './calendar-menu.mjs';
 import { installStoryBook } from './story-book.mjs';
 import { installWorkshopGallery } from './workshop-gallery.mjs';
 import { installGameList } from './game-list.mjs';
+import { installCatalogMaster } from './catalog-master.mjs';
 import { createRuntimeEnvironment } from './runtime-environment.mjs';
 import { installFestivalSearch } from './festival-search.mjs';
 import { installCharacterDialogs } from './character-dialogs.mjs';
@@ -16,6 +17,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  const environment=createRuntimeEnvironment();
  installSongList();
  installGameList();
+ installCatalogMaster();
  installWorkshopGallery();
  installStoryBook();
  installExternalEmbeds();
@@ -102,6 +104,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
    const empty=document.querySelector('#catalog-empty');if(empty)empty.hidden=count>0;
    const total=document.querySelector('#game-count');if(total)total.textContent='Найдено игр: '+count;
    const dittyCount=document.querySelector('#ditty-count');if(dittyCount)dittyCount.textContent='Найдено: '+count;
+   document.dispatchEvent(new Event('catalog:filter'));
  }
  document.addEventListener('input',e=>{if(e.target?.id==='catalog-search')refreshCatalog();});
  document.addEventListener('change',e=>{if(e.target?.id==='catalog-filter')refreshCatalog();});

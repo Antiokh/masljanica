@@ -15,7 +15,12 @@ const groups=['Блины','Оладьи'].map(title=>({title,items:recipes.filt
       <h2 id="pancake-recipes">Рецепты блинов</h2>
       <p>«Лучшие московские блины, или Практические наставления, как печь блины и оладьи, состоящие из 24 правил». Москва, 1854. Все 24 правила в современном изложении, с номерами и страницами оригинала.</p>
       <details class="recipe-measures"><summary>Как читать старинные меры</summary><p>Фунт — около 409,5 г; полфунта — около 205 г; штоф — около 1,23 л, полуштоф — около 615 мл. Бутылки, рюмки и чашки оставлены в исходных мерах: объём мог различаться. «По пропорции» означает, что точного количества книга не указывает. Коринка — мелкий сушёный виноград; чухонское масло — старое название сливочного масла. Исторические рецепты не апробированы на современной кухне; яйца и начинки доводите до готовности.</p></details>
+  <div class="catalog-master" data-catalog-master="recipes">
+    <nav class="catalog-master-nav" data-master-nav aria-label="Список рецептов" hidden></nav>
+    <div class="catalog-master-content" data-master-content>
       {groups.map(group=><section class="recipe-group"><h3>{group.title} · {group.items.length}</h3>{group.items.map(recipe=><RecipeCard recipe={recipe}/>)}</section>)}
+    </div>
+  </div>
     </section>
   </div>
 </StarlightPage>

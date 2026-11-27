@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { assertSongLayout } from './assert-song-layout.mjs';
-import { assertCatalogColumns } from './assert-catalog-columns.mjs';
+import { assertCatalogColumns, assertCatalogMaster } from './assert-catalog-columns.mjs';
 const readData=name=>JSON.parse(readFileSync(new URL('../src/data/'+name+'.json',import.meta.url),'utf8'));
 const allActors=readData('characters'),allGames=readData('games');
 const portraitArchive=readData('character-archive').files,gameAudioArchive=readData('audio-archive').files;
@@ -218,7 +218,7 @@ try {
   assert.match(await page.locator('.pancakes-invitation').innerText(),/Приносите свои блины/);
   assert.equal(await page.locator('#pancake-recipes').innerText(),'Рецепты блинов');
   assert.equal(await page.locator('.recipe-card').count(),24);
-  await assertCatalogColumns(page,'.recipe-group','.recipe-card');
+  await assertCatalogMaster(page,'.recipe-card');
   await page.locator('.recipe-card').first().locator('summary').click();
   await page.locator('.recipe-card').first().locator('.recipe-method').waitFor({state:'visible'});
   const pancakeManifest=await (await page.request.get('/offline-manifest.json')).json();
@@ -431,7 +431,7 @@ try {
   await page.locator('#catalog-empty').waitFor({state:'hidden'});
   assert.equal(await page.locator('.song-row').count(),15);
   await page.locator('#song-player').waitFor({state:'visible'});
-  await assertCatalogColumns(page,'.song-list','.song-row');
+  await assertCatalogMaster(page,'.song-row');
   await assertSongLayout(page);
   await page.locator('[data-playlist-action="toggle"]').click();
   await page.waitForFunction(()=>{const a=document.querySelector('#song-player-audio');return a&&!a.paused&&a.currentTime>.25;});
@@ -499,7 +499,7 @@ try {
   const gameCount=await page.locator('.game-card').count();
   assert.equal(gameCount,allGames.length,'Every game is displayed');
   assert.deepEqual((await page.locator('.game-card').evaluateAll(els=>els.map(el=>el.id))).sort(),allGames.map(g=>g.slug).sort());
-  await assertCatalogColumns(page,'.game-list','.game-card');
+  await assertCatalogMaster(page,'.game-card');
   await page.locator('[data-game-filter="category"][data-value="historical"]').click();
   await page.locator('[data-game-filter="audience"][data-value="children"]').click();
   const filtered=await page.locator('.game-card:not([hidden])').evaluateAll(els=>els.map(e=>[e.dataset.category,e.dataset.audience]));

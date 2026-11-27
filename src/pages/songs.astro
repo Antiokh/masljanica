@@ -53,6 +53,9 @@ const duration=(seconds:number)=>Math.floor(seconds/60)+':'+String(Math.floor(se
     </div>
     <p id="song-player-error" role="status" hidden></p>
   </section>
+  <div class="catalog-master" data-catalog-master="songs">
+    <nav class="catalog-master-nav" data-master-nav aria-label="Список песен" hidden></nav>
+    <div class="catalog-master-content" data-master-content>
   <section class="catalog-group song-list" aria-label="Песенник">
     {ordered.map(song=>{
       const tracks=song.audio.map(localTrack);
@@ -111,4 +114,6 @@ const duration=(seconds:number)=>Math.floor(seconds/60)+':'+String(Math.floor(se
       );
     })}
   </section>
+    </div>
+  </div>
 </StarlightPage>

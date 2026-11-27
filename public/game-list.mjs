@@ -19,7 +19,7 @@ export function installGameList(){
  function bind(){const next=document.querySelector('#game-audio');if(audio===next)return;if(audio)audio.pause();audio=next;active=null;pending=null;attempt++;sync();}
  function select(track){if(!audio||!/^\/media\/audio\/[a-z0-9_-]+\.mp3$/.test(track.dataset.gameTrack))return false;if(active!==track){attempt++;audio.pause();active=track;pending=null;audio.src=track.dataset.gameTrack;audio.load();}return true;}
  function seek(){if(pending!==null&&Number.isFinite(audio?.duration)&&audio.duration>0){try{audio.currentTime=Math.min(audio.duration*pending,Math.max(0,audio.duration-.01));pending=null;}catch{}}}
- function openHash(){if(!location.pathname.match(/^\/games\/?$/)||!location.hash)return;let id;try{id=decodeURIComponent(location.hash.slice(1));}catch{return;}const row=document.getElementById(id);if(row?.matches('.game-card')){row.querySelector('details').open=true;requestAnimationFrame(()=>row.scrollIntoView({block:'start'}));}}
+ function openHash(){if(!location.pathname.match(/^\/games\/?$/)||!location.hash)return;let id;try{id=decodeURIComponent(location.hash.slice(1));}catch{return;}const row=document.getElementById(id);if(row?.matches('.game-card')){row.querySelector('details').open=true;if(!matchMedia('(min-width:60rem)').matches)requestAnimationFrame(()=>row.scrollIntoView({block:'start'}));}}
  document.addEventListener('click',e=>{
   const target=e.target instanceof Element?e.target:null,button=target?.closest('.game-audio-toggle');if(!button)return;
   bind();const track=button.closest('[data-game-track]');if(!select(track))return;

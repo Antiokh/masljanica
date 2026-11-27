@@ -37,3 +37,29 @@ export async function assertCatalogColumns(page,groupSelector,cardSelector){
     }
   }finally{if(original)await page.setViewportSize(original);}
 }
+
+export async function assertCatalogMaster(page,cardSelector){
+ const original=page.viewportSize(),root=page.locator('[data-catalog-master]'),cards=root.locator(cardSelector),nav=root.locator('[data-master-nav]'),content=root.locator('[data-master-content]');
+ const initial=await cards.evaluateAll(els=>els.map(el=>[el.id,(el.matches('details')?el:el.querySelector('details')).open]));
+ try{
+  await page.setViewportSize({width:390,height:900});await nav.waitFor({state:'hidden'});
+  const mobile=await cards.evaluateAll(els=>els.slice(0,2).map(el=>{const r=el.getBoundingClientRect();return {x:r.x,top:r.top,bottom:r.bottom,width:r.width};}));
+  assert.ok(Math.abs(mobile[0].x-mobile[1].x)<=2&&mobile[1].top>=mobile[0].bottom-1,'Mobile retains original stack');
+  for(const width of [960,1440]){
+   await page.setViewportSize({width,height:900});await nav.waitFor({state:'visible'});
+   const buttons=nav.locator('[data-master-choice]');assert.equal(await buttons.count(),await cards.count(),'All catalog entries selectable');
+   const metrics=await root.evaluate(el=>{const left=el.querySelector('[data-master-nav]'),right=el.querySelector('[data-master-content]'),a=left.getBoundingClientRect(),b=right.getBoundingClientRect();return {left:{right:a.right,top:a.top,width:a.width},right:{left:b.left,top:b.top,width:b.width},overflow:[left,right].some(x=>x.scrollWidth>x.clientWidth+2),scroll:[left,right].map(x=>getComputedStyle(x).overflowY)};});
+   assert.ok(metrics.right.left>=metrics.left.right+3&&metrics.right.width>metrics.left.width&&Math.abs(metrics.left.top-metrics.right.top)<=2,'Desktop master/detail columns at '+width);
+   assert.ok(!metrics.overflow&&metrics.scroll.every(x=>x==='auto'),'Independent scroll panes without horizontal overflow');
+   const second=buttons.nth(1);await second.click();const id=await second.getAttribute('data-master-choice');
+   assert.equal(await second.getAttribute('aria-pressed'),'true');
+   assert.deepEqual(await cards.evaluateAll(els=>els.filter(el=>el.getClientRects().length).map(el=>el.id)),[id],'Exactly one original card visible');
+   assert.equal(await content.locator('[data-master-selected]').evaluate(el=>(el.matches('details')?el:el.querySelector('details')).open),true);
+   assert.equal(await nav.locator('[aria-pressed=true]').count(),1);await buttons.first().click();
+  }
+ }finally{
+  await page.setViewportSize({width:390,height:900});await nav.waitFor({state:'hidden'});
+  await cards.evaluateAll((els,states)=>{for(const el of els)(el.matches('details')?el:el.querySelector('details')).open=states.find(s=>s[0]===el.id)?.[1]||false;},initial);
+  if(original)await page.setViewportSize(original);
+ }
+}

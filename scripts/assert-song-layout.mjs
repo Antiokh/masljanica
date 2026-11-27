@@ -20,7 +20,7 @@ export async function assertSongLayout(page) {
           const inactive=[...el.querySelectorAll('.song-variant[data-selected=false]')];
           const play=q('.song-play'),icon=play.querySelector('.song-play-icon'),disc=play.querySelector('.song-disc'),heading=q('.song-heading');
           const slider=selected.querySelector('.song-seek'),group=q('.song-variants');
-          const panel=document.getElementById('song-player'),next=el.nextElementSibling;
+          const panel=document.getElementById('song-player'),next=el.nextElementSibling?.getClientRects().length?el.nextElementSibling:null;
           const css=style(el),body=style(q('.song-body')),summary=style(q('summary'));
           return {card:rect(el),panel:rect(panel),panelPosition:style(panel).position,group:rect(group),selected:rect(selected),inactive:inactive.map(x=>rect(x)),slider:rect(slider),disc:rect(disc),icon:rect(icon),play:rect(play),heading:rect(heading),next:next?rect(next):null,radius:parseFloat(css.borderTopLeftRadius),border:parseFloat(css.borderTopWidth),bodyBg:body.backgroundColor,summaryBg:summary.backgroundColor,bodyBorder:parseFloat(body.borderTopWidth),color:style(selected).color,background:style(selected).backgroundColor,selectedToken:style(document.documentElement).getPropertyValue('--festival-selected').trim(),audioCount:document.querySelectorAll('audio').length,hiddenAudio:document.querySelector('#song-player-audio')?.hidden};
         });
