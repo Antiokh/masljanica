@@ -943,6 +943,10 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
  .catalog-master-nav .master-select strong{font-size:.88rem;line-height:1.3;overflow-wrap:anywhere;margin:0!important}
  .catalog-master-nav .master-select small{font-size:.72rem;line-height:1.3;color:var(--sl-color-gray-3);margin:0!important}
  .catalog-master-nav .master-play{display:grid;place-items:center;align-self:center;flex:none;width:2rem;height:2rem;margin:0 0 0 .4rem!important;border:0;border-radius:50%;background:var(--festival-selected);color:var(--festival-selected-text);cursor:pointer;font:inherit;font-size:.9rem;padding:0}
+ .catalog-master-nav .master-play .song-disc{position:relative;display:grid;place-items:center;width:100%;height:100%;margin:0!important;padding:0;border-radius:50%}
+ .catalog-master-nav .master-play .song-disc>svg{grid-area:1/1;align-self:center;justify-self:center;width:1.15rem;height:1.15rem;margin:0!important;display:block}
+ .catalog-master-nav .master-play .song-disc>.song-ring{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke-width:2.5;transform:rotate(-90deg);pointer-events:none}
+ .catalog-master-nav .master-play[data-playing=true] .song-play-icon,.catalog-master-nav .master-play[data-playing=false] .song-pause-icon{display:none!important}
  .catalog-master-nav button:focus-visible{outline:2px solid var(--sl-color-text-accent);outline-offset:-2px}
  .catalog-master[data-master-active] :is(.song-row,.game-card,.recipe-card):not([data-master-selected]){display:none!important}
  .catalog-master[data-master-active] :is(.game-group,.recipe-group):not(:has([data-master-selected])){display:none!important}

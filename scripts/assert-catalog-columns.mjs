@@ -48,6 +48,14 @@ export async function assertCatalogMaster(page,cardSelector){
   for(const width of [960,1440]){
    await page.setViewportSize({width,height:900});await nav.waitFor({state:'visible'});
    const buttons=nav.locator('[data-master-choice]');assert.equal(await buttons.count(),await cards.count(),'All catalog entries selectable');
+   if(cardSelector==='.song-row'){
+    const icons=await nav.locator('.master-play').evaluateAll(buttons=>buttons.map(b=>{
+     const source=document.getElementById(b.dataset.masterPlay).querySelector('.song-play');
+     const disc=b.querySelector('.song-disc'),original=source.querySelector('.song-disc');
+     return {same:disc?.innerHTML===original?.innerHTML,text:b.textContent.trim(),playing:b.dataset.playing===source.dataset.playing,playVisible:getComputedStyle(b.querySelector('.song-play-icon')).display!=='none',pauseVisible:getComputedStyle(b.querySelector('.song-pause-icon')).display!=='none',on:b.dataset.playing==='true'};
+    }));
+    assert.ok(icons.length>0&&icons.every(x=>x.same&&!x.text&&x.playing&&x.playVisible===!x.on&&x.pauseVisible===x.on),'Master play uses the same SVG icons and state, no emoji');
+   }
    const metrics=await root.evaluate(el=>{const left=el.querySelector('[data-master-nav]'),right=el.querySelector('[data-master-content]'),a=left.getBoundingClientRect(),b=right.getBoundingClientRect();return {left:{right:a.right,top:a.top,width:a.width},right:{left:b.left,top:b.top,width:b.width},overflow:[left,right].some(x=>x.scrollWidth>x.clientWidth+2),scroll:[left,right].map(x=>getComputedStyle(x).overflowY)};});
    assert.ok(metrics.right.left>=metrics.left.right+3&&metrics.right.width>metrics.left.width&&Math.abs(metrics.left.top-metrics.right.top)<=2,'Desktop master/detail columns at '+width);
    assert.ok(!metrics.overflow&&metrics.scroll.every(x=>x==='auto'),'Independent scroll panes without horizontal overflow');

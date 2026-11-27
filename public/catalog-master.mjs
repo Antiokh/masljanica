@@ -8,9 +8,13 @@ export function installCatalogMaster(){
  function make(tag,className,value){const el=document.createElement(tag);if(className)el.className=className;if(value!=null)el.textContent=value;return el;}
  function playback(){
   if(!active)return;
-  for(const e of entries){if(!e.play)continue;const on=e.row.querySelector('.song-play')?.dataset.playing==='true';
-   e.play.dataset.playing=String(on);e.play.textContent=on?'Ⅱ':'▶';
-   e.play.setAttribute('aria-label',(on?'Пауза: ':'Воспроизвести: ')+e.title);}
+  for(const e of entries){
+   if(!e.play)continue;
+   const source=e.row.querySelector('.song-play'),on=source?.dataset.playing==='true';
+   e.play.dataset.playing=String(on);
+   e.play.style.setProperty('--song-progress',source?.style.getPropertyValue('--song-progress')||'0');
+   e.play.setAttribute('aria-label',(on?'Пауза: ':'Воспроизвести: ')+e.title);
+  }
  }
  function buildNav(){
   nav.replaceChildren();let lastGroup=null;
@@ -20,7 +24,12 @@ export function installCatalogMaster(){
    button.dataset.masterChoice=e.row.id;button.setAttribute('aria-controls',e.row.id);button.setAttribute('aria-pressed','false');
    button.append(make('strong','',e.title));if(e.subtitle)button.append(make('small','',e.subtitle));
    const source=e.row.querySelector('.song-play');
-   e.play=null;if(source&&!source.disabled){e.play=make('button','master-play','▶');e.play.type='button';e.play.dataset.masterPlay=e.row.id;item.append(e.play);}
+   e.play=null;
+   const disc=source?.querySelector('.song-disc');
+   if(source&&!source.disabled&&disc){
+    e.play=make('button','master-play');e.play.type='button';e.play.dataset.masterPlay=e.row.id;
+    e.play.append(disc.cloneNode(true));item.append(e.play);
+   }
    item.append(button);nav.append(item);e.item=item;e.button=button;
   }
  }
@@ -100,7 +109,7 @@ export function installCatalogMaster(){
   else if(e&&e===selected&&!event.target.open)event.target.open=true;
  },true);
  document.addEventListener('catalog:filter',refresh);
- for(const type of ['play','playing','pause','ended','error'])document.addEventListener(type,e=>{if(e.target instanceof HTMLAudioElement)queueMicrotask(playback);},true);
+ for(const type of ['play','playing','pause','ended','error','timeupdate','loadedmetadata','durationchange','emptied'])document.addEventListener(type,e=>{if(e.target instanceof HTMLAudioElement)queueMicrotask(playback);},true);
  desktop.addEventListener('change',()=>{if(root){desktop.matches?enter():leave();}});
  document.addEventListener('astro:page-load',()=>{bind();openHash();});
  window.addEventListener('hashchange',openHash);
