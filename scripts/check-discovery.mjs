@@ -6,6 +6,7 @@ import {renderOgSvg,ogFormats} from './og-layout.mjs';
 for(const [format,layout] of Object.entries(ogFormats)){
  const sample=renderOgSvg('Сказ',{date:'14 марта 2027',time:'11:30–16:00',location:'Roštilj zona, Ada Ciganlija, Beograd'},'Герои, сценарий праздника и музыкальное сопровождение.',format);
  for(const text of ['14 марта 2027','11:30–16:00','Roštilj zona','Сказ','Герои, сценарий'])assert.ok(sample.includes(text),'OG content: '+format+' '+text);
+ assert.ok(!sample.includes('#FFE2C8'),'No separate background under event metadata');
  assert.ok(layout.sun.x+layout.sun.size<=layout.width&&layout.sun.y+layout.sun.size<=layout.height,'Sun fits canvas');
  assert.ok(!renderOgSvg('Сказ',null,'',format).includes('11:30'),'No expired event');
 }

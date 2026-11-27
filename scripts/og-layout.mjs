@@ -28,10 +28,9 @@ function header(event,square){
  if(!event)return brand+'<path d="M64 94h190" stroke="'+accent+'" stroke-width="5" stroke-linecap="round"/>';
  const when=[event.date,event.time].filter(Boolean).join(' · ');
  const d=fit(when,w-52,square?39:31,21,1),place=fit(event.location,w-52,square?30:24,18,2);
- const rect='<rect x="'+(x-12)+'" y="94" width="'+w+'" height="122" rx="16" fill="#FFE2C8"/>';
  const cal='<g transform="translate('+x+' 113)" fill="none" stroke="'+accent+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="20" height="20" rx="3"/><path d="M7 2v6m12-6v6M3 12h20"/></g>';
  const pin='<g transform="translate('+x+' 157)" fill="none" stroke="'+accent+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10c0 6-9 14-9 14S4 16 4 10a9 9 0 1 1 18 0Z"/><circle cx="13" cy="10" r="3"/></g>';
- return brand+rect+cal+text(d.lines.join(' '),x+38,139,d.size,ink,700)+pin+place.lines.map((line,i)=>text(line,x+38,182+i*place.size*1.1,place.size,secondary,500)).join('');
+ return brand+cal+text(d.lines.join(' '),x+38,139,d.size,ink,700)+pin+place.lines.map((line,i)=>text(line,x+38,182+i*place.size*1.1,place.size,secondary,500)).join('');
 }
 export function renderOgSvg(title,event,description='',format='landscape'){
  const layout=ogFormats[format];if(!layout)throw Error('Unknown OG format '+format);
