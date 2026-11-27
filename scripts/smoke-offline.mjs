@@ -91,6 +91,11 @@ try {
     assert.ok(layout.iconGap>=-1&&layout.iconGap<=8,'Compact date/location spacing at '+width);
     assert.ok(layout.sunWidth>=63,'Larger sun at '+width);
     assert.ok(layout.aligned,'Aligned calendar and location at '+width);
+    const cards=await page.locator('.home-section-card').evaluateAll(els=>els.map(el=>{
+      const icon=el.querySelector('svg').getBoundingClientRect(),content=el.querySelector('div').getBoundingClientRect(),card=el.getBoundingClientRect();
+      return {left:icon.right<=content.left+1,center:Math.abs(icon.y+icon.height/2-content.y-content.height/2)<=2,contained:content.right<=card.right+1,height:card.height};
+    }));
+    assert.ok(cards.every(c=>c.left&&c.center&&c.contained&&c.height<=105),'Compact horizontal home cards at '+width);
   }
   assert.equal(await page.locator('.festival-intro details').count(),3);
   for(const [selector,pattern] of [['.story-history-details',/Сырную неделю/],['.story-name-details:not(.home-story-details)',/Дубровский/],['.home-story-details',/Краткая суть сюжета/]]){
