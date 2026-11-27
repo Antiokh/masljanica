@@ -4,8 +4,9 @@ import {createHash} from 'node:crypto';
 import {asUTC} from './event-calendar.mjs';
 export const site='https://masljanica.pages.dev';
 export const brand='Масляница · Белград';
-const read=n=>JSON.parse(readFileSync(new URL('../data/'+n+'.json',import.meta.url),'utf8'));
-const md=n=>readFileSync(new URL('../data/'+n+'.md',import.meta.url),'utf8').trim();
+// Astro bundles server-side modules into dist before prerendering; resolve data from the project root.
+const read=n=>JSON.parse(readFileSync(process.cwd()+'/src/data/'+n+'.json','utf8'));
+const md=n=>readFileSync(process.cwd()+'/src/data/'+n+'.md','utf8').trim();
 const home=md('home');
 function field(name){const m=home.match(new RegExp('^  '+name+': +(.+)$','m'));if(!m)throw Error('Missing event '+name);return m[1].trim().replace(/^["']|["']$/g,'');}
 const config={enabled:field('enabled')==='true',schedule:field('schedule')==='true',date:field('date'),timezone:field('timezone')};
