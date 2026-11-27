@@ -48,7 +48,9 @@ try {
   assert.equal(await page.locator('.festival-brand-title').innerText(),'Масляница');
   assert.match(await page.locator('.festival-brand-subtitle').innerText(),/^Белград/);
   await page.waitForFunction(()=>document.querySelector('.home-dashboard .home-section-card') && document.querySelector('.home-dashboard [data-home-season="event"]')?.hidden === (document.querySelector('.home-dashboard').dataset.eventEnabled!=='true'||document.querySelector('.home-dashboard').dataset.eventDate < new Intl.DateTimeFormat('sv-SE',{timeZone:document.querySelector('.home-dashboard').dataset.eventTimezone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())));
-  assert.equal(await page.locator('.home-section-card').count(),4);
+  assert.equal(await page.locator('.home-section-card').count(),5);
+  assert.equal(await page.locator('.home-section-card[href="/scenario/"]').count(),1,'Story tile is not duplicated');
+  assert.equal(await page.locator('.home-section-card[href="/pancakes/"]').count(),1);
   assert.equal(await page.locator('.home-character-card').count(),0);
   assert.equal(await page.locator('.home-workshop-card').count(),6);
   const home=page.locator('[data-home-dashboard]');
@@ -148,6 +150,15 @@ try {
     }
     await detail.locator('summary').click();
   }
+  await page.locator('.home-section-card[href="/pancakes/"]').click();
+  await page.waitForURL('**/pancakes/');
+  assert.match(await page.locator('.pancakes-invitation').innerText(),/волонтёрских началах/);
+  assert.match(await page.locator('.pancakes-invitation').innerText(),/Приносите свои блины/);
+  assert.equal(await page.locator('#pancake-recipes').innerText(),'Рецепты блинов');
+  const pancakeManifest=await (await page.request.get('/offline-manifest.json')).json();
+  assert.ok(pancakeManifest.entries.some(e=>e.url==='/pancakes/'),'Pancake page belongs to offline pack');
+  await page.locator('.app-nav a[href="/"]').click();
+  await page.waitForURL(url=>url.pathname==='/');
   const ownDittyItems=JSON.parse(readFileSync(new URL('../src/data/ditties.json',import.meta.url),'utf8'));
   const ownDitties=ownDittyItems.map(x=>x.text);
   const folkDitties=JSON.parse(readFileSync(new URL('../src/data/ditties-folk.json',import.meta.url),'utf8')).items;
@@ -535,6 +546,8 @@ try {
   await coldRow.locator('.song-play').click();
   await page.waitForFunction(()=>{const a=document.querySelector('#song-player-audio');return a&&!a.paused&&a.currentTime>0.25&&a.readyState>=2&&a.getAttribute('src').startsWith('/media/audio/');},{},{timeout:20000});
   await coldRow.locator('.song-play').click();
+  await page.goto(origin+'/pancakes/');
+  await page.locator('.pancakes-invitation').waitFor({state:'visible'});
   await page.goto(origin+'/ditties/');
   assert.deepEqual(await page.locator('.ditty-card p').allTextContents(),dittyTexts,'Ditties are readable on cold offline load');
   const offlineRequests=providerRequests;
@@ -572,6 +585,12 @@ try {
     await tg.waitForFunction(()=>history.state?.__masljanicaTelegramBackGuard?.role==='top');
     assert.equal(await tg.evaluate(()=>window.__tgBackVisible),false,'Native Back hidden on root');
     const initialHistory=await tg.evaluate(()=>history.length);
+    await tg.locator('.home-section-card[href="/pancakes/"]').click();
+    await tg.waitForURL('**/pancakes/');
+    await tg.waitForFunction(()=>window.__tgBackVisible);
+    await tg.evaluate(()=>window.__tgBack());
+    await tg.waitForURL(url=>url.pathname==='/');
+    await tg.waitForFunction(()=>!window.__tgBackVisible);
     await tg.locator('.home-ditties-link').click();
     await tg.waitForURL('**/ditties/');
     await tg.waitForFunction(()=>window.__tgBackVisible);

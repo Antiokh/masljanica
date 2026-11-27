@@ -11,6 +11,9 @@ assert.equal(isAppRoute('/characters/'),false,'Legacy character URL is no longer
 assert.equal(isAppRoute('/media/audio/test.mp3'),false);
 assert.equal(isAppRoute('/workshops/example/'),true);
 assert.equal(isAppRoute('/ditties/'),true);
+assert.equal(isAppRoute('/pancakes/'),true);
+assert.equal(parentRoute('/pancakes/'),'/');
+assert.equal(resolveBackAction({path:'/pancakes/'}),'route');
 assert.equal(isPeerRoute('/ditties/'),false);
 assert.equal(parentRoute('/ditties/'),'/');
 assert.equal(resolveBackAction({path:'/ditties/'}),'route');

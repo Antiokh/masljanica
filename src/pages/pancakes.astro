@@ -1,0 +1,24 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+---
+<StarlightPage frontmatter={{title:'Блины',template:'splash',description:'Печём блины вместе: угощение на Маслянице и рецепты домашних блинов.'}}>
+  <div class="pancakes-page">
+    <section class="pancakes-invitation" aria-labelledby="pancakes-title">
+      <h2 id="pancakes-title">Печём блины вместе!</h2>
+      <p>Блины для нашей Масляницы мы печём сами, на волонтёрских началах.</p>
+      <p>Приносите свои блины с собой! Угощайте друг друга, делитесь любимыми рецептами и пробуйте, что испекли другие.</p>
+    </section>
+    <section class="pancakes-recipes" aria-labelledby="pancake-recipes">
+      <h2 id="pancake-recipes">Рецепты блинов</h2>
+      <p>Здесь появятся рецепты из старой поваренной книги.</p>
+    </section>
+  </div>
+</StarlightPage>
+<style>
+  .pancakes-page { display:grid; gap:1rem; min-width:0; }
+  .pancakes-invitation { padding:1rem; border:1px solid var(--sl-color-gray-5); border-inline-start:3px solid var(--sl-color-accent); border-radius:.8rem; background:var(--festival-surface); }
+  .pancakes-invitation h2 { color:var(--sl-color-text-accent); font-size:1.15rem; margin:0 0 .6rem!important; }
+  .pancakes-invitation p { margin:.45rem 0 0!important; }
+  .pancakes-recipes h2 { font-size:1.12rem; margin:0 0 .5rem!important; }
+  .pancakes-recipes p { color:var(--sl-color-gray-3); margin:0!important; }
+</style>
