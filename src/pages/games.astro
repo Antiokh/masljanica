@@ -8,7 +8,7 @@ import archive from '../data/audio-archive.json';
 import MarkdownIt from 'markdown-it';
 import {existsSync} from 'node:fs';
 const markdown=new MarkdownIt({html:false,linkify:false,breaks:false});
-const audiences=[{id:'children',title:'Дети',icon:'baby',match:'Дети'},{id:'teens',title:'Дети и подростки',icon:'users',match:'Дети и подростки'},{id:'youth',title:'Молодёжь',icon:'heart',match:'Молодёжь'},{id:'family',title:'Взрослые и дети',icon:'users',match:'Взрослые и дети'},{id:'strength',title:'Добры молодцы',icon:'strength',match:'Добры молодцы'}];
+const audiences=[{id:'children',title:'Дети',icon:'baby',match:'Дети'},{id:'teens',title:'Дети и подростки',icon:'teens',match:'Дети и подростки'},{id:'youth',title:'Молодёжь',icon:'heart',match:'Молодёжь'},{id:'family',title:'Взрослые и дети',icon:'family',match:'Взрослые и дети'},{id:'strength',title:'Добры молодцы',icon:'strength',match:'Добры молодцы'}];
 const audienceOf=(s:string)=>audiences.find(a=>s.endsWith(a.match))||{id:'other',title:s,icon:'users'};
 type Details={formation?:string;role?:string;equipment?:string;age_min?:number;age_max?:number;players_min?:number;players_max?:number};
 const details=meta as Record<string,Details>;

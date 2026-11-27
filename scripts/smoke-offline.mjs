@@ -496,6 +496,10 @@ try {
   await page.locator('.app-nav a[href="/games/"]').click();
   await page.waitForURL('**/games/');
   await page.locator('.game-card').first().waitFor();
+  const audienceIcons=await page.locator('[data-game-filter="audience"][data-value="teens"] svg path,[data-game-filter="audience"][data-value="family"] svg path').evaluateAll(paths=>paths.map(path=>{const b=path.getBBox();return {d:path.getAttribute('d'),x:b.x,y:b.y,right:b.x+b.width,bottom:b.y+b.height};}));
+  assert.equal(audienceIcons.length,2);
+  assert.notEqual(audienceIcons[0].d,audienceIcons[1].d,'Distinct age-group pictograms');
+  assert.ok(audienceIcons.every(b=>b.x>=1&&b.y>=1&&b.right<=23&&b.bottom<=23),'Audience pictograms fit 24px viewBox with stroke clearance');
   const gameCount=await page.locator('.game-card').count();
   assert.equal(gameCount,allGames.length,'Every game is displayed');
   assert.deepEqual((await page.locator('.game-card').evaluateAll(els=>els.map(el=>el.id))).sort(),allGames.map(g=>g.slug).sort());
