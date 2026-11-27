@@ -854,3 +854,44 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
   html[data-runtime-environment="telegram"][data-has-toc]{scroll-padding-top:calc(var(--sl-nav-height) + var(--sl-mobile-toc-height) + .75rem)}
   html[data-runtime-environment="telegram"] mobile-starlight-toc nav{top:var(--sl-nav-height);inset-inline:max(0px,var(--telegram-content-left,0px)) max(0px,var(--telegram-content-right,0px))}
 }
+
+
+/* Desktop dashboard and catalog grids. Keep mobile DOM/order, one transport per catalog,
+   and intrinsic card heights. The desktop areas adapt to seasonal visibility. */
+@media(min-width:60rem){
+  .home-dashboard{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-areas:"hero intro" "admission intro" "sections sections" "workshops workshops" "credit credit";
+    align-items:start;
+    align-content:start;
+    gap:1rem;
+  }
+  .home-dashboard:not(:has(>.home-admission:not([hidden]))){
+    grid-template-areas:"hero intro" "sections sections" "workshops workshops" "credit credit";
+  }
+  .home-dashboard:has(>.home-program:not([hidden])){
+    grid-template-areas:"hero program" "admission program" "intro sections" "workshops workshops" "credit credit";
+  }
+  .home-dashboard:has(>.home-program:not([hidden])):not(:has(>.home-admission:not([hidden]))){
+    grid-template-areas:"hero program" "intro sections" "workshops workshops" "credit credit";
+  }
+  .home-dashboard>.home-hero{grid-area:hero;padding:1.15rem}
+  .home-dashboard>.home-program{grid-area:program}
+  .home-dashboard>.home-admission{grid-area:admission}
+  .home-dashboard>.festival-intro{grid-area:intro}
+  .home-dashboard>.home-sections{grid-area:sections}
+  .home-dashboard>.home-workshops{grid-area:workshops}
+  .home-dashboard>.home-credit{grid-area:credit}
+  .home-dashboard #home-title{font-size:clamp(1.65rem,2.5vw,2.5rem)}
+  .home-dashboard .home-section-grid,.home-dashboard .home-workshop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .home-dashboard .home-section-card{min-height:3.75rem}
+  .home-dashboard .home-workshop-card{min-height:4rem}
+  .song-list.catalog-group,.game-list,.recipe-group{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    align-items:start;
+    gap:.65rem;
+  }
+  .song-list .song-row,.game-list>.game-card,.recipe-group>.recipe-card{min-width:0;align-self:start}
+  .recipe-group>h3{grid-column:1/-1}
+}

@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { assertSongLayout } from './assert-song-layout.mjs';
+import { assertCatalogColumns } from './assert-catalog-columns.mjs';
 const origin='http://localhost:4321';
 const server=spawn('npm',['run','preview','--','--host','localhost','--port','4321'],{stdio:'inherit'});
 let browser;
@@ -117,14 +118,16 @@ try {
   assert.equal(await page.locator('.home-timeline a[href="/games/"]').count(),1);
   await page.locator('[data-header-event-date]').waitFor({state:'visible'});
   await page.setViewportSize({width:1440,height:900});
-  for(const width of [320,390,1440]){
+  for(const width of [320,390,960,1440]){
     await page.setViewportSize({width,height:900});
     const layout=await page.locator('[data-home-dashboard]').evaluate(root=>{
       const ordered=['.home-hero','.festival-intro','.home-program','.home-admission','.home-sections','.home-workshops'].map(s=>root.querySelector(s).getBoundingClientRect());
       const icon=root.querySelector('.home-calendar .home-event-icon').getBoundingClientRect(),map=root.querySelector('.home-location .home-event-icon').getBoundingClientRect(),mapRow=root.querySelector('.home-location').getBoundingClientRect(),sun=root.querySelector('.home-hero-art').getBoundingClientRect();
-      return {stack:ordered.slice(1).every((r,i)=>r.top>=ordered[i].bottom-1),widths:ordered.every(r=>Math.abs(r.width-ordered[0].width)<2),iconGap:mapRow.top-root.querySelector('.home-calendar').getBoundingClientRect().bottom,sunWidth:sun.width,aligned:Math.abs(icon.left-map.left)<2};
+      const [hero,intro,program,admission,sections,workshops]=ordered;
+      const desktop=Math.abs(hero.top-program.top)<2&&hero.right<program.left&&Math.abs(hero.width-program.width)<2&&Math.abs(hero.left-admission.left)<2&&admission.top>=hero.bottom-1&&Math.abs(intro.top-sections.top)<2&&intro.right<sections.left&&intro.top>=Math.max(admission.bottom,program.bottom)-1&&workshops.top>=Math.max(intro.bottom,sections.bottom)-1&&Math.abs(workshops.width-root.getBoundingClientRect().width)<2;
+      return {desktop,stack:ordered.slice(1).every((r,i)=>r.top>=ordered[i].bottom-1),widths:ordered.every(r=>Math.abs(r.width-ordered[0].width)<2),iconGap:mapRow.top-root.querySelector('.home-calendar').getBoundingClientRect().bottom,sunWidth:sun.width,aligned:Math.abs(icon.left-map.left)<2};
     });
-    assert.ok(layout.stack&&layout.widths,'Home sections follow editorial order at '+width);
+    assert.ok(width>=960?layout.desktop:layout.stack&&layout.widths,'Home layout follows approved composition at '+width);
     assert.ok(layout.iconGap>=-1&&layout.iconGap<=8,'Compact date/location spacing at '+width);
     assert.ok(layout.sunWidth>=63,'Larger sun at '+width);
     assert.ok(layout.aligned,'Aligned calendar and location at '+width);
@@ -159,6 +162,7 @@ try {
   assert.match(await page.locator('.pancakes-invitation').innerText(),/Приносите свои блины/);
   assert.equal(await page.locator('#pancake-recipes').innerText(),'Рецепты блинов');
   assert.equal(await page.locator('.recipe-card').count(),24);
+  await assertCatalogColumns(page,'.recipe-group','.recipe-card');
   await page.locator('.recipe-card').first().locator('summary').click();
   await page.locator('.recipe-card').first().locator('.recipe-method').waitFor({state:'visible'});
   const pancakeManifest=await (await page.request.get('/offline-manifest.json')).json();
@@ -200,6 +204,7 @@ try {
   await dittyLink.click();
   await page.waitForURL('**/ditties/');
   assert.deepEqual(await page.locator('.ditty-card p').allTextContents(),dittyTexts,'Preserve original verses and line breaks');
+  await assertCatalogColumns(page,'.ditties-grid','.ditty-card');
   assert.equal(await page.locator('.ditty-card .ditty-credit a').count(),folkDitties.length,'Every sourced ditty retains a source');
   for(const [category,expected] of [['own',ownDitties],['folk',folkDitties.filter(x=>x.category==='folk').map(x=>x.text)],['bawdy',folkDitties.filter(x=>x.category==='bawdy').map(x=>x.text)],['political',[...ownDittyItems,...folkDitties].filter(x=>x.political).map(x=>x.text)]]){
     await page.locator('[data-ditty-filter][data-value="'+category+'"]').click();
@@ -370,6 +375,7 @@ try {
   await page.locator('#catalog-empty').waitFor({state:'hidden'});
   assert.equal(await page.locator('.song-row').count(),15);
   await page.locator('#song-player').waitFor({state:'visible'});
+  await assertCatalogColumns(page,'.song-list','.song-row');
   await assertSongLayout(page);
   await page.locator('[data-playlist-action="toggle"]').click();
   await page.waitForFunction(()=>{const a=document.querySelector('#song-player-audio');return a&&!a.paused&&a.currentTime>.25;});
@@ -436,6 +442,7 @@ try {
   await page.locator('.game-card').first().waitFor();
   const gameCount=await page.locator('.game-card').count();
   assert.ok(gameCount>=31,'Original game catalog retained');
+  await assertCatalogColumns(page,'.game-list','.game-card');
   await page.locator('[data-game-filter="category"][data-value="historical"]').click();
   await page.locator('[data-game-filter="audience"][data-value="children"]').click();
   const filtered=await page.locator('.game-card:not([hidden])').evaluateAll(els=>els.map(e=>[e.dataset.category,e.dataset.audience]));

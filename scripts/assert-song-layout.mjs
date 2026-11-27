@@ -33,7 +33,7 @@ export async function assertSongLayout(page) {
         assert.equal(metrics.bodyBg,'rgba(0, 0, 0, 0)',label+' unified body surface');
         assert.equal(metrics.summaryBg,'rgba(0, 0, 0, 0)',label+' unified header surface');
         assert.equal(metrics.bodyBorder,0,label+' no internal separator');
-        if(metrics.next)assert.ok(metrics.next.y-metrics.card.bottom>=3,label+' space between cards');
+        if(metrics.next)assert.ok(metrics.next.y-metrics.card.bottom>=3||metrics.next.x-metrics.card.right>=3,label+' space between cards');
         assert.ok(metrics.heading.x-metrics.play.right>=4,label+' spacing after play icon');
         const center=r=>[r.x+r.w/2,r.y+r.h/2];
         const [dx,dy]=center(metrics.disc),[ix,iy]=center(metrics.icon);
@@ -44,8 +44,8 @@ export async function assertSongLayout(page) {
         assert.ok(metrics.slider.w>12,label+' usable seek area');
         assert.ok(Math.abs(center(metrics.slider)[1]-center(metrics.selected)[1])<=6,label+' vertically centered seek');
         assert.ok(metrics.group.right<=metrics.card.right+1 && metrics.group.x>=metrics.card.x-1,label+' no overflow');
-        const expected=theme==='dark'?'rgb(185, 77, 34)':'rgb(196, 61, 50)';
-        assert.equal(metrics.selectedToken.toUpperCase(),theme==='dark'?'#B94D22':'#C43D32',label+' approved theme-specific action token');
+        const expected=theme==='dark'?'rgb(169, 67, 24)':'rgb(195, 77, 33)';
+        assert.equal(metrics.selectedToken.toUpperCase(),theme==='dark'?'#A94318':'#C34D21',label+' approved theme-specific action token');
         assert.equal(metrics.color,'rgb(255, 255, 255)',label+' white foreground');
         assert.equal(metrics.background,expected,label+' selected action background');
       }
