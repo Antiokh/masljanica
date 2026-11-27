@@ -59,18 +59,24 @@ try {
   await page.locator('.home-event-meta').waitFor({state:'visible'});
   assert.equal(await page.locator('.home-event-when .home-event-date').count(),1);
   assert.equal(await page.locator('.home-event-when [data-calendar-menu]').count(),1);
-  assert.equal(await page.locator('.home-event-where .home-event-address').count(),1);
+  assert.equal(await page.locator('.home-location .home-event-address').count(),1);
   assert.equal(await page.locator('.home-event-where .home-location').count(),1);
   const eventGeometry=await page.locator('.home-hero').evaluate(hero=>{
     const rect=s=>hero.querySelector(s).getBoundingClientRect();
-    const date=rect('.home-event-date'),calendar=rect('.home-calendar .home-event-icon'),place=rect('.home-event-address'),map=rect('.home-location'),sun=rect('.home-hero-art'),heading=rect('.home-hero-heading'),meta=rect('.home-event-meta');
-    return {dateRight:date.right,calendarLeft:calendar.left,calendarRight:calendar.right,calendarY:calendar.y+calendar.height/2,dateY:date.y+date.height/2,placeRight:place.right,mapLeft:map.left,mapRight:map.right,mapY:map.y+map.height/2,placeY:place.y+place.height/2,sunTop:sun.top,headingTop:heading.top,sunRight:sun.right,headingRight:heading.right,metaRight:meta.right};
+    const date=rect('.home-event-date'),calendar=rect('.home-calendar .home-event-icon'),place=rect('.home-location .home-event-address'),map=rect('.home-location .home-event-icon'),mapRow=rect('.home-location'),sun=rect('.home-hero-art'),heading=rect('.home-hero-heading'),meta=rect('.home-event-meta');
+    return {dateLeft:date.left,calendarLeft:calendar.left,calendarRight:calendar.right,calendarY:calendar.y+calendar.height/2,dateY:date.y+date.height/2,placeLeft:place.left,mapLeft:map.left,mapRight:map.right,mapRowRight:mapRow.right,mapY:map.y+map.height/2,placeY:place.y+place.height/2,sunTop:sun.top,headingTop:heading.top,sunRight:sun.right,headingRight:heading.right,metaRight:meta.right};
   });
-  assert.ok(eventGeometry.dateRight<=eventGeometry.calendarLeft+1&&Math.abs(eventGeometry.calendarY-eventGeometry.dateY)<2,'Date and calendar icon share a row');
-  assert.ok(eventGeometry.placeRight<=eventGeometry.mapLeft+1&&Math.abs(eventGeometry.placeY-eventGeometry.mapY)<2,'Address and map icon share a row');
-  assert.ok(Math.abs(eventGeometry.calendarRight-eventGeometry.mapRight)<2,'Calendar and map icons align');
+  assert.ok(eventGeometry.calendarRight<=eventGeometry.dateLeft+1&&Math.abs(eventGeometry.calendarY-eventGeometry.dateY)<2,'Date and calendar icon share a row');
+  assert.ok(eventGeometry.mapRight<=eventGeometry.placeLeft+1&&Math.abs(eventGeometry.placeY-eventGeometry.mapY)<2,'Address and map icon share a row');
+  assert.ok(Math.abs(eventGeometry.calendarLeft-eventGeometry.mapLeft)<2,'Calendar and map icons align');
   assert.ok(Math.abs(eventGeometry.sunTop-eventGeometry.headingTop)<2&&Math.abs(eventGeometry.sunRight-eventGeometry.headingRight)<2,'Sun at top right of heading');
-  assert.ok(Math.abs(eventGeometry.mapRight-eventGeometry.metaRight)<2,'Full width event facts');
+  assert.ok(Math.abs(eventGeometry.mapRowRight-eventGeometry.metaRight)<2,'Full width event facts');
+  assert.match(await page.locator('.home-location').getAttribute('href'),/^https:\/\/www\.google\.com\/maps\?q=/);
+  assert.equal(await page.locator('.home-location .home-event-address').evaluate(el=>el.closest('a')?.classList.contains('home-location')),true,'Entire address belongs to the map link');
+  await page.locator('.home-location').evaluate(el=>el.hidden=true);
+  await page.locator('.home-location-offline').waitFor({state:'visible'});
+  assert.equal(await page.locator('.home-location-offline a').count(),0,'Offline address remains readable without external navigation');
+  await page.locator('.home-location').evaluate(el=>el.hidden=false);
   await page.locator('[data-calendar-menu] summary').click();
   await page.locator('[data-calendar-provider="apple"]').waitFor({state:'visible'});
   await page.locator('[data-calendar-provider="google"]').waitFor({state:'visible'});
@@ -95,8 +101,8 @@ try {
     await page.setViewportSize({width,height:900});
     const layout=await page.locator('[data-home-dashboard]').evaluate(root=>{
       const ordered=['.home-hero','.festival-intro','.home-program','.home-admission','.home-sections','.home-workshops'].map(s=>root.querySelector(s).getBoundingClientRect());
-      const icon=root.querySelector('.home-calendar .home-event-icon').getBoundingClientRect(),map=root.querySelector('.home-location').getBoundingClientRect(),sun=root.querySelector('.home-hero-art').getBoundingClientRect();
-      return {stack:ordered.slice(1).every((r,i)=>r.top>=ordered[i].bottom-1),widths:ordered.every(r=>Math.abs(r.width-ordered[0].width)<2),iconGap:map.top-icon.bottom,sunWidth:sun.width,aligned:Math.abs(icon.right-map.right)<2};
+      const icon=root.querySelector('.home-calendar .home-event-icon').getBoundingClientRect(),map=root.querySelector('.home-location .home-event-icon').getBoundingClientRect(),mapRow=root.querySelector('.home-location').getBoundingClientRect(),sun=root.querySelector('.home-hero-art').getBoundingClientRect();
+      return {stack:ordered.slice(1).every((r,i)=>r.top>=ordered[i].bottom-1),widths:ordered.every(r=>Math.abs(r.width-ordered[0].width)<2),iconGap:mapRow.top-root.querySelector('.home-calendar').getBoundingClientRect().bottom,sunWidth:sun.width,aligned:Math.abs(icon.left-map.left)<2};
     });
     assert.ok(layout.stack&&layout.widths,'Home sections follow editorial order at '+width);
     assert.ok(layout.iconGap>=-1&&layout.iconGap<=8,'Compact date/location spacing at '+width);

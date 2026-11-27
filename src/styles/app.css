@@ -778,16 +778,16 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 .home-dashboard .home-event-meta{display:grid;gap:.15rem;margin:.25rem 0 0!important}
 .home-dashboard .home-event-group{min-width:0;margin:0!important}
 .home-dashboard .home-event-group>*{margin:0!important}
-.home-dashboard .home-event-where{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.65rem}
+.home-dashboard .home-event-where{display:block}
 .home-dashboard .home-event-address{line-height:1.4;overflow-wrap:anywhere}
 .home-dashboard .home-calendar-menu{width:100%;max-width:100%;margin:0!important}
-.home-dashboard .home-calendar-menu>summary{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.65rem;width:100%;max-width:none;padding:0!important;border:0;border-radius:.5rem;background:transparent;color:var(--sl-color-text);margin:0!important;text-align:left;box-sizing:border-box}
+.home-dashboard .home-calendar-menu>summary{display:grid;grid-template-columns:2.5rem minmax(0,1fr);align-items:center;gap:.65rem;width:100%;max-width:none;padding:0!important;border:0;border-radius:.5rem;background:transparent;color:var(--sl-color-text);margin:0!important;text-align:left;box-sizing:border-box}
 .home-dashboard .home-calendar-menu>summary>.home-event-date{font-size:1.05rem;line-height:1.35;min-width:0;font-weight:650;margin:0!important}
-.home-dashboard .home-event-icon{display:grid;place-items:center;box-sizing:border-box;width:2.5rem;height:2.5rem;border-radius:.55rem;border:1px solid var(--festival-control-border);background:var(--sl-color-bg);color:var(--sl-color-text-accent);padding:0!important;margin:0!important;justify-self:end;flex:none}
+.home-dashboard .home-event-icon{display:grid;place-items:center;box-sizing:border-box;width:2.5rem;height:2.5rem;border-radius:.55rem;border:1px solid var(--festival-control-border);background:var(--sl-color-bg);color:var(--sl-color-text-accent);padding:0!important;margin:0!important;justify-self:start;flex:none}
 .home-dashboard .home-event-icon svg{width:1.35rem;height:1.35rem;margin:0!important}
-.home-dashboard .home-calendar-menu[open] .home-event-icon,.home-dashboard .home-calendar-menu>summary:hover .home-event-icon,.home-dashboard .home-location:hover{background:var(--festival-selected);color:var(--festival-selected-text);border-color:var(--festival-selected)}
+.home-dashboard .home-calendar-menu[open] .home-event-icon,.home-dashboard .home-calendar-menu>summary:hover .home-event-icon,.home-dashboard .home-location:hover .home-event-icon{background:var(--festival-selected);color:var(--festival-selected-text);border-color:var(--festival-selected)}
 .home-dashboard .home-calendar-providers{margin-top:.35rem!important}
-.home-dashboard .home-event-where:has(.home-location[hidden]){grid-template-columns:minmax(0,1fr)}
+
 .home-dashboard .home-calendar-menu>summary:focus-visible{outline:2px solid var(--sl-color-accent);outline-offset:2px}
 
 /* Editorial order: event, introduction, programme, admission, materials, characters. */
@@ -826,3 +826,12 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 /* Ensemble illustration inside the home plot, in its original proportions. */
 .home-story-figure{margin:0 0 .85rem!important;min-width:0}
 .home-story-figure img{display:block;width:100%;height:auto;border-radius:.7rem;margin:0!important}
+
+/* Full-width event actions, with a shared left icon column. */
+.home-dashboard :is(.home-location,.home-location-offline){display:grid;grid-template-columns:2.5rem minmax(0,1fr);align-items:center;gap:.65rem;width:100%;min-width:0;box-sizing:border-box;padding:0;margin:0!important;text-align:left;text-decoration:none;font-weight:400;border-radius:.5rem}
+.home-dashboard .home-location .home-event-address,.home-dashboard .home-location-offline .home-event-address{min-width:0;margin:0!important}
+.home-dashboard .home-location:hover .home-event-address{color:var(--sl-color-text-accent)}
+.home-dashboard .home-location:focus-visible{outline:2px solid var(--sl-color-accent);outline-offset:2px}
+.home-dashboard .home-location-offline{display:none}
+.home-dashboard .home-location[hidden]+.home-location-offline,html[data-network="offline"] .home-dashboard .home-location-offline{display:grid}
+.home-dashboard .home-location-offline .home-event-icon{color:var(--sl-color-gray-3)}
