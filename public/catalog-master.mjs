@@ -33,13 +33,13 @@ export function installCatalogMaster(){
    item.append(button);nav.append(item);e.item=item;e.button=button;
   }
  }
- function select(e,{reset=true,remember=false}={}){
+ function select(e,{remember=false}={}){
   if(!active||!e||!available(e))return;
-  const changed=selected!==e;selected=e;
+  selected=e;
   for(const x of entries){const on=x===e;x.row.toggleAttribute('data-master-selected',on);
    x.button.setAttribute('aria-pressed',String(on));disclosure(x.row).open=on;}
   if(remember)mobileOpen.set(e.row,true);
-  if(changed&&reset)content.scrollTop=0;playback();
+  playback();
  }
  function refresh(){
   if(!active)return;

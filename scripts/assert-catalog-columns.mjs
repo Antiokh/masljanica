@@ -56,14 +56,25 @@ export async function assertCatalogMaster(page,cardSelector){
     }));
     assert.ok(icons.length>0&&icons.every(x=>x.same&&!x.text&&x.playing&&x.playVisible===!x.on&&x.pauseVisible===x.on),'Master play uses the same SVG icons and state, no emoji');
    }
-   const metrics=await root.evaluate(el=>{const left=el.querySelector('[data-master-nav]'),right=el.querySelector('[data-master-content]'),a=left.getBoundingClientRect(),b=right.getBoundingClientRect();return {left:{right:a.right,top:a.top,width:a.width},right:{left:b.left,top:b.top,width:b.width},overflow:[left,right].some(x=>x.scrollWidth>x.clientWidth+2),scroll:[left,right].map(x=>getComputedStyle(x).overflowY)};});
+   const metrics=await root.evaluate(el=>{const left=el.querySelector('[data-master-nav]'),right=el.querySelector('[data-master-content]'),a=left.getBoundingClientRect(),b=right.getBoundingClientRect();return {left:{right:a.right,top:a.top,width:a.width,height:a.height},right:{left:b.left,top:b.top,width:b.width,height:b.height},overflow:[left,right].some(x=>x.scrollWidth>x.clientWidth+2),scroll:[left,right].map(x=>getComputedStyle(x).overflowY),rightClipped:right.scrollHeight>right.clientHeight+2};});
    assert.ok(metrics.right.left>=metrics.left.right+3&&metrics.right.width>metrics.left.width&&Math.abs(metrics.left.top-metrics.right.top)<=2,'Desktop master/detail columns at '+width);
-   assert.ok(!metrics.overflow&&metrics.scroll.every(x=>x==='auto'),'Independent scroll panes without horizontal overflow');
+   assert.ok(!metrics.overflow&&metrics.scroll[0]==='auto'&&metrics.scroll[1]==='visible'&&!metrics.rightClipped,'Only the list may scroll internally');
+   assert.ok(Math.abs(metrics.left.height-metrics.right.height)<=2,'List follows natural detail height');
    const second=buttons.nth(1);await second.click();const id=await second.getAttribute('data-master-choice');
    assert.equal(await second.getAttribute('aria-pressed'),'true');
    assert.deepEqual(await cards.evaluateAll(els=>els.filter(el=>el.getClientRects().length).map(el=>el.id)),[id],'Exactly one original card visible');
    assert.equal(await content.locator('[data-master-selected]').evaluate(el=>(el.matches('details')?el:el.querySelector('details')).open),true);
-   assert.equal(await nav.locator('[aria-pressed=true]').count(),1);await buttons.first().click();
+   assert.equal(await nav.locator('[aria-pressed=true]').count(),1);
+   const after=await root.evaluate(el=>{
+    const left=el.querySelector('[data-master-nav]'),right=el.querySelector('[data-master-content]');
+    const selected=right.querySelector('[data-master-selected]'),body=selected.querySelector('.song-body,.game-body,.recipe-method');
+    const before=right.getBoundingClientRect().height,probe=document.createElement('div');
+    probe.style.height='1200px';body.append(probe);
+    try{return {before,expanded:right.getBoundingClientRect().height,list:left.getBoundingClientRect().height,scroll:getComputedStyle(right).overflowY};}
+    finally{probe.remove();}
+   });
+   assert.ok(after.expanded>=after.before+1190&&Math.abs(after.expanded-after.list)<=2&&after.scroll==='visible','Long content grows both columns without internal detail scroll');
+   await buttons.first().click();
   }
  }finally{
   await page.setViewportSize({width:390,height:900});await nav.waitFor({state:'hidden'});
