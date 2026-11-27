@@ -1,0 +1,13 @@
+---
+import {existsSync} from 'node:fs';
+const {item}=Astro.props;
+const local='/media/history/'+item.id+'.webp';
+const archived=existsSync(process.cwd()+'/public'+local);
+---
+<figure class="history-figure">
+  {archived ? <img src={local} alt={item.caption} loading="lazy" decoding="async"/> : <div data-external-embed data-embed-kind="image" data-embed-src={item.url} data-embed-alt={item.caption} data-online-only hidden><button type="button" class="history-media-load" data-embed-load>Показать историческую иллюстрацию</button><div data-embed-surface hidden></div></div>}
+  <figcaption>{item.caption} <a href={item.source} target="_blank" rel="noopener noreferrer" data-online-only hidden>Источник ↗</a></figcaption>
+</figure>
+<style>
+.history-figure{margin:0!important;min-width:0}.history-figure :global(img){width:100%;height:auto;max-height:32rem;object-fit:contain;border-radius:.65rem;background:var(--sl-color-bg);display:block}.history-figure figcaption{font-size:.75rem;color:var(--sl-color-gray-3);line-height:1.45;margin:.35rem 0 0!important}.history-media-load{color:var(--sl-color-text-accent);border:1px solid var(--sl-color-gray-5);border-radius:.5rem;background:var(--sl-color-bg);padding:.55rem .75rem;font:inherit;font-size:.85rem;cursor:pointer}
+</style>

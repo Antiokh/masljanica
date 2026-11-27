@@ -1,0 +1,16 @@
+[
+  {
+    "id": "sledding",
+    "url": "https://tile.loc.gov/image-services/iiif/service%3Agdc%3Agdclccn%3A20%3A18%3A68%3A70%3A48%3A2018687048%3Aekrb0076/full/pct%3A100/0/default.jpg",
+    "source": "https://www.loc.gov/item/2018687048/",
+    "caption": "Катание с ледяных горок в селе Ледейское, 1892–1923. Красноярский краевой краеведческий музей / Library of Congress.",
+    "rights": "LOC: no known restrictions in WDL collection"
+  },
+  {
+    "id": "snow-town",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/3/34/SurikovSnowFortress.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:SurikovSnowFortress.jpg",
+    "caption": "Василий Суриков. «Взятие снежного городка», 1891. Русский музей / Wikimedia Commons.",
+    "rights": "Public domain (PD-Art)"
+  }
+]
