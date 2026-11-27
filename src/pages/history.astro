@@ -8,19 +8,10 @@ const headings=[...chapters.map(chapter=>({depth:2,slug:chapter.id,text:chapter.
   <div class="history-book story-book" data-story-book>
     <p class="history-lead">Как встречали и провожали Масляницу? Листаем старинные книги, слушаем песни, смотрим на народные гулянья и знакомимся с обычаями.</p>
     <audio id="story-audio" hidden preload="none"></audio>
-    {chapters.map((chapter,i)=><HistoryChapter chapter={chapter} number={i+1}/>)}
+    {chapters.map(chapter=><HistoryChapter chapter={chapter}/>)}
     <section class="history-bibliography"><h2 id="sources">Источники</h2><p>Н. Дубровский. «Масляница». Москва, типография С. Селивановского, 1870.</p><p>И. Н. Божерянов. «Как праздновал и празднует народ русский Рождество Христово, Новый год, Крещение и Масляницу». Издание М. Ледерле и Ко, 1894.</p><p>«Лучшие московские блины, или Практические наставления, как печь блины и оладьи». Москва, типография Александра Семена, 1854.</p><p>Словарь В. И. Даля, статья «Масло». Современные аудиозаписи и игры — материалы нашего фестиваля.</p></section>
   </div>
 </StarlightPage>
 <style>
-.history-book{display:grid;gap:.7rem;min-width:0}.history-lead{margin:0!important;color:var(--sl-color-gray-2)}.history-bibliography{font-size:.82rem;color:var(--sl-color-gray-3);padding:.5rem 0}.history-bibliography h2{font-size:1.1rem;color:var(--sl-color-text)}.history-bibliography p{margin:.35rem 0!important}
+.history-book{display:grid;gap:1.75rem;min-width:0}.history-lead{margin:0!important;color:var(--sl-color-gray-2)}.history-bibliography{font-size:.82rem;color:var(--sl-color-gray-3);padding:.5rem 0}.history-bibliography h2{font-size:1.1rem;color:var(--sl-color-text)}.history-bibliography p{margin:.35rem 0!important}
 </style>
-<script>
-function chapterHeading(hash:string){try{const el=document.getElementById(decodeURIComponent(hash.slice(1)));return el?.closest('.history-chapter')?el:null;}catch{return null;}}
-function openChapter(){if(!document.querySelector('.history-book'))return;const el=chapterHeading(location.hash);if(el){(el.closest('.history-chapter') as HTMLDetailsElement).open=true;requestAnimationFrame(()=>el.scrollIntoView({block:'start'}));}}
-// Open before the native fragment jump, including repeated selection of the same hash.
-document.addEventListener('click',event=>{const link=(event.target as Element)?.closest?.('mobile-starlight-toc a[href^="#"], starlight-toc a[href^="#"]');if(!link||!document.querySelector('.history-book'))return;const el=chapterHeading((link as HTMLAnchorElement).hash);if(el)(el.closest('.history-chapter') as HTMLDetailsElement).open=true;},true);
-document.addEventListener('astro:page-load',openChapter);
-window.addEventListener('hashchange',openChapter);
-openChapter();
-</script>

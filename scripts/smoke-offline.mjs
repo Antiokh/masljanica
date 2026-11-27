@@ -50,6 +50,8 @@ try {
   await page.waitForFunction(()=>document.querySelector('.home-dashboard .home-section-card') && document.querySelector('.home-dashboard [data-home-season="event"]')?.hidden === (document.querySelector('.home-dashboard').dataset.eventEnabled!=='true'||document.querySelector('.home-dashboard').dataset.eventDate < new Intl.DateTimeFormat('sv-SE',{timeZone:document.querySelector('.home-dashboard').dataset.eventTimezone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())));
   assert.equal(await page.locator('.home-section-card').count(),6);
   assert.equal(await page.locator('.home-section-card[href="/history/"]').count(),1);
+  assert.equal(await page.locator('.home-credit a').getAttribute('href'),'https://t.me/antiokh');
+  assert.equal(await page.locator('.home-credit a').innerText(),'Антон Назаров');
   assert.equal(await page.locator('.home-section-card[href="/scenario/"]').count(),1,'Story tile is not duplicated');
   assert.equal(await page.locator('.home-section-card[href="/pancakes/"]').count(),1);
   assert.equal(await page.locator('.home-character-card').count(),0);
@@ -173,7 +175,9 @@ try {
   await historyToc.locator('summary').click();
   await historyToc.locator('a[href="#farewell"]').click();
   await page.waitForURL('**/history/#farewell');
-  await page.waitForFunction(()=>document.getElementById('farewell')?.closest('details')?.open===true);
+  assert.equal(await page.locator('details.history-chapter').count(),0,'History is an open wiki article');
+  await page.locator('#farewell').waitFor({state:'visible'});
+  await page.waitForFunction(()=>{const h=document.getElementById('farewell');const toc=document.querySelector('#starlight__mobile-toc summary');return h&&toc&&h.getBoundingClientRect().top>=toc.getBoundingClientRect().bottom-2&&h.getBoundingClientRect().top<innerHeight;});
   assert.equal(await historyToc.evaluate(el=>el.open),false,'Native mobile TOC closes on selection');
   await page.setViewportSize({width:1440,height:900});
   await page.locator('.right-sidebar-panel starlight-toc a[href="#farewell"]').waitFor({state:'visible'});
