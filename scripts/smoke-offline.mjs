@@ -209,13 +209,13 @@ try {
     assert.ok(result.height>0&&result.height<=4,'Progress line must stay thin');
     assert.equal(result.color,result.accent,'Progress uses the resolved theme accent');
     const theme=await page.evaluate(()=>document.documentElement.dataset.theme);
-    assert.equal(result.accent,theme==='dark'?'rgb(249, 160, 75)':'rgb(196, 61, 50)','Approved accent for resolved theme');
+    assert.equal(result.accent,theme==='dark'?'rgb(249, 160, 75)':'rgb(195, 77, 33)','Approved accent for resolved theme');
     const palette=await page.evaluate(()=>{
       const s=getComputedStyle(document.documentElement);
       const token=n=>s.getPropertyValue(n).trim().toUpperCase();
       return {action:token('--festival-action'),selected:token('--festival-selected'),foreground:token('--festival-selected-text'),surface:token('--festival-surface')};
     });
-    assert.equal(palette.action,theme==='dark'?'#A94318':'#C43D32','Approved action color');
+    assert.equal(palette.action,theme==='dark'?'#A94318':'#C34D21','Approved action color');
     assert.equal(palette.selected,palette.action,'Selected states follow the common action token');
     assert.equal(palette.foreground,'#FFFFFF','White text on solid actions');
     assert.equal(palette.surface,theme==='dark'?'#1D2B40':'#F2F5F8','Surface palette unchanged');
@@ -598,7 +598,7 @@ try {
     await tg.locator('.more-menu > summary').click();
     await tg.locator('[data-telegram-theme]').selectOption('light');
     await tg.waitForFunction(()=>document.documentElement.dataset.theme==='light'&&!document.documentElement.dataset.telegramPalette);
-    assert.equal(await tg.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--festival-action').trim().toLowerCase()),'#c43d32');
+    assert.equal(await tg.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--festival-action').trim().toLowerCase()),'#c34d21');
     await tg.evaluate(()=>window.__tgTheme('dark'));
     assert.equal(await tg.evaluate(()=>document.documentElement.dataset.theme),'light');
     assert.equal(await tg.locator('[data-telegram-theme] option[value="auto"]').innerText(),'Telegram');
