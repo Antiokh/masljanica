@@ -750,7 +750,7 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 .home-calendar svg{width:1.1rem;height:1.1rem;flex:none}
 .home-calendar:hover{color:var(--sl-color-text-accent);border-color:var(--sl-color-text-accent)}
 .home-time-range{display:grid;gap:0;margin:0!important;line-height:1.25}
-.home-time-range time:last-child{font-size:.72rem;color:var(--sl-color-gray-3);font-weight:400}
+.home-time-range .home-stage-end{font-size:.72rem;color:var(--sl-color-gray-3);font-weight:400}
 .home-admission{border:1px solid var(--sl-color-gray-5);border-inline-start:3px solid var(--sl-color-accent);border-radius:.65rem;background:var(--festival-surface);padding:.75rem .9rem}
 .home-admission strong{color:var(--sl-color-text-accent)}
 .home-admission p{font-size:.86rem;margin:.3rem 0 0!important}
@@ -815,3 +815,10 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 .home-workshop-chevron{width:.85rem;height:.85rem;transform:rotate(-90deg);color:var(--sl-color-text-accent);margin:0!important}
 @media(max-width:60rem){.home-workshop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:420px){.home-workshop-card{grid-template-columns:2.85rem minmax(0,1fr);gap:.4rem;padding:.4rem}.home-workshop-chevron{display:none}.home-workshop-info strong{font-size:.78rem}}
+
+/* Timeline shows each transition once. Keep real gaps and the final end. */
+.home-dashboard .home-timeline{gap:.55rem}
+.home-dashboard .home-timeline li{align-items:start}
+.home-dashboard .home-time-range{line-height:1.35}
+.home-timeline .home-timeline-end strong{color:var(--sl-color-gray-3);font-weight:500}
+.home-timeline .home-timeline-end>div::before{background:var(--sl-color-gray-3)}

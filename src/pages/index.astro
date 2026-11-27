@@ -19,7 +19,8 @@ calendarDay(new Date(), config.timezone); // Validate timezone at build time.
 const dateLabel = new Intl.DateTimeFormat('ru-RU', { day:'numeric', month:'long', timeZone:'UTC' }).format(new Date(config.date+'T00:00:00Z'));
 const year = config.date.slice(0,4);
 const items = [...schedule].sort((a,b)=>a.start.localeCompare(b.start));
-const timeLabel = items.length ? items[0].start+'–'+items.reduce((last,x)=>x.end>last?x.end:last,'') : '';
+const eventEnd = items.reduce((last,x)=>x.end>last?x.end:last,'');
+const timeLabel = items.length ? items[0].start+'–'+eventEnd : '';
 const googleCalendar = items.length ? googleCalendarUrl(calendarEvent(config,event,items)) : '';
 const sections = [
   {href:'/songs/',title:'Песни',description:songs.length+' народных песен',icon:'M9 18V5l12-2v13M9 18a3 3 0 1 1-3-3h3m12 1a3 3 0 1 1-3-3h3'},
@@ -90,7 +91,8 @@ const sections = [
     {items.length>0 && <section class="home-program" aria-labelledby="home-program-title" data-home-season="schedule" data-pagefind-ignore hidden>
         <div class="home-section-heading"><h2 id="home-program-title">Программа праздника</h2><span>{dateLabel}</span></div>
         <div class="home-program-body"><ol class="home-timeline">
-          {items.map(item=><li><span class="home-time-range"><time>{item.start}</time><time>{item.end}</time></span><div><strong>{item.title}</strong>{item.classes && <a href="/workshops/">Мастер-классы</a>}</div></li>)}
+          {items.map((item,i)=><li><span class="home-time-range"><time>{item.start}</time>{i<items.length-1 && item.end!==items[i+1].start && <time class="home-stage-end" aria-label={'Окончание: '+item.end}>до {item.end}</time>}</span><div><strong>{item.title}</strong>{item.classes && <a href="/workshops/">Мастер-классы</a>}</div></li>)}
+          <li class="home-timeline-end"><time>{eventEnd}</time><div><strong>Завершение праздника</strong></div></li>
         </ol></div>
       </section>}
     {config.enabled && <section class="home-admission" data-home-season="event" data-pagefind-ignore hidden>
