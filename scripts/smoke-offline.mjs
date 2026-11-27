@@ -209,7 +209,16 @@ try {
     assert.ok(result.height>0&&result.height<=4,'Progress line must stay thin');
     assert.equal(result.color,result.accent,'Progress uses the resolved theme accent');
     const theme=await page.evaluate(()=>document.documentElement.dataset.theme);
-    assert.equal(result.accent,theme==='dark'?'rgb(255, 85, 72)':'rgb(196, 61, 50)','Approved accent for resolved theme');
+    assert.equal(result.accent,theme==='dark'?'rgb(255, 145, 77)':'rgb(196, 61, 50)','Approved accent for resolved theme');
+    const palette=await page.evaluate(()=>{
+      const s=getComputedStyle(document.documentElement);
+      const token=n=>s.getPropertyValue(n).trim().toUpperCase();
+      return {action:token('--festival-action'),selected:token('--festival-selected'),foreground:token('--festival-selected-text'),surface:token('--festival-surface')};
+    });
+    assert.equal(palette.action,theme==='dark'?'#B94D22':'#C43D32','Approved action color');
+    assert.equal(palette.selected,palette.action,'Selected states follow the common action token');
+    assert.equal(palette.foreground,'#FFFFFF','White text on solid actions');
+    assert.equal(palette.surface,theme==='dark'?'#1D2B40':'#F2F5F8','Surface palette unchanged');
     assert.equal(result.appearance,'none','No OS-native progress styling');
     assert.equal(result.track,'rgba(0, 0, 0, 0)','Header progress track is transparent');
   }

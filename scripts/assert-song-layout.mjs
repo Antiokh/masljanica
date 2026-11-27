@@ -44,10 +44,10 @@ export async function assertSongLayout(page) {
         assert.ok(metrics.slider.w>12,label+' usable seek area');
         assert.ok(Math.abs(center(metrics.slider)[1]-center(metrics.selected)[1])<=6,label+' vertically centered seek');
         assert.ok(metrics.group.right<=metrics.card.right+1 && metrics.group.x>=metrics.card.x-1,label+' no overflow');
-        const expected=theme==='dark'?'rgb(181, 35, 44)':'rgb(196, 61, 50)';
-        assert.equal(metrics.selectedToken.toUpperCase(),theme==='dark'?'#B5232C':'#C43D32',label+' approved theme-specific red token');
+        const expected=theme==='dark'?'rgb(185, 77, 34)':'rgb(196, 61, 50)';
+        assert.equal(metrics.selectedToken.toUpperCase(),theme==='dark'?'#B94D22':'#C43D32',label+' approved theme-specific action token');
         assert.equal(metrics.color,'rgb(255, 255, 255)',label+' white foreground');
-        assert.equal(metrics.background,expected,label+' selected red background');
+        assert.equal(metrics.background,expected,label+' selected action background');
       }
     }
   } finally {

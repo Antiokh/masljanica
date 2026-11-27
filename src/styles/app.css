@@ -14,11 +14,11 @@
   --sl-color-bg-nav: #1D2B40;
   --sl-color-bg-sidebar: #17243A;
   --sl-color-text: #E2E8F0;
-  --sl-color-text-accent: #FF5548;
-  --sl-color-accent-low: #352326;
-  --sl-color-accent: #FF5548;
-  --sl-color-accent-high: #FF8979;
-  --festival-action: #C32935;
+  --sl-color-text-accent: #FF914D;
+  --sl-color-accent-low: #3B2A24;
+  --sl-color-accent: #FF914D;
+  --sl-color-accent-high: #FFB77F;
+  --festival-action: #B94D22;
   --festival-gold: #EBC47B;
   --festival-surface: #1D2B40;
   --festival-hero: #172840;
@@ -441,7 +441,7 @@ progress[data-pwa-bar]:indeterminate::-moz-progress-bar, progress#offline-progre
 
 /* Strong, shared action palette. Reserve low accents for hover and secondary surfaces. */
 :root {
-  --festival-selected: #B5232C;
+  --festival-selected: var(--festival-action);
   --festival-selected-text: #FFFFFF;
   --festival-control-border: #546780;
   --festival-control-text: #E2E8F0;
