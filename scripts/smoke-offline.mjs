@@ -52,6 +52,16 @@ try {
   assert.equal(await page.locator('.home-event-when [data-calendar-menu]').count(),1);
   assert.equal(await page.locator('.home-event-where .home-event-address').count(),1);
   assert.equal(await page.locator('.home-event-where .home-location').count(),1);
+  const eventGeometry=await page.locator('.home-hero').evaluate(hero=>{
+    const rect=s=>hero.querySelector(s).getBoundingClientRect();
+    const date=rect('.home-event-date'),calendar=rect('.home-calendar .home-event-icon'),place=rect('.home-event-address'),map=rect('.home-location'),sun=rect('.home-hero-art'),heading=rect('.home-hero-heading'),meta=rect('.home-event-meta');
+    return {dateRight:date.right,calendarLeft:calendar.left,calendarRight:calendar.right,calendarY:calendar.y+calendar.height/2,dateY:date.y+date.height/2,placeRight:place.right,mapLeft:map.left,mapRight:map.right,mapY:map.y+map.height/2,placeY:place.y+place.height/2,sunTop:sun.top,headingTop:heading.top,sunRight:sun.right,headingRight:heading.right,metaRight:meta.right};
+  });
+  assert.ok(eventGeometry.dateRight<=eventGeometry.calendarLeft+1&&Math.abs(eventGeometry.calendarY-eventGeometry.dateY)<2,'Date and calendar icon share a row');
+  assert.ok(eventGeometry.placeRight<=eventGeometry.mapLeft+1&&Math.abs(eventGeometry.placeY-eventGeometry.mapY)<2,'Address and map icon share a row');
+  assert.ok(Math.abs(eventGeometry.calendarRight-eventGeometry.mapRight)<2,'Calendar and map icons align');
+  assert.ok(Math.abs(eventGeometry.sunTop-eventGeometry.headingTop)<2&&Math.abs(eventGeometry.sunRight-eventGeometry.headingRight)<2,'Sun at top right of heading');
+  assert.ok(Math.abs(eventGeometry.mapRight-eventGeometry.metaRight)<2,'Full width event facts');
   await page.locator('[data-calendar-menu] summary').click();
   await page.locator('[data-calendar-provider="apple"]').waitFor({state:'visible'});
   await page.locator('[data-calendar-provider="google"]').waitFor({state:'visible'});

@@ -789,10 +789,25 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 .home-calendar-providers a span{display:grid;gap:.15rem;min-width:0}
 .home-calendar-providers small{font-size:.69rem;color:var(--sl-color-gray-3)}
 
-/* Keep each event fact with its corresponding action. */
-.home-dashboard .home-event-meta{gap:.85rem}
-.home-dashboard .home-event-group{display:grid;gap:.3rem;justify-items:start;min-width:0;margin:0!important}
+
+/* Compact event card: artwork only in the title row; facts span the full card. */
+.home-dashboard .home-hero{display:block}
+.home-dashboard .home-hero-copy{width:100%}
+.home-dashboard .home-hero-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:.65rem;margin:0!important}
+.home-dashboard .home-hero-title{min-width:0;margin:0!important}
+.home-dashboard .home-hero-art{width:clamp(2.75rem,10vw,5rem);margin:0!important;align-self:start;justify-self:end}
+.home-dashboard .home-hero-art img{display:block;width:100%;height:auto;margin:0!important}
+.home-dashboard .home-event-meta{display:grid;gap:.45rem;margin-top:.65rem}
+.home-dashboard .home-event-group{min-width:0;margin:0!important}
 .home-dashboard .home-event-group>*{margin:0!important}
-.home-dashboard .home-event-address{line-height:1.45}
-.home-dashboard .home-event-group .home-calendar{margin:0!important}
-.home-dashboard .home-event-group .home-location{margin:0!important}
+.home-dashboard .home-event-where{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.65rem}
+.home-dashboard .home-event-address{line-height:1.4;overflow-wrap:anywhere}
+.home-dashboard .home-calendar-menu{width:100%;max-width:100%;margin:0!important}
+.home-dashboard .home-calendar-menu>summary{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.65rem;width:100%;max-width:none;padding:0!important;border:0;border-radius:.5rem;background:transparent;color:var(--sl-color-text);margin:0!important;text-align:left;box-sizing:border-box}
+.home-dashboard .home-calendar-menu>summary>.home-event-date{font-size:1.05rem;line-height:1.35;min-width:0;font-weight:650;margin:0!important}
+.home-dashboard .home-event-icon{display:grid;place-items:center;box-sizing:border-box;width:2.75rem;height:2.75rem;border-radius:.65rem;border:1px solid var(--festival-control-border);background:var(--sl-color-bg);color:var(--sl-color-text-accent);padding:0!important;margin:0!important;justify-self:end;flex:none}
+.home-dashboard .home-event-icon svg{width:1.35rem;height:1.35rem;margin:0!important}
+.home-dashboard .home-calendar-menu[open] .home-event-icon,.home-dashboard .home-calendar-menu>summary:hover .home-event-icon,.home-dashboard .home-location:hover{background:var(--festival-selected);color:var(--festival-selected-text);border-color:var(--festival-selected)}
+.home-dashboard .home-calendar-providers{margin-top:.35rem!important}
+.home-dashboard .home-event-where:has(.home-location[hidden]){grid-template-columns:minmax(0,1fr)}
+.home-dashboard .home-calendar-menu>summary:focus-visible{outline:2px solid var(--sl-color-accent);outline-offset:2px}
