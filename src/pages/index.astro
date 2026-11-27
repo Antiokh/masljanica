@@ -2,7 +2,8 @@
 import { existsSync } from 'node:fs';
 const storyArt='/media/all-characters.webp';
 if(!existsSync(process.cwd()+'/public'+storyArt))throw Error('Missing ensemble illustration: '+storyArt);
-const heroLogo = existsSync(process.cwd()+'/public/media/maslenitsa-sun.webp') ? '/media/maslenitsa-sun.webp' : '/icon.svg';
+const heroLogo = '/media/maslyanica-sun.webp';
+if (!existsSync(process.cwd()+'/public'+heroLogo)) throw Error('Missing festival sun: '+heroLogo);
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { frontmatter } from '../data/home.md';
 import event from '../data/event.json';

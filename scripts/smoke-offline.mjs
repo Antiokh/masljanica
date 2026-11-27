@@ -36,6 +36,14 @@ try {
   }
   await assertGlobalSearch();
   await page.locator('[data-home-dashboard]').waitFor();
+  for(const selector of ['.festival-brand-icon img','.home-hero-art img']){
+    const image=page.locator(selector);
+    assert.equal(await image.getAttribute('src'),'/media/maslyanica-sun.webp');
+    await image.evaluate(el=>el.decode());
+    assert.ok(await image.evaluate(el=>el.naturalWidth>0&&el.naturalWidth===el.naturalHeight),'Festival sun loads as a square local image');
+  }
+  const sunManifest=await (await page.request.get('/offline-manifest.json')).json();
+  assert.ok(sunManifest.entries.some(e=>e.url==='/media/maslyanica-sun.webp'),'Festival sun is included in offline copy');
   assert.equal(await page.locator('.festival-brand-title').innerText(),'Масляница');
   assert.match(await page.locator('.festival-brand-subtitle').innerText(),/^Белград/);
   await page.waitForFunction(()=>document.querySelector('.home-dashboard .home-section-card') && document.querySelector('.home-dashboard [data-home-season="event"]')?.hidden === (document.querySelector('.home-dashboard').dataset.eventEnabled!=='true'||document.querySelector('.home-dashboard').dataset.eventDate < new Intl.DateTimeFormat('sv-SE',{timeZone:document.querySelector('.home-dashboard').dataset.eventTimezone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())));
