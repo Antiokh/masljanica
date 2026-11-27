@@ -92,17 +92,17 @@ const sections = [
       </section>
     </div>
     <div class="home-column home-column-right">
-    <HomeProgramme items={items} eventEnd={eventEnd} dateLabel={dateLabel}/>
-    {config.enabled && <section class="home-admission" data-home-season="event" data-pagefind-ignore hidden>
-      <strong>Мероприятие без билетов.</strong>
-      <p>Приветствуется донейшн на <a href="/pancakes/">блины</a> в коробочку у <a href="/scenario/#character-баба-яга">Бабы Яги</a>. Действо проводится на волонтёрских началах.</p>
-    </section>}
     <nav class="home-socials" aria-label="Социальные сети Масляницы" data-online-only hidden>
       {socials.map(social=><a href={social.href} target="_blank" rel="noopener noreferrer" class="home-social-link">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={social.path}/></svg>
         <span>{social.name}</span>
       </a>)}
     </nav>
+    <HomeProgramme items={items} eventEnd={eventEnd} dateLabel={dateLabel}/>
+    {config.enabled && <section class="home-admission" data-home-season="event" data-pagefind-ignore hidden>
+      <strong>Мероприятие без билетов.</strong>
+      <p>Приветствуется донейшн на <a href="/pancakes/">блины</a> в коробочку у <a href="/scenario/#character-баба-яга">Бабы Яги</a>. Действо проводится на волонтёрских началах.</p>
+    </section>}
     </div>
     <FestivalIntro home={true}>
       <section class="story-name home-plot" aria-labelledby="home-story-title">

@@ -132,8 +132,8 @@ try {
       const [hero,intro,program,admission,sections,workshops]=ordered;
       const socials=root.querySelector('.home-socials').getBoundingClientRect();
       const fullWidth=root.getBoundingClientRect().width;
-      const desktop=Math.abs(hero.top-program.top)<2&&hero.right<program.left&&Math.abs(hero.width-program.width)<2&&Math.abs(hero.left-sections.left)<2&&Math.abs(admission.left-program.left)<2&&sections.top-hero.bottom>=0&&sections.top-hero.bottom<=24&&admission.top-program.bottom>=0&&admission.top-program.bottom<=24&&Math.abs(socials.left-admission.left)<2&&Math.abs(socials.width-admission.width)<2&&socials.top-admission.bottom>=0&&socials.top-admission.bottom<=24&&intro.top>=Math.max(sections.bottom,socials.bottom)-1&&Math.abs(intro.width-fullWidth)<2&&workshops.top>=intro.bottom-1&&Math.abs(workshops.width-fullWidth)<2;
-      return {desktop,stack:ordered.slice(1).every((r,i)=>r.top>=ordered[i].bottom-1),widths:ordered.every(r=>Math.abs(r.width-ordered[0].width)<2),iconGap:mapRow.top-root.querySelector('.home-calendar').getBoundingClientRect().bottom,sunWidth:sun.width,aligned:Math.abs(icon.left-map.left)<2};
+      const desktop=Math.abs(hero.top-socials.top)<2&&hero.right<program.left&&Math.abs(hero.width-program.width)<2&&Math.abs(hero.left-sections.left)<2&&Math.abs(admission.left-program.left)<2&&sections.top-hero.bottom>=0&&sections.top-hero.bottom<=24&&admission.top-program.bottom>=0&&admission.top-program.bottom<=24&&Math.abs(socials.left-program.left)<2&&Math.abs(socials.width-program.width)<2&&program.top-socials.bottom>=0&&program.top-socials.bottom<=24&&intro.top>=Math.max(sections.bottom,admission.bottom)-1&&Math.abs(intro.width-fullWidth)<2&&workshops.top>=intro.bottom-1&&Math.abs(workshops.width-fullWidth)<2;
+      return {desktop,stack:ordered.slice(1).every((r,i)=>r.top>=ordered[i].bottom-1)&&socials.top>=sections.bottom-1&&workshops.top>=socials.bottom-1,widths:ordered.every(r=>Math.abs(r.width-ordered[0].width)<2),iconGap:mapRow.top-root.querySelector('.home-calendar').getBoundingClientRect().bottom,sunWidth:sun.width,aligned:Math.abs(icon.left-map.left)<2};
     });
     assert.ok(width>=960?layout.desktop:layout.stack&&layout.widths,'Home layout follows approved composition at '+width);
     const socialLayout=await page.locator('.home-socials').evaluate(el=>{const cards=[...el.querySelectorAll('a')].map(a=>a.getBoundingClientRect());return cards.length===3&&cards.every(c=>Math.abs(c.top-cards[0].top)<2&&c.right<=el.getBoundingClientRect().right+1)&&el.scrollWidth<=el.clientWidth+1;});
@@ -142,7 +142,7 @@ try {
     assert.equal(workshopColumns,width>=960?4:2,'Workshop preview columns at '+width);
     assert.ok(layout.iconGap>=-1&&layout.iconGap<=8,'Compact date/location spacing at '+width);
     assert.ok(layout.sunWidth>=63,'Larger sun at '+width);
-    assert.equal(await page.locator('.home-program>.home-section-heading').isVisible(),width<960,'Programme heading only on mobile');
+    assert.equal(await page.locator('.home-program>.home-section-heading').isVisible(),true,'Programme heading visible on mobile and desktop');
     assert.ok(await page.locator('.home-hero').evaluate(el=>{
       const sun=el.querySelector('.home-hero-art');
       const before=el.getBoundingClientRect().height;

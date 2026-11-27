@@ -911,8 +911,6 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
   .home-dashboard .home-sections{grid-area:sections}
   .home-dashboard .home-program{grid-area:program}
   .home-dashboard .home-socials{grid-area:socials}
-  /* The hero already supplies the date; keep the accessible section name. */
-  .home-dashboard .home-program>.home-section-heading{display:none}
   .home-dashboard .home-hero-copy{--home-sun-size:clamp(4rem,8vw,6.25rem)}
   .home-dashboard>.festival-intro{grid-area:intro}
   .home-dashboard>.home-workshops{grid-area:workshops}
