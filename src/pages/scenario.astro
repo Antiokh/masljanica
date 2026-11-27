@@ -9,13 +9,8 @@ import audioArchive from '../data/audio-archive.json';
 import scenario from '../data/scenario.json';
 import parts from '../data/parts.json';
 import songs from '../data/songs.json';
-import MarkdownIt from 'markdown-it';
+import FestivalIntro from '../components/FestivalIntro.astro';
 import {existsSync} from 'node:fs';
-import historySource from '../data/maslyanica-history.md?raw';
-import nameSource from '../data/maslyanica-name.md?raw';
-const nameHistory=nameSource.trim();
-const md=new MarkdownIt({html:false});
-const history=historySource.trim();
 const portraits=characterArchive.files as Record<string,{path:string;width:number;height:number}>;
 const files=audioArchive.files as Record<string,{path:string;duration:number}>;
 const people=characters.map(x=>{const p=portraits[x.image];return {...x,src:p?.path&&/^\/media\/characters\/[a-f0-9]+\.webp$/.test(p.path)&&existsSync(process.cwd()+'/public'+p.path)?p.path:''};});
@@ -33,19 +28,7 @@ const prepared=ordered.map(row=>{const actor=actors.get(row.actor),song=row.song
 ---
 <StarlightPage frontmatter={{title:'Сказ',template:'splash',description:'История Масляницы и театральный сказ нашего праздника.'}}>
  <div class="story-book" data-character-gallery data-story-book>
-  <section class="story-history" aria-labelledby="story-history-title">
-    <details class="story-history-details">
-      <summary><span id="story-history-title">Что такое Масляница?</span><GameIcon name="chevron"/></summary>
-      {history && <div class="story-history-content" set:html={md.render(history)}></div>}
-      {!history && <p class="story-history-content">История праздника и народные традиции. Текст готовится.</p>}
-    </details>
-  </section>
-  <section class="story-name" id="why-maslyanica" aria-labelledby="story-name-title">
-    <details class="story-name-details">
-      <summary><span id="story-name-title">Почему Масляница через «я»?</span><GameIcon name="chevron"/></summary>
-      <div class="story-name-content" set:html={md.render(nameHistory)}></div>
-    </details>
-  </section>
+  <FestivalIntro />
   <section class="story-scenario" aria-labelledby="story-scenario-title">
     <h2 id="story-scenario-title">Наш масляничный сказ</h2>
     <audio id="story-audio" hidden preload="none"></audio>

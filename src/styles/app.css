@@ -573,18 +573,11 @@ progress[data-pwa-bar]:indeterminate::-moz-progress-bar, progress#offline-progre
 .home-location svg { width:1.1rem; height:1.1rem; flex:none; }
 .home-hero-art { position:relative; flex:0 0 auto; display:grid; place-items:center; width:clamp(4rem,14vw,8.5rem); aspect-ratio:1; }
 .home-hero-art img { width:100%; height:auto; object-fit:contain; }
-.home-main { display:grid; grid-template-columns:minmax(0,1fr); align-items:stretch; gap:1rem; }
-.home-main > :is(.home-sections,.home-program) { display:grid; grid-template-rows:auto 1fr; min-width:0; margin:0; }
-.home-main > .home-program[hidden] { display:none!important; }
-.home-main > :is(.home-sections,.home-program) > * { margin-block:0; }
-.home-main > :is(.home-sections,.home-program) > .home-section-heading { margin-block:0 .65rem; }
-.home-main:has(.home-program:not([hidden])) { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
 .home-section-heading { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:.35rem .8rem; margin-bottom:.65rem; }
-.home-dashboard .home-section-heading h2,.home-dashboard .home-traditions h2 { font-size:1.12rem; line-height:1.3; font-weight:650; }
+.home-dashboard .home-section-heading h2 { font-size:1.12rem; line-height:1.3; font-weight:650; }
 .home-section-heading > :is(a,span) { color:var(--sl-color-gray-3); font-size:.8rem; }
 .home-section-heading > a:hover { color:var(--sl-color-text-accent); }
 .home-section-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.65rem; }
-.home-main:has(.home-program:not([hidden])) .home-section-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
 .home-section-card { display:flex; flex-direction:column; align-items:flex-start; gap:.65rem; min-width:0; padding:.9rem; border:1px solid var(--sl-color-gray-5); border-radius:.8rem; background:var(--festival-surface); color:var(--sl-color-text); }
 .home-section-card svg { width:1.6rem;height:1.6rem;color:var(--sl-color-text-accent);flex:none; }
 .home-section-card div { display:grid; gap:.18rem; min-width:0; }
@@ -617,27 +610,13 @@ progress[data-pwa-bar]:indeterminate::-moz-progress-bar, progress#offline-progre
 .character-dialog-art { width:min(100%,13rem); max-height:35dvh; object-fit:contain; justify-self:center; border-radius:.65rem; }
 .character-dialog-close { position:sticky; top:0; justify-self:end; z-index:1; display:grid; place-items:center; width:2rem; height:2rem; padding:.4rem; border:1px solid var(--sl-color-gray-5); border-radius:50%; background:var(--sl-color-bg); color:var(--sl-color-text); cursor:pointer; }
 .character-dialog-close svg { width:100%;height:100%; }
-.home-story-details { border:1px solid var(--sl-color-gray-5); border-radius:.65rem; padding:.65rem .8rem; }
-.home-story-details summary { cursor:pointer; font-weight:600; }
-.home-dashboard .home-story-details p { margin-top:.5rem; }
-.home-story-details a { display:inline-block; margin-top:.5rem; }
-.home-traditions { border-top:1px solid var(--sl-color-gray-5); padding-top:.9rem; display:grid; gap:.4rem; }
-.home-traditions p { color:var(--sl-color-gray-2); font-size:.9rem; }
-.home-traditions a { font-size:.85rem; color:var(--sl-color-text-accent); width:fit-content; }
 .home-credit { text-align:center; font-size:.75rem; color:var(--sl-color-gray-3); }
 @media(max-width:60rem){
-  .home-main:has(.home-program:not([hidden])) { grid-template-columns:minmax(0,1fr); }
   .home-section-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .home-character-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
   .home-dashboard { gap:1rem; }
 }
 
-/* Keep the two dashboard columns on shared header and body tracks on wide screens. */
-@media(min-width:60.001rem){
-  .home-main:has(.home-program:not([hidden])) { grid-template-rows:auto 1fr; row-gap:.65rem; }
-  .home-main:has(.home-program:not([hidden])) > :is(.home-sections,.home-program) { grid-row:span 2; grid-template-rows:subgrid; row-gap:inherit; }
-  .home-main:has(.home-program:not([hidden])) > :is(.home-sections,.home-program) > .home-section-heading { margin:0; }
-}
 
 /* Compact contextual header, shared by mobile and desktop. */
 .festival-brand-label { display:grid; gap:.1rem; min-width:0; max-width:100%; color:inherit; text-decoration:none; }
@@ -775,7 +754,6 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 .home-admission{border:1px solid var(--sl-color-gray-5);border-inline-start:3px solid var(--sl-color-accent);border-radius:.65rem;background:var(--festival-surface);padding:.75rem .9rem}
 .home-admission strong{color:var(--sl-color-text-accent)}
 .home-admission p{font-size:.86rem;margin:.3rem 0 0!important}
-.home-history-links{display:flex;flex-wrap:wrap;gap:.35rem .9rem;margin:0 0 .2rem!important}
 
 /* Calendar provider selection stays in the hero flow (no clipping/popover overflow). */
 .home-calendar-menu{width:fit-content;max-width:100%;border:0;background:transparent;padding:0!important;margin:0!important}
@@ -795,9 +773,9 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 .home-dashboard .home-hero-copy{width:100%}
 .home-dashboard .home-hero-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:.65rem;margin:0!important}
 .home-dashboard .home-hero-title{min-width:0;margin:0!important}
-.home-dashboard .home-hero-art{width:clamp(2.75rem,10vw,5rem);margin:0!important;align-self:start;justify-self:end}
+.home-dashboard .home-hero-art{width:clamp(4rem,13vw,6.25rem);margin:0!important;align-self:start;justify-self:end}
 .home-dashboard .home-hero-art img{display:block;width:100%;height:auto;margin:0!important}
-.home-dashboard .home-event-meta{display:grid;gap:.45rem;margin-top:.65rem}
+.home-dashboard .home-event-meta{display:grid;gap:.15rem;margin:.25rem 0 0!important}
 .home-dashboard .home-event-group{min-width:0;margin:0!important}
 .home-dashboard .home-event-group>*{margin:0!important}
 .home-dashboard .home-event-where{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.65rem}
@@ -805,9 +783,20 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 .home-dashboard .home-calendar-menu{width:100%;max-width:100%;margin:0!important}
 .home-dashboard .home-calendar-menu>summary{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.65rem;width:100%;max-width:none;padding:0!important;border:0;border-radius:.5rem;background:transparent;color:var(--sl-color-text);margin:0!important;text-align:left;box-sizing:border-box}
 .home-dashboard .home-calendar-menu>summary>.home-event-date{font-size:1.05rem;line-height:1.35;min-width:0;font-weight:650;margin:0!important}
-.home-dashboard .home-event-icon{display:grid;place-items:center;box-sizing:border-box;width:2.75rem;height:2.75rem;border-radius:.65rem;border:1px solid var(--festival-control-border);background:var(--sl-color-bg);color:var(--sl-color-text-accent);padding:0!important;margin:0!important;justify-self:end;flex:none}
+.home-dashboard .home-event-icon{display:grid;place-items:center;box-sizing:border-box;width:2.5rem;height:2.5rem;border-radius:.55rem;border:1px solid var(--festival-control-border);background:var(--sl-color-bg);color:var(--sl-color-text-accent);padding:0!important;margin:0!important;justify-self:end;flex:none}
 .home-dashboard .home-event-icon svg{width:1.35rem;height:1.35rem;margin:0!important}
 .home-dashboard .home-calendar-menu[open] .home-event-icon,.home-dashboard .home-calendar-menu>summary:hover .home-event-icon,.home-dashboard .home-location:hover{background:var(--festival-selected);color:var(--festival-selected-text);border-color:var(--festival-selected)}
 .home-dashboard .home-calendar-providers{margin-top:.35rem!important}
 .home-dashboard .home-event-where:has(.home-location[hidden]){grid-template-columns:minmax(0,1fr)}
 .home-dashboard .home-calendar-menu>summary:focus-visible{outline:2px solid var(--sl-color-accent);outline-offset:2px}
+
+/* Editorial order: event, introduction, programme, admission, materials, characters. */
+.home-dashboard > :is(.home-hero,.festival-intro,.home-program,.home-admission,.home-sections,.home-characters,.home-credit){min-width:0;margin:0!important}
+.home-dashboard #home-title{margin:.2rem 0 0!important}
+.home-dashboard .home-hero-heading{align-items:start}
+.home-dashboard .home-program .home-section-heading,.home-dashboard .home-sections .home-section-heading{margin:0 0 .65rem!important}
+.home-dashboard .home-program-body,.home-dashboard .home-section-grid{margin:0!important}
+@media(max-width:420px){
+ .home-dashboard #home-title{font-size:clamp(1.6rem,6.8vw,1.9rem)}
+ .home-dashboard .home-hero{padding:.85rem 1rem}
+}

@@ -80,11 +80,25 @@ try {
   await page.locator('.home-program').waitFor({state:'visible'});
   await page.locator('[data-header-event-date]').waitFor({state:'visible'});
   await page.setViewportSize({width:1440,height:900});
-  const geometry=await page.evaluate(()=>{
-    const box=s=>document.querySelector(s).getBoundingClientRect();
-    return {heads:box('.home-sections .home-section-heading').top-box('.home-program .home-section-heading').top,top:box('.home-section-grid').top-box('.home-program-body').top,bottom:box('.home-section-grid').bottom-box('.home-program-body').bottom};
-  });
-  assert.ok(Object.values(geometry).every(v=>Math.abs(v)<=1),'Home headings and content edges must align');
+  for(const width of [320,390,1440]){
+    await page.setViewportSize({width,height:900});
+    const layout=await page.locator('[data-home-dashboard]').evaluate(root=>{
+      const ordered=['.home-hero','.festival-intro','.home-program','.home-admission','.home-sections','.home-characters'].map(s=>root.querySelector(s).getBoundingClientRect());
+      const icon=root.querySelector('.home-calendar .home-event-icon').getBoundingClientRect(),map=root.querySelector('.home-location').getBoundingClientRect(),sun=root.querySelector('.home-hero-art').getBoundingClientRect();
+      return {stack:ordered.slice(1).every((r,i)=>r.top>=ordered[i].bottom-1),widths:ordered.every(r=>Math.abs(r.width-ordered[0].width)<2),iconGap:map.top-icon.bottom,sunWidth:sun.width,aligned:Math.abs(icon.right-map.right)<2};
+    });
+    assert.ok(layout.stack&&layout.widths,'Home sections follow editorial order at '+width);
+    assert.ok(layout.iconGap>=-1&&layout.iconGap<=8,'Compact date/location spacing at '+width);
+    assert.ok(layout.sunWidth>=63,'Larger sun at '+width);
+    assert.ok(layout.aligned,'Aligned calendar and location at '+width);
+  }
+  assert.equal(await page.locator('.festival-intro details').count(),3);
+  for(const [selector,pattern] of [['.story-history-details',/Сырную неделю/],['.story-name-details:not(.home-story-details)',/Дубровский/],['.home-story-details',/Краткая суть сюжета/]]){
+    const detail=page.locator('.festival-intro '+selector);
+    await detail.locator('summary').click();
+    assert.match(await detail.innerText(),pattern);
+    await detail.locator('summary').click();
+  }
   const character=page.locator('[data-character-open]').first();
   const urlBefore=page.url();
   await character.click();

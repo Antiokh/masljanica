@@ -6,6 +6,8 @@ import { frontmatter } from '../data/home.md';
 import event from '../data/event.json';
 import schedule from '../data/schedule.json';
 import { calendarEvent, googleCalendarUrl } from '../lib/event-calendar.mjs';
+import FestivalIntro from '../components/FestivalIntro.astro';
+import GameIcon from '../components/GameIcon.astro';
 import CharacterGallery from '../components/CharacterGallery.astro';
 import songs from '../data/songs.json';
 import games from '../data/games.json';
@@ -69,8 +71,33 @@ const sections = [
         </div>
       </div>
     </section>
-    <div class="home-main">
-      <section class="home-sections" aria-label="Материалы праздника">
+    <FestivalIntro home={true}>
+      <section class="story-name home-plot" aria-labelledby="home-story-title">
+        <details class="story-name-details home-story-details">
+          <summary><span id="home-story-title">Наша масляница</span><GameIcon name="chevron"/></summary>
+          <div class="story-name-content">
+            <p>Сюжет нашей масляницы театрализованный, адаптированный к публике, мало знакомой с традицией.</p>
+            <h3>Краткая суть сюжета</h3>
+    <p>Во время празднования Масляницы весёлый Скоморох устраивает шумное представление, чем тревожит Бабу Ягу. Разгневанная Яга угрожает проклятиями, если гости не знают традиций праздника. Скоморох вместе со зрителями разгадывает её загадку, заслуживая благосклонность колдуньи. Однако за свою дерзость он получает наказание – развлекать народ песнями и играми.</p>
+    <p>Веселье продолжается, но Масляница так и не появляется. Скоморох обращается за ответом к Бабе Яге, и та вызывает духов Масляницы, Зимы и Весны. Выясняется, что Зима заточила Масляницу, ведь только она может привести Весну.</p>
+    <p>Освободить её можно лишь сожжением чучела, а из его пепла Весна должна испечь блины, чтобы окончательно сменить Зиму.</p>
+    <p>Скоморох собирает дружину, получая помощь от Бабы Яги, лесных духов, а также от Весны, которая приводит птиц и зверей. Зима старается помешать, устраивая испытания – игры на ловкость и силу. Победители получают ленты, дающие силу против Зимы.</p>
+    <a href="/scenario/">Читать полный сказ →</a>
+          </div>
+        </details>
+      </section>
+    </FestivalIntro>
+    {items.length>0 && <section class="home-program" aria-labelledby="home-program-title" data-home-season="schedule" data-pagefind-ignore hidden>
+        <div class="home-section-heading"><h2 id="home-program-title">Программа праздника</h2><span>{dateLabel}</span></div>
+        <div class="home-program-body"><ol class="home-timeline">
+          {items.map(item=><li><span class="home-time-range"><time>{item.start}</time><time>{item.end}</time></span><div><strong>{item.title}</strong>{item.classes && <a href="/workshops/">Мастер-классы</a>}</div></li>)}
+        </ol></div>
+      </section>}
+    {config.enabled && <section class="home-admission" data-home-season="event" data-pagefind-ignore hidden>
+      <strong>Мероприятие без билетов.</strong>
+      <p>Приветствуется донейшн на блины в коробочку у Бабы Яги. Действо проводится на волонтёрских началах.</p>
+    </section>}
+    <section class="home-sections" aria-label="Материалы праздника">
         <div class="home-section-heading"><h2>В нашей избушке</h2></div>
         <div class="home-section-grid">
           {sections.map(item=><a class="home-section-card" href={item.href} data-astro-prefetch="hover">
@@ -79,34 +106,6 @@ const sections = [
           </a>)}
         </div>
       </section>
-      {items.length>0 && <section class="home-program" aria-labelledby="home-program-title" data-home-season="schedule" data-pagefind-ignore hidden>
-        <div class="home-section-heading"><h2 id="home-program-title">Программа праздника</h2><span>{dateLabel}</span></div>
-        <div class="home-program-body"><ol class="home-timeline">
-          {items.map(item=><li><span class="home-time-range"><time>{item.start}</time><time>{item.end}</time></span><div><strong>{item.title}</strong>{item.classes && <a href="/workshops/">Мастер-классы</a>}</div></li>)}
-        </ol></div>
-      </section>}
-    </div>
-    {config.enabled && <section class="home-admission" data-home-season="event" data-pagefind-ignore hidden>
-      <strong>Мероприятие без билетов.</strong>
-      <p>Приветствуется донейшн на блины в коробочку у Бабы Яги. Действо проводится на волонтёрских началах.</p>
-    </section>}
-    <section class="home-traditions" aria-labelledby="home-story-title">
-  <h2 id="home-story-title">Наша масляница</h2>
-  <div class="home-history-links">
-    <a href="/scenario/#story-history-title">О Маслянице →</a>
-    <a href="/scenario/#why-maslyanica">Почему через «я»? →</a>
-    <a href="https://rslive.ru/masljanica/" data-online-only hidden target="_blank" rel="noopener noreferrer">Страница в «Инструкции по Сербии» ↗</a>
-  </div>
-  <p>Сюжет нашей масляницы театрализованный, адаптированный к публике, мало знакомой с традицией.</p>
-  <details class="home-story-details">
-    <summary>Краткая суть сюжета</summary>
-    <p>Во время празднования Масляницы весёлый Скоморох устраивает шумное представление, чем тревожит Бабу Ягу. Разгневанная Яга угрожает проклятиями, если гости не знают традиций праздника. Скоморох вместе со зрителями разгадывает её загадку, заслуживая благосклонность колдуньи. Однако за свою дерзость он получает наказание – развлекать народ песнями и играми.</p>
-    <p>Веселье продолжается, но Масляница так и не появляется. Скоморох обращается за ответом к Бабе Яге, и та вызывает духов Масляницы, Зимы и Весны. Выясняется, что Зима заточила Масляницу, ведь только она может привести Весну.</p>
-    <p>Освободить её можно лишь сожжением чучела, а из его пепла Весна должна испечь блины, чтобы окончательно сменить Зиму.</p>
-    <p>Скоморох собирает дружину, получая помощь от Бабы Яги, лесных духов, а также от Весны, которая приводит птиц и зверей. Зима старается помешать, устраивая испытания – игры на ловкость и силу. Победители получают ленты, дающие силу против Зимы.</p>
-    <a href="/scenario/">Читать полный сказ →</a>
-  </details>
-</section>
     <section class="home-characters" aria-labelledby="home-characters-title">
       <div class="home-section-heading"><h2 id="home-characters-title">Герои нашего сказа</h2></div>
       <CharacterGallery />

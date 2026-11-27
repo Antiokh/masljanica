@@ -1,0 +1,26 @@
+---
+import GameIcon from './GameIcon.astro';
+import MarkdownIt from 'markdown-it';
+import historySource from '../data/maslyanica-history.md?raw';
+import nameSource from '../data/maslyanica-name.md?raw';
+const {home=false}=Astro.props;
+const md=new MarkdownIt({html:false});
+const history=historySource.trim();
+const nameHistory=nameSource.trim();
+---
+<div class="festival-intro">
+  <section class="story-history" aria-labelledby="story-history-title">
+    <details class="story-history-details">
+      <summary><span id="story-history-title">Что такое Масляница?</span><GameIcon name="chevron"/></summary>
+      {history && <div class="story-history-content"><div set:html={md.render(history)}></div>{home && <p><a href="https://rslive.ru/masljanica/" data-online-only hidden target="_blank" rel="noopener noreferrer">Страница в «Инструкции по Сербии» ↗</a></p>}</div>}
+      {!history && <p class="story-history-content">История праздника и народные традиции. Текст готовится.</p>}
+    </details>
+  </section>
+  <section class="story-name" id="why-maslyanica" aria-labelledby="story-name-title">
+    <details class="story-name-details">
+      <summary><span id="story-name-title">Почему Масляница через «я»?</span><GameIcon name="chevron"/></summary>
+      <div class="story-name-content" set:html={md.render(nameHistory)}></div>
+    </details>
+  </section>
+  <slot/>
+</div>
