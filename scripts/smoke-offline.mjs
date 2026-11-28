@@ -30,6 +30,14 @@ try {
     await localized.goto(origin);
     await localized.waitForLoadState('load');
     assert.equal(new URL(localized.url()).pathname,'/','Explicit Russian selection overrides browser locale');
+    await localized.goto(origin);
+    await localized.locator('.hero-language-toggle a[data-language-choice="sr"]').click();
+    await localized.waitForURL(origin+'/sr/');
+    assert.equal(await localized.locator('.hero-language-toggle [aria-current="page"]').getAttribute('data-language-choice'),'sr');
+    await localized.locator('.hero-language-toggle a[data-language-choice="en"]').focus();
+    await localized.keyboard.press('Enter');
+    await localized.waitForURL(origin+'/en/');
+    assert.equal(await localized.locator('.hero-language-toggle [aria-current="page"]').getAttribute('data-language-choice'),'en');
     await localized.goto(origin+'/en/games/');
     assert.equal(new URL(localized.url()).pathname,'/en/games/','Explicit prefixed locale respected');
    }finally{await ctx.close();}
@@ -68,6 +76,9 @@ try {
   assert.ok(!sunManifest.entries.some(e=>/^\/(?:og|og-square|_llms-txt)(?:\/|$)/.test(e.url)),'Crawler-only assets must stay outside the offline pack');
   assert.equal(sunManifest.bytes,sunManifest.entries.reduce((sum,e)=>sum+e.bytes,0),'Manifest reports decoded payload bytes');
   assert.ok(sunManifest.entries.some(e=>e.url==='/media/maslyanica-sun.webp'),'Festival sun is included in offline copy');
+  for(const code of ['ru','gb','sr'])assert.ok(sunManifest.entries.some(e=>e.url==='/media/flags/'+code+'.svg'),'Language flag is included offline');
+  assert.deepEqual(await page.locator('.hero-language-toggle a').evaluateAll(els=>els.map(el=>el.getAttribute('href'))),['/','/en/','/sr/']);
+  assert.equal(await page.locator('.hero-language-toggle [aria-current="page"]').getAttribute('data-language-choice'),'ru');
   assert.equal(await page.locator('.festival-brand-title').innerText(),'Масляница');
   assert.match(await page.locator('.festival-brand-subtitle').innerText(),/^Белград/);
   await page.waitForFunction(()=>document.querySelector('.home-dashboard .home-section-card') && document.querySelector('.home-dashboard [data-home-season="event"]')?.hidden === (document.querySelector('.home-dashboard').dataset.eventEnabled!=='true'||document.querySelector('.home-dashboard').dataset.eventDate < new Intl.DateTimeFormat('sv-SE',{timeZone:document.querySelector('.home-dashboard').dataset.eventTimezone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())));
@@ -75,7 +86,7 @@ try {
   assert.equal(await page.locator('.home-section-card[href="/history/"]').count(),1);
   assert.equal(await page.locator('.home-credit a').getAttribute('href'),'https://t.me/antiokh');
   assert.equal(await page.locator('.home-credit a').innerText(),'Антон Назаров');
-  assert.deepEqual(await page.locator('.home-footer-links a').evaluateAll(els=>els.map(el=>el.getAttribute('href'))),['/sources/','/sr/','/en/']);
+  assert.deepEqual(await page.locator('.home-footer-links a').evaluateAll(els=>els.map(el=>el.getAttribute('href'))),['/sources/']);
   for(const [selector,pattern] of [['[data-home-glossary]',/Скоморох/],['[data-home-faq]',/Когда проходит Масляница в Белграде/]]){
     const block=page.locator(selector);
     assert.equal(await block.evaluate(el=>el.open),false,'Reference accordion starts closed');
@@ -180,6 +191,7 @@ try {
     assert.equal(workshopColumns,width>=960?4:2,'Workshop preview columns at '+width);
     assert.ok(layout.iconGap>=-1&&layout.iconGap<=8,'Compact date/location spacing at '+width);
     assert.ok(layout.sunWidth>=63,'Larger sun at '+width);
+    assert.ok(await page.locator('.home-hero').evaluate(hero=>{const toggle=hero.querySelector('.hero-language-toggle').getBoundingClientRect(),address=hero.querySelector('.home-location .home-event-address').getBoundingClientRect(),box=hero.getBoundingClientRect();return toggle.right<=box.right&&toggle.bottom<=box.bottom&&toggle.left>=box.left&&(toggle.top>=address.bottom-1||toggle.left>=address.right-1);}), 'Language toggle fits without overlapping address at '+width);
     assert.equal(await page.locator('.home-program>.home-section-heading').isVisible(),true,'Programme heading visible on mobile and desktop');
     assert.ok(await page.locator('.home-hero').evaluate(el=>{
       const sun=el.querySelector('.home-hero-art');

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 16" role="img" aria-label="Српски">
+  <rect width="24" height="16" rx="2" fill="#C6363C"/>
+  <path fill="#0C4076" d="M0 5.333h24v5.334H0z"/>
+  <path fill="#fff" d="M0 10.667h24V14a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2z"/>
+  <rect x=".5" y=".5" width="23" height="15" rx="1.5" fill="none" stroke="#000" stroke-opacity=".14"/>
+</svg>

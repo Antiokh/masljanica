@@ -32,4 +32,9 @@ for(const l of ['sr','en']){
  assert.equal(translate(' '+source+'  ',l),' '+translate(source,l)+'  ','Editorial translation preserves surrounding whitespace');
  for(const song of read('songs'))assert.ok(read('song-meanings')[song.slug]?.[l],song.slug+' '+l);
 }
+const toggle=readFileSync(new URL('../src/components/LanguageToggle.astro',import.meta.url),'utf8');
+assert.match(toggle,/data-language-choice=\{mode\.code\}/);
+assert.match(toggle,/data-astro-reload/);
+assert.match(toggle,/aria-current=\{locale===mode\.code\?/);
+for(const flag of ['ru','gb','sr'])assert.match(readFileSync(new URL('../public/media/flags/'+flag+'.svg',import.meta.url),'utf8'),/<svg/);
 console.log('Locale routes and editorial coverage verified.');

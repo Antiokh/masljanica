@@ -1,0 +1,9 @@
+---
+import {localize,localizedPath} from '../lib/editorial-i18n.mjs';
+const {locale,path='/'}=Astro.props;
+const {tx}=localize(Astro.url.pathname);
+const modes=[{code:'ru',flag:'ru',label:'Русский',lang:'ru'},{code:'en',flag:'gb',label:'English',lang:'en'},{code:'sr',flag:'sr',label:'Srpski',lang:'sr-Latn'}];
+---
+<nav class="hero-language-toggle" aria-label={tx('Язык')} data-pagefind-ignore>
+  {modes.map(mode=><a href={localizedPath(path,mode.code)} lang={mode.lang} hreflang={mode.lang} data-language-choice={mode.code} data-astro-reload aria-label={mode.label} title={mode.label} aria-current={locale===mode.code?'page':undefined}><img src={'/media/flags/'+mode.flag+'.svg'} alt="" width="20" height="14"/></a>)}
+</nav>

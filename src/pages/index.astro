@@ -1,5 +1,5 @@
 ---
-import {localize,localizedPath} from '../lib/editorial-i18n.mjs';
+import {localize} from '../lib/editorial-i18n.mjs';
 const {tx,lp,uiLocale,uiTag,basePath}=localize(Astro.url.pathname);
 import { existsSync } from 'node:fs';
 const storyArt='/media/all-characters.webp';
@@ -21,6 +21,7 @@ import GameIcon from '../components/GameIcon.astro';
 import WorkshopPreview from '../components/WorkshopPreview.astro';
 import HomeReference from '../components/HomeReference.astro';
 import HomeParticipation from '../components/HomeParticipation.astro';
+import LanguageToggle from '../components/LanguageToggle.astro';
 import songs from '../data/songs.json';
 import games from '../data/games.json';
 import { validEventDate, calendarDay } from '../../public/home-season.mjs';
@@ -87,6 +88,7 @@ const sections = [
           </div>
         </div>
       </div>
+      <LanguageToggle locale={uiLocale} path={basePath} />
     </section>
     <section class="home-sections" aria-label={tx("Материалы праздника")}>
         <div class="home-section-heading"><h2>{tx("В нашей избушке")}</h2><a class="home-ditties-link" href={lp("/ditties/")} data-astro-prefetch="hover">{tx("…частушки?")}</a></div>
@@ -127,7 +129,7 @@ const sections = [
     <div class="home-bottom">
       <HomeParticipation />
       <HomeReference config={config} dateLabel={dateLabel+' '+year} timeLabel={timeLabel} location={event.address+', '+event.country} mapUrl={event.mapUrl}/>
-      <nav class="home-footer-links" aria-label={tx("Источники и языки")}><a href={lp("/sources/")}>{tx("Источники")}</a><span aria-hidden="true">·</span>{['ru','sr','en'].filter(x=>x!==uiLocale).map((x,i)=><>{i>0&&<span aria-hidden="true">·</span>}<a href={localizedPath('/',x)} data-language-choice={x} data-astro-reload lang={x==='sr'?'sr-Latn':x}>{x==='ru'?'Русский':x==='sr'?'Srpski':'English'}</a></>)}</nav>
+      <nav class="home-footer-links" aria-label={tx("Источники")}><a href={lp("/sources/")}>{tx("Источники")}</a></nav>
       <footer class="home-credit">{tx("Разработано ")}<a href="https://t.me/antiokh" target="_blank" rel="noopener noreferrer">{tx("Антон Назаров")}</a></footer>
     </div>
   </div>
