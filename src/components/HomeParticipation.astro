@@ -1,6 +1,6 @@
 ---
 import {participation} from '../lib/knowledge-content.mjs';
-const {socials}=Astro.props;
+const contact=participation.contact;
 ---
 <section class="home-participation" id="join" aria-labelledby="home-join-title">
   <h2 id="home-join-title">{participation.title}</h2>
@@ -10,11 +10,11 @@ const {socials}=Astro.props;
   </ul>
   <p>{participation.outro}</p>
   <nav class="participation-contacts" aria-label="Связь с командой" data-online-only hidden>
-    {socials.map(social=><a href={social.href} target="_blank" rel="noopener noreferrer">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={social.path}/></svg><span>{social.name}</span>
-    </a>)}
+    <a href={contact.url} target="_blank" rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 9 13m13-11-8 20-5-9-8-4 21-7Z"/></svg><span>{contact.label}</span>
+    </a>
   </nav>
-  <p class="participation-offline">Контакты: {socials.map((social,i)=><>{i>0?' · ':''}{social.href.replace(/^https:\/\//,'')}</>)}</p>
+  <p class="participation-offline">Telegram: {contact.handle}</p>
 </section>
 <style>
  .home-participation{min-width:0;padding:1rem;border:1px solid var(--sl-color-gray-5);border-inline-start:3px solid var(--sl-color-accent);border-radius:.85rem;background:var(--festival-surface);scroll-margin-top:5rem;overflow-wrap:anywhere}

@@ -46,7 +46,8 @@ export const participation={
   ['Угощение','Испечь и принести блины, помочь с угощением гостей.'],
   ['Фото, видео и продвижение','Снимать праздник, рассказывать о нём и делиться материалами.']
  ],
- outro:'Есть своя идея или просто желание помочь? Расскажите о себе и о том, чем хотели бы заняться. Свяжитесь с нами через официальные социальные сети Масляницы.'
+ outro:'Есть своя идея или просто желание помочь? Расскажите о себе и о том, чем хотели бы заняться. Напишите Антону в Telegram.',
+ contact:{url:'https://t.me/antiokh',handle:'@antiokh',label:'Написать в Telegram'}
 };
-export const participationText=socials=>['## '+participation.title,participation.intro,...participation.roles.map(([title,description])=>'- **'+title+'** — '+description),participation.outro,socials.map(s=>l(s.name,s.href)).join(' · ')].join('\n\n');
+export const participationText=()=>['## '+participation.title,participation.intro,...participation.roles.map(([title,description])=>'- **'+title+'** — '+description),participation.outro,l(participation.contact.label,participation.contact.url)].join('\n\n');
 export const faqText=rows=>rows.map(([q,a])=>'## '+q+'\n\n'+a).join('\n\n');
