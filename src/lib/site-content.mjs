@@ -84,7 +84,7 @@ const localizedLabel=(p,locale)=>{
  const description=t(p.description);
  return {...p,path:localizedPath(p.path,locale),basePath:p.path,lang:languageTag(locale),code:locale,locale:locale==='sr'?'sr_RS':'en_US',brand:locale==='sr'?'MASLJANICA · BEOGRAD':'MASLJANICA · BELGRADE',title,seoTitle:title+' · '+suffix,description:description===p.description&&/[А-Яа-яЁё]/u.test(description)?title+' · '+(section?t(section.title)+' · ':'')+suffix:description,body:p.path==='/faq/'?faqText(localizedQuestions({upcoming,date:new Intl.DateTimeFormat(languageTag(locale),{dateStyle:'long',timeZone:'UTC'}).format(new Date(config.date+'T00:00:00Z')),time:ogEvent?.time,location:ogEvent?.location,mapUrl:event.mapUrl},locale)):translateDocument(p.body,locale)};
 };
-export const localizedPages=localizedHome.map(h=>({...h,basePath:'/',title:translate('Масляница в Белграде',h.code)}));
+export const localizedPages=localizedHome.map(h=>({...h,basePath:'/',title:translate('Масляница в Белграде',h.code),body:[h.body,translateDocument(basePages[0].body,h.code)].join('\n\n')}));
 const localizedDetails=['sr','en'].flatMap(locale=>basePages.filter(p=>p.path!=='/').map(p=>localizedLabel(p,locale)));
 export const languageAlternates=[{lang:'ru',path:'/'},{lang:'sr-Latn',path:'/sr/'},{lang:'en',path:'/en/'},{lang:'x-default',path:'/'}];
 export const alternatesFor=path=>languageAlternates.map(a=>({lang:a.lang,path:localizedPath(stripLocale(path),a.lang==='sr-Latn'?'sr':a.lang==='en'?'en':'ru')}));

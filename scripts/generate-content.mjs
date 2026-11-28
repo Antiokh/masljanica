@@ -14,19 +14,20 @@ function audioSource(source) {
       && existsSync(new URL('../public' + entry.path, import.meta.url))) return entry.path;
   return url(source);
 }
-function media(x){
+function media(x,locale='ru'){
   let output='';
-  if(x.video){try{const u=new URL(x.video);const id=u.hostname==='youtu.be'?u.pathname.slice(1):u.searchParams.get('v');if(id&&/^[\w-]{11}$/.test(id))output+='<div class="external-video" data-online-only data-external-embed data-embed-src="https://www.youtube-nocookie.com/embed/'+id+'" data-embed-mode="auto" hidden><div data-embed-surface hidden></div></div>\n\n';else if(url(x.video))output+='<p data-online-only hidden><a href="'+url(x.video)+'" target="_blank" rel="noopener noreferrer">Видео</a></p>\n\n';}catch{}}
+  if(x.video){try{const u=new URL(x.video);const id=u.hostname==='youtu.be'?u.pathname.slice(1):u.searchParams.get('v');if(id&&/^[\w-]{11}$/.test(id))output+='<div class="external-video" data-online-only data-external-embed data-embed-src="https://www.youtube-nocookie.com/embed/'+id+'" data-embed-mode="auto" hidden><div data-embed-surface hidden></div></div>\n\n';else if(url(x.video))output+='<p data-online-only hidden><a href="'+url(x.video)+'" target="_blank" rel="noopener noreferrer">'+escape(translate('Видео',locale))+'</a></p>\n\n';}catch{}}
   for(const audio of x.audio??[]){const src=audioSource(audio);if(src)output+='<audio controls preload="none" src="'+src+'"></audio>\n\n';}
   return output;
 }
-function page(section,slug,title,body){
-  const dir=new URL(section+'/',root);mkdirSync(dir,{recursive:true});
-  const meta=pageFor('/'+section+'/'+slug+'/');
-  const front='---\ntitle: '+JSON.stringify(title)+'\nslug: '+JSON.stringify(section+'/'+slug)+'\ndescription: '+JSON.stringify(meta?.description||title)+'\ntemplate: splash\n---\n\n';
-  writeFileSync(new URL(encodeURIComponent(slug)+'.md',dir),front+'[← К списку](/'+section+'/)\n\n'+body+'\n');
+function page(section,slug,title,body,locale='ru'){
+  const route=localizedPath('/'+section+'/'+slug+'/',locale),prefix=route.slice(1,-1);
+  const dir=new URL(prefix.slice(0,prefix.lastIndexOf('/')+1),root);mkdirSync(dir,{recursive:true});
+  const meta=pageFor(route);
+  const front='---\ntitle: '+JSON.stringify(title)+'\nslug: '+JSON.stringify(prefix)+'\ndescription: '+JSON.stringify(meta?.description||title)+'\ntemplate: splash\n---\n\n';
+  writeFileSync(new URL(encodeURIComponent(slug)+'.md',dir),front+'['+translate('← К списку',locale)+']('+localizedPath('/'+section+'/',locale)+')\n\n'+body+'\n');
 }
-const songs=read('songs'),games=read('games'),actors=read('characters');
+const songs=read('songs'),games=read('games'),actors=read('characters'),meanings=read('song-meanings');
 for(const x of songs)page('songs',x.slug,x.title,media(x)+'<div class="song-lyrics">'+escape(x.lyrics)+'</div>');
 for(const x of games)page('games',x.slug,x.title,escape(x.audience)+'\n\n'+media(x)+x.description);
 for(const x of read('workshops'))page('workshops',x.slug,x.title,(x.enabled?'В программе.':'Пока не подтверждено (участие уточняется).')+'\n\n'+(x.host?'Ведущий: '+escape(x.host)+'\n\n':'')+'<div class="scenario-text">'+escape(x.description)+'</div>');
@@ -43,8 +44,21 @@ for(const p of editorialPages){
  const front='---\ntitle: '+JSON.stringify(p.title)+'\nslug: '+JSON.stringify(segments.join('/'))+'\ndescription: '+JSON.stringify(p.description)+'\ntemplate: splash\n---\n\n';
  writeFileSync(new URL(segments[0]+'.md',root),front+'[← На главную](/)\n\n'+p.body+'\n');
 }
-// Native Starlight localized docs: stable slugs and explicit original-language attribution.
-for(const p of pages.filter(p=>p.lang&&p.basePath!=='/'&&!['/songs/','/games/','/scenario/','/workshops/','/pancakes/','/history/','/ditties/'].includes(p.basePath))){
+for(const locale of ['sr','en']) {
+ const tx=s=>translate(s,locale);
+ for(const x of songs)page('songs',x.slug,tx(x.title),media(x,locale)+'<p>'+escape(meanings[x.slug]?.[locale])+'</p>\n\n<p>'+escape(tx('Оригинал на русском языке'))+'</p>\n\n<div class="song-lyrics" lang="ru">'+escape(x.lyrics)+'</div>',locale);
+ for(const x of games)page('games',x.slug,tx(x.title),escape(tx(x.audience))+'\n\n'+media(x,locale)+tx(x.description),locale);
+ for(const x of read('workshops'))page('workshops',x.slug,tx(x.title),(x.enabled?tx('В программе.'):tx('Пока не подтверждено (участие уточняется).'))+'\n\n'+(x.host?tx('Ведущий: ')+escape(x.host)+'\n\n':'')+'<div class="scenario-text">'+escape(tx(x.description))+'</div>',locale);
+ for(const p of read('parts')){
+  const body=read('scenario').filter(x=>x.part===p.number).map(x=>{
+   const actor=actors.find(a=>a.id===x.actor),song=songs.find(s=>s.id===x.song);
+   return '<p class="scenario-role">'+escape(tx(actor?.title))+'</p>\n\n<div class="scenario-text">'+escape(tx(x.text))+'</div>\n\n'+(song?'[♫ '+tx(song.title)+']('+localizedPath('/songs/#'+song.slug,locale)+')\n\n':'')+'---\n\n';
+  }).join('');
+  page('scenario',String(p.number),tx(p.title),body,locale);
+ }
+}
+// Localized editorial docs use the same canonical routes.
+for(const p of pages.filter(p=>p.lang&&p.basePath!=='/'&&!['/songs/','/games/','/scenario/','/workshops/','/pancakes/','/history/','/ditties/'].includes(p.basePath)&&!/^\/(?:songs|games|workshops)\/[^/]+\/$/.test(p.basePath)&&!/^\/scenario\/\d+\/$/.test(p.basePath))){
  const segments=p.path.split('/').filter(Boolean).map(decodeURIComponent),file=segments.pop();
  const dir=new URL(segments.map(encodeURIComponent).join('/')+'/',root);mkdirSync(dir,{recursive:true});
  const front='---\ntitle: '+JSON.stringify(p.title)+'\nslug: '+JSON.stringify(p.path.slice(1,-1).split('/').map(decodeURIComponent).join('/'))+'\ndescription: '+JSON.stringify(p.description)+'\ntemplate: splash\n---\n\n';

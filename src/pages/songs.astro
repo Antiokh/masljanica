@@ -3,6 +3,7 @@ import {localize} from '../../public/i18n.mjs';
 const {tx,lp,uiLocale,uiTag}=localize(Astro.url.pathname);
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import songs from '../data/songs.json';
+import meanings from '../data/song-meanings.json';
 import archive from '../data/audio-archive.json';
 import { existsSync } from 'node:fs';
 const files = archive.files as Record<string,{path:string;duration:number}>;
@@ -103,7 +104,7 @@ const duration=(seconds:number)=>Math.floor(seconds/60)+':'+String(Math.floor(se
                   <noscript>{tracks.map((track,i)=><p><a href={track.src}>{tx('Запись ')}{i+1}</a></p>)}</noscript>
                 </div>
               )}
-              {song.lyrics && <>{uiLocale!=='ru'&&<p>{tx('Оригинал на русском языке')}</p>}<div class="song-lyrics" lang="ru">{song.lyrics}</div></>}
+              {song.lyrics && <>{uiLocale!=='ru'&&meanings[song.slug]?.[uiLocale]&&<p>{meanings[song.slug][uiLocale]}</p>}{uiLocale!=='ru'&&<p>{tx('Оригинал на русском языке')}</p>}<div class="song-lyrics" lang="ru">{song.lyrics}</div></>}
               <p><a href={lp('/songs/'+song.slug+'/')}>{tx("Открыть отдельную страницу песни")}</a></p>
               {video && <div class="song-video" data-online-only data-external-embed data-embed-src={video.embed||undefined} data-embed-mode="manual" hidden>
                 <h3>{tx("Видео")}</h3>

@@ -646,5 +646,33 @@
   "Завершение театральной части": {
     "sr": "Završetak pozorišnog dela",
     "en": "End of the theatrical performance"
+  },
+  "Часть 1": {
+    "sr": "Prvi deo",
+    "en": "Part 1"
+  },
+  "Часть 2": {
+    "sr": "Drugi deo",
+    "en": "Part 2"
+  },
+  "Завершение": {
+    "sr": "Završetak",
+    "en": "Finale"
+  },
+  "В программе.": {
+    "sr": "U programu.",
+    "en": "On the programme."
+  },
+  "Пока не подтверждено (участие уточняется).": {
+    "sr": "Još nije potvrđeno (učešće se dogovara).",
+    "en": "Not yet confirmed (participation is being arranged)."
+  },
+  "Ведущий:": {
+    "sr": "Voditelj:",
+    "en": "Host:"
+  },
+  "← К списку": {
+    "sr": "← Nazad na spisak",
+    "en": "← Back to list"
   }
 }
