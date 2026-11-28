@@ -18,18 +18,18 @@ await writeFile(out+'/favicon.ico',Buffer.concat([ico,...icons]));
 for(const [format,layout] of Object.entries(ogFormats)){
  const art=await png(layout.sun.size,layout.sun.size);
  for(const p of pages){
-  const localizedEvent=p.lang&&ogEvent?{...ogEvent,date:p.dateText}:ogEvent;
+  const localizedEvent=p.lang&&ogEvent?{...ogEvent,date:p.dateText||new Intl.DateTimeFormat(p.lang,{dateStyle:'long',timeZone:'UTC'}).format(new Date(festivalData.date+'T00:00:00Z'))}:ogEvent;
   const svg=Buffer.from(renderOgSvg(p.title,localizedEvent,p.description,format,p.brand));
   await sharp(svg).composite([{input:art,left:layout.sun.x,top:layout.sun.y}]).png({compressionLevel:9}).toFile(out+ogPath(p.path,format));
  }
 }
-const slug=p=>p.path==='/'?'festival':p.path.split('/').filter(Boolean)[0];
+const slug=p=>p.path==='/'?'festival':p.path.split('/').filter(Boolean).join('-');
 const fragment=p=>aiIntro+'\n# '+p.title+'\n\nКанонический URL: '+url(p.path)+'\n\n'+p.body+'\n';
 for(const p of sections)await writeFile(out+'/_llms-txt/'+slug(p)+'.txt',fragment(p),'utf8');
 const index=aiIntro+'\n## Разделы\n\n'+sections.map(p=>'- ['+p.title+']('+url(p.path)+'): '+p.description+' ([текст]('+site+'/_llms-txt/'+slug(p)+'.txt))').join('\n')+'\n\n## Дополнительные материалы\n\n- [Полный текст]('+site+'/llms-full.txt)\n- [Краткий текст]('+site+'/llms-small.txt)\n- [Sitemap]('+site+'/sitemap-index.xml)\n- [Festival JSON]('+site+'/festival.json)\n- [Knowledge graph JSON-LD]('+site+'/knowledge.jsonld)\n';
 await writeFile(out+'/llms.txt',index,'utf8');
 await writeFile(out+'/llms-small.txt',index+'\n## Афиша и традиции\n\n'+sections[0].body+'\n','utf8');
-await writeFile(out+'/llms-full.txt',aiIntro+'\n'+[...sections,...editorialPages.filter(p=>!sections.includes(p))].map(p=>'# '+p.title+'\n\nКанонический URL: '+url(p.path)+'\n\n'+p.body).join('\n\n---\n\n')+'\n','utf8');
+await writeFile(out+'/llms-full.txt',aiIntro+'\n'+pages.map(p=>'# '+p.title+'\n\nКанонический URL: '+url(p.path)+'\n\n'+p.body).join('\n\n---\n\n')+'\n','utf8');
 await writeFile(out+'/festival.json',JSON.stringify(festivalData,null,2),'utf8');
 await writeFile(out+'/knowledge.jsonld',JSON.stringify(knowledgeGraph()),'utf8');
 await writeFile(out+'/robots.txt','User-agent: *\nAllow: /\nSitemap: '+site+'/sitemap-index.xml\n','utf8');

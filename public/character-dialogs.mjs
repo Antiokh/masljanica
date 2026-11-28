@@ -1,3 +1,4 @@
+import {tr,currentPath,stripLocale,localeOf} from './i18n.mjs';
 // A single delegated native-dialog controller survives Astro navigation.
 export function installCharacterDialogs(){
   let opener=null;
@@ -39,7 +40,7 @@ export function installCharacterDialogs(){
     if(event.target.matches?.('[data-character-dialog]')){if(opener?.isConnected)opener.focus({preventScroll:true});opener=null;}
   },true);
   function openFromHash(){
-    if(!/^\/scenario\/?$/.test(location.pathname))return;
+    if(!/^\/scenario\/?$/.test(stripLocale(location.pathname)))return;
     let id;try{id=decodeURIComponent(location.hash.slice(1));}catch{return;}
     if(!id.startsWith('character-'))return;
     const d=document.getElementById(id);

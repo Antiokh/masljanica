@@ -1,3 +1,4 @@
+import {tr,currentPath,stripLocale,localeOf} from './i18n.mjs';
 // One native audio on the games catalog, deliberately no auto-advance.
 export function installGameList(){
  let audio=null,active=null,pending=null,attempt=0;
@@ -13,7 +14,7 @@ export function installGameList(){
    track.dataset.playing=String(playing);track.style.setProperty('--game-progress',pct+'%');track.style.setProperty('--game-ring-progress',String(pct));
    const range=track.querySelector('.game-seek');range.value=String(Math.round(pct*10));range.setAttribute('aria-valuetext',fmt(time)+' / '+fmt(duration));
    track.querySelector('.game-track-time').textContent=current?fmt(time)+' / '+fmt(duration):fmt(duration);
-   track.querySelector('button').setAttribute('aria-label',(playing?'Пауза: ':'Воспроизвести: ')+track.closest('.game-card').querySelector('.game-heading strong').textContent);
+   track.querySelector('button').setAttribute('aria-label',(playing?tr('Пауза: '):tr('Воспроизвести: '))+track.closest('.game-card').querySelector('.game-heading strong').textContent);
   }
  }
  function bind(){const next=document.querySelector('#game-audio');if(audio===next)return;if(audio)audio.pause();audio=next;active=null;pending=null;attempt++;sync();}
@@ -25,10 +26,10 @@ export function installGameList(){
   bind();const track=button.closest('[data-game-track]');if(!select(track))return;
   if(!audio.paused&&!audio.ended){attempt++;audio.pause();sync();return;}
   if(audio.ended)audio.currentTime=0;error('');const token=++attempt;
-  audio.play().catch(e=>{if(token===attempt&&e.name!=='AbortError'){error('Не удалось воспроизвести локальную запись. Проверьте офлайн-копию или подключение.');sync();}});sync();
+  audio.play().catch(e=>{if(token===attempt&&e.name!=='AbortError'){error(tr('Не удалось воспроизвести локальную запись. Проверьте офлайн-копию или подключение.'));sync();}});sync();
  });
  document.addEventListener('input',e=>{const range=e.target;if(!(range instanceof HTMLInputElement)||!range.matches('.game-seek'))return;const fraction=Number(range.value)/1000;bind();if(!select(range.closest('[data-game-track]')))return;pending=fraction;seek();sync();});
- for(const event of ['play','playing','pause','ended','timeupdate','loadedmetadata','durationchange','error','emptied'])document.addEventListener(event,e=>{if(e.target!==audio)return;if(event==='loadedmetadata'||event==='durationchange')seek();if(event==='error'&&active)error('Локальная запись недоступна.');sync();},true);
+ for(const event of ['play','playing','pause','ended','timeupdate','loadedmetadata','durationchange','error','emptied'])document.addEventListener(event,e=>{if(e.target!==audio)return;if(event==='loadedmetadata'||event==='durationchange')seek();if(event==='error'&&active)error(tr('Локальная запись недоступна.'));sync();},true);
  document.addEventListener('astro:before-swap',()=>{attempt++;audio?.pause();});
  document.addEventListener('astro:page-load',()=>{bind();openHash();});
  window.addEventListener('hashchange',openHash);bind();openHash();

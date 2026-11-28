@@ -1,3 +1,4 @@
+import {tr,currentPath,stripLocale,localeOf} from './i18n.mjs';
 // Pagefind remains the full-text engine. The input is SSR markup, never an async placeholder.
 // One document-level controller handles all Astro page swaps; no DOMContentLoaded dependency.
 export function installFestivalSearch(){
@@ -13,7 +14,7 @@ export function installFestivalSearch(){
     d.querySelector('#festival-search-input').value='';
     d.querySelector('#festival-search-results').replaceChildren();
     d.querySelector('[data-search-more]').hidden=true;
-    status(d,'Введите слово или фразу.');
+    status(d,tr('Введите слово или фразу.'));
   }
   function close(restore=true){
     const d=current();if(!d)return;
@@ -32,10 +33,10 @@ export function installFestivalSearch(){
   }
   function resultLink(result, fallbackTitle){
     let url;try{url=new URL(result.url,location.origin);}catch{return null;}
-    if(url.origin!==location.origin||!/^https?:$/.test(url.protocol))return null;
+    if(url.origin!==location.origin||!/^https?:$/.test(url.protocol)||localeOf(url.pathname)!==localeOf(location.pathname))return null;
     // The song list is the primary player; keep deep links in that experience.
-    const song=url.pathname.match(/^\/songs\/([^/]+)\/?$/);
-    if(song){url=new URL('/songs/#'+song[1],location.origin);}
+    const song=stripLocale(url.pathname).match(/^\/songs\/([^/]+)\/?$/);
+    if(song){url=new URL(currentPath('/songs/#'+song[1]),location.origin);}
     const a=document.createElement('a');a.href=url.pathname+url.search+url.hash;
     a.textContent=result.title||result.meta?.title||fallbackTitle||url.pathname;
     return a;
@@ -54,7 +55,7 @@ export function installFestivalSearch(){
   const live=(d,token)=>d===current()&&token===sequence;
   function failure(d,token){
     if(!live(d,token))return;
-    status(d,navigator.onLine?'Не удалось загрузить поиск. Измените запрос или повторите попытку.':'Поиск недоступен без полной офлайн-копии. Проверьте её в разделе «Офлайн».');
+    status(d,navigator.onLine?tr('Не удалось загрузить поиск. Измените запрос или повторите попытку.'):tr('Поиск недоступен без полной офлайн-копии. Проверьте её в разделе «Офлайн».'));
     d.querySelector('[data-search-more]').hidden=true;
   }
   async function next(d,token){
@@ -64,22 +65,22 @@ export function installFestivalSearch(){
       if(!live(d,token))return;
       for(const data of loaded){const node=renderResult(data);if(node)d.querySelector('#festival-search-results').append(node);}
       offset+=loaded.length;more.hidden=offset>=matches.length;
-      status(d,'Найдено страниц: '+matches.length);
+      status(d,tr('Найдено страниц: ')+matches.length);
     }catch{failure(d,token);}finally{if(live(d,token))more.disabled=false;}
   }
   function query(d,value){
     invalidate();const token=sequence;
     const results=d.querySelector('#festival-search-results'),more=d.querySelector('[data-search-more]');
     results.replaceChildren();more.hidden=true;more.disabled=false;
-    const term=value.trim();if(!term){status(d,'Введите слово или фразу.');return;}
-    status(d,'Ищем…');
+    const term=value.trim();if(!term){status(d,tr('Введите слово или фразу.'));return;}
+    status(d,tr('Ищем…'));
     timer=setTimeout(async()=>{
       try{
         const pf=await loadEngine();if(!live(d,token))return;
         const found=await pf.search(term);if(!live(d,token))return;
         if(!found||!Array.isArray(found.results))throw Error('Search index unavailable');
         matches=found.results;
-        if(!matches.length){status(d,'Ничего не найдено.');return;}
+        if(!matches.length){status(d,tr('Ничего не найдено.'));return;}
         await next(d,token);
       }catch{failure(d,token);}
     },180);

@@ -1,8 +1,9 @@
+import {tr,currentPath,stripLocale,localeOf} from './i18n.mjs';
 // Presentation only. All state and commands belong to the PWA controller.
 export function installPwaPresentation({onOpen}={}){
   let closeTimer,anchor,returningFocus,pinned=false,estimate=null,estimatePending=false,lastEstimate=0;
   const panel=()=>document.querySelector('#festival-pwa-menu');
-  const fmt=n=>((n||0)/1e6).toFixed(1).replace('.',',')+' МБ';
+  const fmt=n=>((n||0)/1e6).toFixed(1).replace('.',',')+tr(' МБ');
   function setValue(key,value){document.querySelectorAll('[data-pwa-value="'+key+'"]').forEach(el=>{if(el.textContent!==value)el.textContent=value;});}
   async function readStorage(force=false){
     if(estimatePending||(!force&&Date.now()-lastEstimate<30000)||!navigator.storage?.estimate)return;
@@ -54,13 +55,13 @@ export function installPwaPresentation({onOpen}={}){
   return {render(model){
     const {online,standalone,launchLabel,readiness,ready,stale,busy,deleting,progress,automatic,canChange,canDelete,canDownload,error}=model;
     const percent=progress?.total?Math.min(100,Math.floor(100*progress.done/progress.total)):0;
-    const copy=deleting?'Удаление…':busy?(ready?'Обновление ':'Загрузка ')+(progress?.total?percent+'%':'…'):readiness==='unknown'?'Проверяем…':stale?'Устарела':ready?'Готова':'Не скачана';
-    setValue('connection',online?'Онлайн':ready?'Офлайн · копия доступна':readiness==='unknown'?'Офлайн · проверяем':'Офлайн · копии нет');
-    setValue('launch',launchLabel||(standalone?'Приложение':'Браузер'));setValue('copy',copy);setValue('compact','Офлайн-копия · '+copy);setValue('storage',estimate||'—');setValue('percent',progress?.total?percent+'%':'…');
+    const copy=deleting?tr('Удаление…'):busy?(ready?tr('Обновление '):tr('Загрузка '))+(progress?.total?percent+'%':'…'):readiness==='unknown'?tr('Проверяем…'):stale?tr('Устарела'):ready?tr('Готова'):tr('Не скачана');
+    setValue('connection',online?tr('Онлайн'):ready?tr('Офлайн · копия доступна'):readiness==='unknown'?tr('Офлайн · проверяем'):tr('Офлайн · копии нет'));
+    setValue('launch',launchLabel||(standalone?tr('Приложение'):tr('Браузер')));setValue('copy',copy);setValue('compact',tr('Офлайн-копия · ')+copy);setValue('storage',estimate||'—');setValue('percent',progress?.total?percent+'%':'…');
     const dot=document.querySelector('#offline-indicator');if(dot)dot.dataset.state=busy||deleting?'busy':online?'online':readiness==='unknown'?'unknown':ready?'ready':'unavailable';
     document.querySelectorAll('[data-pwa-auto]').forEach(el=>{el.setAttribute('aria-checked',String(automatic));el.disabled=!canChange;});
     document.querySelectorAll('[data-pwa-delete]').forEach(el=>el.disabled=!canDelete);
-    document.querySelectorAll('[data-pwa-download]').forEach(el=>{el.disabled=!canDownload;el.textContent=ready?'Обновить':'Скачать';});
+    document.querySelectorAll('[data-pwa-download]').forEach(el=>{el.disabled=!canDownload;el.textContent=ready?tr('Обновить'):tr('Скачать');});
     document.querySelectorAll('[data-pwa-progress],[data-pwa-nav-progress]').forEach(el=>el.hidden=!busy);
     document.querySelectorAll('[data-pwa-bar]').forEach(el=>{if(progress?.total)el.value=percent;else el.removeAttribute('value');});
     document.querySelectorAll('[data-pwa-error]').forEach(el=>{el.hidden=!error;el.textContent=error||'';});

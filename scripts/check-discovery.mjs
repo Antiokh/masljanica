@@ -27,9 +27,9 @@ for(const p of pages){
  const html=readFileSync(file,'utf8');
  for(const marker of ['og:image','twitter:card','masljanica-schema','rel="canonical"',site+ogPath(p.path)])assert.ok(html.includes(marker),p.path+' missing '+marker);
  if(p.seoTitle)assert.ok(html.includes(p.seoTitle.replaceAll('&','&amp;')),p.path+' SEO title');
- if(p.kind==='LocalizedFestival'||p.path==='/'){
+ {
   for(const a of languageAlternates)assert.ok(html.includes('hreflang="'+a.lang+'"'),p.path+' hreflang '+a.lang);
-  if(p.lang)assert.ok(html.includes('<html lang="'+p.lang+'"'),p.path+' HTML language');
+  if(p.lang)assert.ok(/<html\b[^>]*\blang="([^"]+)"/.exec(html)?.[1]===p.lang,p.path+' HTML language');
  }
  const images=[...html.matchAll(/<meta\b[^>]*property="og:image"[^>]*content="([^"]+)"/g)].map(m=>m[1]);
  assert.deepEqual(images,[site+ogPath(p.path),site+ogPath(p.path,'square')],p.path+' ordered OG alternatives');

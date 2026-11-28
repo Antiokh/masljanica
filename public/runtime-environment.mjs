@@ -1,3 +1,4 @@
+import {tr,currentPath,stripLocale,localeOf} from './i18n.mjs';
 import { sanitizeTelegramPalette, applyTelegramPalette, telegramNativeColors } from './telegram-palette.mjs';
 import { setupTelegramBackNavigation } from './telegram-back.mjs';
 // One environment adapter. Launch hints affect UI only, never authentication.
@@ -82,7 +83,7 @@ export function createRuntimeEnvironment(win=window){
   }
   function diagnostics(){
     if(!isTelegram)return;
-    const values={palette:root().dataset.telegramPalette==='active'?'Цвета Telegram':'Фирменная палитра',background:root().dataset.telegramPalette==='active'?telegramColors.bg_color:'—',themeMode:mode(),telegramTheme:telegramTheme||'Не получена',themeSource:mode()!=='auto'?'Ручной выбор':themeSource==='bridge'?'Telegram SDK':themeSource==='launch'?'Параметры Telegram':'Системная (резерв)',appliedTheme:root().dataset.theme,environment:'Telegram Mini App · '+context.platform,bridge:bridgeStatus==='ready'?'Подключён':bridgeStatus==='unavailable'?'Недоступен · резервный режим':'Подключение…',sw:sw?'API доступен':'Недоступен',cache:cacheStorage?'API доступен':'Недоступен',retention:retention==='retained'?'Предыдущая копия обнаружена':retention==='missing'?'Предыдущая копия не обнаружена':retention==='checking'?'Проверяем…':'Нет данных о предыдущем запуске'};
+    const values={palette:root().dataset.telegramPalette==='active'?tr('Цвета Telegram'):tr('Фирменная палитра'),background:root().dataset.telegramPalette==='active'?telegramColors.bg_color:'—',themeMode:mode(),telegramTheme:telegramTheme||tr('Не получена'),themeSource:mode()!=='auto'?tr('Ручной выбор'):themeSource==='bridge'?'Telegram SDK':themeSource==='launch'?tr('Параметры Telegram'):tr('Системная (резерв)'),appliedTheme:root().dataset.theme,environment:'Telegram Mini App · '+context.platform,bridge:bridgeStatus==='ready'?tr('Подключён'):bridgeStatus==='unavailable'?tr('Недоступен · резервный режим'):tr('Подключение…'),sw:sw?tr('API доступен'):tr('Недоступен'),cache:cacheStorage?tr('API доступен'):tr('Недоступен'),retention:retention==='retained'?tr('Предыдущая копия обнаружена'):retention==='missing'?tr('Предыдущая копия не обнаружена'):retention==='checking'?tr('Проверяем…'):tr('Нет данных о предыдущем запуске')};
     for(const [key,value] of Object.entries(values))doc.querySelectorAll('[data-runtime-value="'+key+'"]').forEach(el=>{el.textContent=value;});
   }
   function sync(){if(isTelegram){syncTheme();syncInsets();diagnostics();}}
@@ -143,7 +144,7 @@ export function createRuntimeEnvironment(win=window){
     loadBridge();
   }
   return {isTelegram,isStandalone,canOfferInstall:()=>!isTelegram&&!isStandalone(),serviceWorker:sw,
-    launchLabel:()=>isTelegram?'Telegram Mini App':isStandalone()?'Приложение':'Браузер',sync,
+    launchLabel:()=>isTelegram?'Telegram Mini App':isStandalone()?tr('Приложение'):tr('Браузер'),sync,
     observeCopy({verified,ready,version}){
       if(!isTelegram)return;
       if(verified&&!observed){retention=copyRetention(previous,true,ready);observed=true;}

@@ -1,3 +1,4 @@
+import {tr,currentPath,stripLocale,localeOf} from './i18n.mjs';
 // Responsive enhancement over the original SSR cards. No cloned content/audio.
 export function installCatalogMaster(){
  const desktop=matchMedia('(min-width:60rem)');
@@ -13,7 +14,7 @@ export function installCatalogMaster(){
    const source=e.row.querySelector('.song-play'),on=source?.dataset.playing==='true';
    e.play.dataset.playing=String(on);
    e.play.style.setProperty('--song-progress',source?.style.getPropertyValue('--song-progress')||'0');
-   e.play.setAttribute('aria-label',(on?'Пауза: ':'Воспроизвести: ')+e.title);
+   e.play.setAttribute('aria-label',(on?tr('Пауза: '):tr('Воспроизвести: '))+e.title);
   }
  }
  function buildNav(){

@@ -1,24 +1,25 @@
+import {localeOf,localizedPath,stripLocale} from './i18n.mjs';
 // Adapted from dobri-visarun/src/lib/telegram.ts, setupTelegramBackNavigation.
 // Astro owns document swaps. This guard is an interception mechanism, not a route stack.
 const KEY='__masljanicaTelegramBackGuard';
 const PEERS=new Set(['/','/songs/','/games/']);
-const SECTIONS=new Set(['songs','games','scenario','workshops','ditties','pancakes','history']);
+const SECTIONS=new Set(['songs','games','scenario','workshops','ditties','pancakes','history','faq','sources','glossary']);
 export function normalizedRoute(path){
   const parts=String(path||'/').split('/').filter(Boolean);
   return parts.length?'/'+parts.join('/')+'/':'/';
 }
-export function isPeerRoute(path){return PEERS.has(normalizedRoute(path));}
+export function isPeerRoute(path){return PEERS.has(normalizedRoute(stripLocale(path)));}
 export function isAppRoute(path){
-  const route=normalizedRoute(path);
+  const route=normalizedRoute(stripLocale(path));
   return route==='/'||SECTIONS.has(route.split('/')[1]);
 }
 export function parentRoute(path,lastPeer='/'){
-  const route=normalizedRoute(path);
-  if(PEERS.has(route))return null;
-  const parts=route.split('/').filter(Boolean);
-  if(!SECTIONS.has(parts[0]))return isPeerRoute(lastPeer)?normalizedRoute(lastPeer):'/';
-  if(parts.length>1)return '/'+parts.slice(0,-1).join('/')+'/';
-  return isPeerRoute(lastPeer)?normalizedRoute(lastPeer):'/';
+ const locale=localeOf(path),route=normalizedRoute(stripLocale(path)),peer=localeOf(lastPeer)===locale&&isPeerRoute(lastPeer)?normalizedRoute(lastPeer):localizedPath('/',locale);
+ if(PEERS.has(route))return null;
+ const parts=route.split('/').filter(Boolean);
+ if(!SECTIONS.has(parts[0]))return peer;
+ if(parts.length>1)return localizedPath('/'+parts.slice(0,-1).join('/')+'/',locale);
+ return peer;
 }
 export function resolveBackAction({search=false,character=false,popover=false,calendar=false,toc=false,menu=false,path='/',lastPeer='/'}={}){
   if(search)return 'search';

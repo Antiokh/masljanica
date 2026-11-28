@@ -4,6 +4,7 @@ import {createHash} from 'node:crypto';
 import {asUTC} from './event-calendar.mjs';
 import {sources,sourceText,terms,glossaryText,questions,faqText,participationText} from './knowledge-content.mjs';
 import {localizedFestivalPages} from './festival-locales.mjs';
+import {translate,localizedPath,localeOf,stripLocale,languageTag} from '../../public/i18n.mjs';
 export const site='https://masljanica.pages.dev';
 export const brand='Масляница · Белград';
 // Astro bundles server-side modules into dist before prerendering; resolve data from the project root.
@@ -74,10 +75,21 @@ const details=[
  ...workshops.map(x=>section('/workshops/'+x.slug+'/',x.title,(x.enabled?'Мастер-класс Масляницы. ':'Мастер-класс пока не подтверждён. ')+excerpt(x.description),workshopBody(x))),
  ...parts.map(p=>section('/scenario/'+p.number+'/',p.title,'Театральный сказ Масляницы, часть '+p.number+'.',partBody(p)))
 ];
-export const localizedPages=localizedFestivalPages({upcoming,date:config.date,time:ogEvent?.time,location:ogEvent?.location,mapUrl:event.mapUrl,schedule,showSchedule:config.schedule});
+const localizedHome=localizedFestivalPages({upcoming,date:config.date,time:ogEvent?.time,location:ogEvent?.location,mapUrl:event.mapUrl,schedule,showSchedule:config.schedule});
+const basePages=[...sections,...details,...editorialPages.filter(p=>!referenceSections.includes(p))];
+const localizedLabel=(p,locale)=>{
+ const t=s=>translate(s,locale),title=t(p.title);
+ const section=basePages.find(x=>x.path!=='/'&&p.path.startsWith(x.path)&&x.path.split('/').filter(Boolean).length===1);
+ const suffix=locale==='sr'?'Masljanica · Beograd':'Masljanica · Belgrade';
+ const description=t(p.description);
+ return {...p,path:localizedPath(p.path,locale),basePath:p.path,lang:languageTag(locale),code:locale,locale:locale==='sr'?'sr_RS':'en_US',brand:locale==='sr'?'MASLJANICA · BEOGRAD':'MASLJANICA · BELGRADE',title,seoTitle:title+' · '+suffix,description:description===p.description&&/[А-Яа-яЁё]/u.test(description)?title+' · '+(section?t(section.title)+' · ':'')+suffix:description,body:p.body};
+};
+export const localizedPages=localizedHome.map(h=>({...h,basePath:'/',title:translate('Масляница в Белграде',h.code)}));
+const localizedDetails=['sr','en'].flatMap(locale=>basePages.filter(p=>p.path!=='/').map(p=>localizedLabel(p,locale)));
 export const languageAlternates=[{lang:'ru',path:'/'},{lang:'sr-Latn',path:'/sr/'},{lang:'en',path:'/en/'},{lang:'x-default',path:'/'}];
-sections.push(...localizedPages);
-export const pages=[...sections,...details,...editorialPages.filter(p=>!referenceSections.includes(p))];
+export const alternatesFor=path=>languageAlternates.map(a=>({lang:a.lang,path:localizedPath(stripLocale(path),a.lang==='sr-Latn'?'sr':a.lang==='en'?'en':'ru')}));
+sections.push(...localizedPages,...localizedDetails.filter(p=>p.basePath.split('/').filter(Boolean).length===1));
+export const pages=[...basePages,...localizedPages,...localizedDetails];
 export const pageFor=path=>pages.find(p=>p.path===canonicalPath(path));
 export const ogPath=(path,format='landscape')=>{
  const dir=format==='square'?'/og-square/':'/og/';
@@ -86,7 +98,7 @@ export const ogPath=(path,format='landscape')=>{
 const id=site+'/#website';
 export const website={'@type':'WebSite','@id':id,name:brand,alternateName:['Масленица в Белграде','Масленица в Сербии','Masljanica','Maslenica u Beogradu','Maslenitsa in Belgrade'],url:site+'/',inLanguage:['ru','sr-Latn','en'],description:sections[0].description,sameAs:socials.map(s=>s.href)};
 export function structuredData(p){
- const pageUrl=url(p.path),parent=sections.find(s=>s.path!=='/'&&p.path.startsWith(s.path)),crumb=p.path==='/'?null:{'@type':'BreadcrumbList','@id':pageUrl+'#breadcrumb',itemListElement:[sections[0],...(parent&&parent!==p?[parent]:[]),p].map((x,i)=>({'@type':'ListItem',position:i+1,name:x.title,item:url(x.path)}))};
+ const pageUrl=url(p.path),parent=sections.find(s=>s.path!=='/'&&s.path!=='/sr/'&&s.path!=='/en/'&&p.path.startsWith(s.path)),crumb=p.path==='/'?null:{'@type':'BreadcrumbList','@id':pageUrl+'#breadcrumb',itemListElement:[sections[0],...(parent&&parent!==p?[parent]:[]),p].map((x,i)=>({'@type':'ListItem',position:i+1,name:x.title,item:url(x.path)}))};
  const page={'@type':p.path==='/'||p.kind==='LocalizedFestival'||details.includes(p)||editorialPages.includes(p)?'WebPage':['/history/'].includes(p.path)?'WebPage':'CollectionPage','@id':pageUrl+'#webpage',url:pageUrl,name:p.title,description:p.description,inLanguage:p.lang||'ru',isPartOf:{'@id':id},primaryImageOfPage:{'@type':'ImageObject',url:site+ogPath(p.path),width:1200,height:630},...(crumb?{breadcrumb:{'@id':crumb['@id']}}:{})};
  const graph=[website,page];if(crumb)graph.push(crumb);
  if(p.path==='/'&&upcoming&&period){
@@ -103,8 +115,8 @@ export function structuredData(p){
  if(p.kind==='Recipe'){const x=recipes.find(x=>p.path===canonicalPath('/pancakes/'+x.id+'/'));if(x)add({'@type':'Recipe',description:'Исторический рецепт из издания 1854 года',recipeCategory:x.category,recipeInstructions:x.method});}
  if(p.kind==='MusicComposition'){const x=songs.find(x=>p.path===canonicalPath('/songs/'+x.slug+'/'));if(x){const recordings=(x.audio||[]).map(u=>audio[u]).filter(a=>a?.path).map(a=>({'@type':'MusicRecording',name:x.title,audio:{'@type':'AudioObject',contentUrl:site+a.path}}));add({'@type':'MusicComposition',lyrics:{'@type':'CreativeWork',text:x.lyrics},...(recordings.length?{recordedAs:recordings}:{})});}}
  if(p.kind==='CreativeWork')add({'@type':'CreativeWork',description:p.description});
- if(p.kind==='FAQPage'){page['@type']='FAQPage';page.mainEntity=faq.map(([name,text])=>({'@type':'Question',name,acceptedAnswer:{'@type':'Answer',text:text.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'$1 ($2)')}}));}
- if(p.kind==='DefinedTermSet')add({'@type':'DefinedTermSet',hasDefinedTerm:terms.map(([name,description,href])=>({'@type':'DefinedTerm',name,description,url:site+href}))});
+ if(p.kind==='FAQPage'&&!p.lang){page['@type']='FAQPage';page.mainEntity=faq.map(([name,text])=>({'@type':'Question',name,acceptedAnswer:{'@type':'Answer',text:text.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'$1 ($2)')}}));}
+ if(p.kind==='DefinedTermSet'&&!p.lang)add({'@type':'DefinedTermSet',hasDefinedTerm:terms.map(([name,description,href])=>({'@type':'DefinedTerm',name,description,url:site+href}))});
  if(p.path==='/sources/')for(const s of sources)graph.push({'@type':s.type||'CreativeWork','@id':pageUrl+'#'+s.id,name:s.name,...(s.author?{author:{'@type':'Person',name:s.author}}:{}),...(s.year?{datePublished:String(s.year)}:{}),...(s.url?{url:s.url}:{})});
  const children=pages.filter(x=>x.path!==p.path&&p.path!=='/'&&x.path.startsWith(p.path)&&x.path.split('/').length===p.path.split('/').length+1);
  if(children.length&&p.path!=='/pancakes/')graph.push({'@type':'ItemList',itemListElement:children.map((x,i)=>({'@type':'ListItem',position:i+1,name:x.title,url:url(x.path)}))});

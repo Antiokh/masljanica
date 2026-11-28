@@ -1,3 +1,4 @@
+import {tr,currentPath,stripLocale,localeOf} from './i18n.mjs';
 // One attached audio element, independent of accordion visibility.
 // Queue order is the catalog order, then the archived variants of each song.
 export function installSongList(){
@@ -20,12 +21,12 @@ export function installSongList(){
       const toggle=panel.querySelector('[data-playlist-action="toggle"]');
       const prev=panel.querySelector('[data-playlist-action="previous"]'),next=panel.querySelector('[data-playlist-action="next"]');
       toggle.disabled=!display;toggle.dataset.playing=String(playing);
-      toggle.setAttribute('aria-label',playing?'Пауза':'Воспроизвести плейлист');
+      toggle.setAttribute('aria-label',playing?tr('Пауза'):tr('Воспроизвести плейлист'));
       toggle.style.setProperty('--song-progress',String(track?progress():0));
       prev.disabled=index<=0;next.disabled=!display||Math.max(0,index)>=queue.length-1;
       if(display){
         panel.querySelector('#playlist-title').textContent=display.title;
-        panel.querySelector('#playlist-variant').textContent='Запись '+(display.variant+1)+' из '+display.count;
+        panel.querySelector('#playlist-variant').textContent=tr('Запись ')+(display.variant+1)+tr(' из ')+display.count;
         panel.querySelector('#playlist-position').textContent=(Math.max(0,index)+1)+' / '+queue.length;
         const total=track&&Number.isFinite(audio.duration)?audio.duration:display.duration||0;
         const position=track?(pendingSeek!==null?pendingSeek*total:audio.currentTime):0;
@@ -38,7 +39,7 @@ export function installSongList(){
     for(const row of rows()){
       const button=row.querySelector('.song-play'),current=track?.song===row.id;
       const on=current&&playing;
-      if(button){button.dataset.playing=String(on);button.setAttribute('aria-label',(on?'Пауза: ':'Воспроизвести: ')+row.dataset.song);button.style.setProperty('--song-progress',current?String(progress()):'0');}
+      if(button){button.dataset.playing=String(on);button.setAttribute('aria-label',(on?tr('Пауза: '):tr('Воспроизвести: '))+row.dataset.song);button.style.setProperty('--song-progress',current?String(progress()):'0');}
       row.classList.toggle('is-playing',on);
       const selected=selectedBySong.get(row.id)??0;
       for(const variant of row.querySelectorAll('.song-variant')){
@@ -47,7 +48,7 @@ export function installSongList(){
         variant.dataset.playing=String(isCurrent&&playing);
         const toggle=variant.querySelector('.song-variant-toggle');
         toggle?.setAttribute('aria-pressed',String(isSelected));
-        toggle?.setAttribute('aria-label',((isCurrent&&playing)?'Пауза: ':'Воспроизвести: ')+'запись '+(n+1)+' — '+row.dataset.song);
+        toggle?.setAttribute('aria-label',((isCurrent&&playing)?tr('Пауза: '):tr('Воспроизвести: '))+tr('запись ')+(n+1)+' — '+row.dataset.song);
         const info=variant.querySelector('.song-variant-info');if(info)info.inert=!isSelected;
         variant.style.setProperty('--song-progress',isCurrent?String(progress()):'0');
         const time=variant.querySelector('.song-variant-time');
@@ -86,7 +87,7 @@ export function installSongList(){
     // Invoke play synchronously during the user's click, preserving mobile activation.
     current.play().catch(e=>{
       if(token!==attempt||audio!==current||e.name==='AbortError')return;
-      showError('Не удалось воспроизвести локальную запись: '+(e.name==='NotAllowedError'?'нажмите Play ещё раз.':'проверьте подключение или загрузите офлайн-копию.'));
+      showError(tr('Не удалось воспроизвести локальную запись: ')+(e.name==='NotAllowedError'?tr('нажмите Play ещё раз.'):tr('проверьте подключение или загрузите офлайн-копию.')));
       sync();
     });
     sync();
@@ -152,7 +153,7 @@ export function installSongList(){
     if(e.target!==audio)return;
     if(event==='loadedmetadata'||event==='durationchange')applySeek();
     if(event==='ended'&&index+1<queue.length){select(index+1);return;}
-    if(event==='error'&&active())showError('Локальная запись недоступна. Проверьте подключение или офлайн-копию.');
+    if(event==='error'&&active())showError(tr('Локальная запись недоступна. Проверьте подключение или офлайн-копию.'));
     sync();
   },true);
   function openHash(){

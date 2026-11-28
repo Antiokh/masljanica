@@ -1,3 +1,4 @@
+import {tr,currentPath,stripLocale,localeOf} from './i18n.mjs';
 import { installCalendarMenu } from './calendar-menu.mjs';
 import { installStoryBook } from './story-book.mjs';
 import { installWorkshopGallery } from './workshop-gallery.mjs';
@@ -37,7 +38,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
      const routes=['/','/songs/','/games/','/scenario/','/workshops/','/pancakes/','/history/'];
      for(const path of routes){
        if(!navigator.onLine||sw.controller!==controller)return;
-       if(location.pathname===path)continue;
+       if(location.pathname===currentPath(path))continue;
        try{const response=await fetch(path,{priority:'low',signal:AbortSignal.timeout(5000),headers:{Accept:'text/html'}});if(response.ok)await response.arrayBuffer();}catch{}
      }
    };
@@ -87,7 +88,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();if(!environment.canOfferInstall())return;installPrompt=e;resolveOffer();render();});
  window.addEventListener('appinstalled',()=>{installPrompt=null;offer=null;render();});
 
- const fmt=n=>((n||0)/1e6).toFixed(1).replace('.',',')+' МБ';
+ const fmt=n=>((n||0)/1e6).toFixed(1).replace('.',',')+tr(' МБ');
  const send=type=>sw?.controller?.postMessage({type});
  // Telegram owns its native chrome and meta theme-color in runtime-environment.
  // In browsers/PWA read the resolved CSS token, including future palette changes.
@@ -111,8 +112,8 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
    });
    document.querySelectorAll('.catalog-group').forEach(g=>g.hidden=!g.querySelector('[data-entry]:not([hidden])'));
    const empty=document.querySelector('#catalog-empty');if(empty)empty.hidden=count>0;
-   const total=document.querySelector('#game-count');if(total)total.textContent='Найдено игр: '+count;
-   const dittyCount=document.querySelector('#ditty-count');if(dittyCount)dittyCount.textContent='Найдено: '+count;
+   const total=document.querySelector('#game-count');if(total)total.textContent=tr('Найдено игр: ')+count;
+   const dittyCount=document.querySelector('#ditty-count');if(dittyCount)dittyCount.textContent=tr('Найдено: ')+count;
    document.dispatchEvent(new Event('catalog:filter'));
  }
  document.addEventListener('input',e=>{if(e.target?.id==='catalog-search')refreshCatalog();});
@@ -124,9 +125,9 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
    const notice=document.querySelector('#pwa-storage-notice'),prompt=document.querySelector('#pwa-offer'),message=document.querySelector('#pwa-offer-message'),action=document.querySelector('#pwa-offer-action');
    if(notice)notice.hidden=accepted()||!sw;
    if(prompt)prompt.hidden=!accepted()||!offer||busy||deleting;
-   if(message&&offer)message.textContent=offer==='install'?'Установите Масляницу на устройство.':(offer==='offline-download'?'Скачайте материалы праздника':'Доступна новая версия материалов')+(latest?' · '+fmt(latest.bytes):'')+'.';
-   if(action&&offer)action.textContent=offer==='install'?'Установить':offer==='offline-download'?'Скачать':'Обновить';
-   presentation.render({online:navigator.onLine,standalone:standalone(),launchLabel:environment.launchLabel(),readiness,ready:state.ready,stale:!!stale,busy,deleting,checking,progress:state.progress,automatic:automatic(),canChange:accepted()&&verified&&!deleting,canDelete:verified&&!busy&&!deleting&&(state.ready||state.staging),canDownload:accepted()&&verified&&!busy&&!deleting&&!checking&&navigator.onLine,error:error||(registrationFailed?'Не удалось запустить Service Worker.':!sw?'Офлайн-режим не поддерживается.':'')});
+   if(message&&offer)message.textContent=offer==='install'?tr('Установите Масляницу на устройство.'):(offer==='offline-download'?tr('Скачайте материалы праздника'):tr('Доступна новая версия материалов'))+(latest?' · '+fmt(latest.bytes):'')+'.';
+   if(action&&offer)action.textContent=offer==='install'?tr('Установить'):offer==='offline-download'?tr('Скачать'):tr('Обновить');
+   presentation.render({online:navigator.onLine,standalone:standalone(),launchLabel:environment.launchLabel(),readiness,ready:state.ready,stale:!!stale,busy,deleting,checking,progress:state.progress,automatic:automatic(),canChange:accepted()&&verified&&!deleting,canDelete:verified&&!busy&&!deleting&&(state.ready||state.staging),canDownload:accepted()&&verified&&!busy&&!deleting&&!checking&&navigator.onLine,error:error||(registrationFailed?tr('Не удалось запустить Service Worker.'):!sw?tr('Офлайн-режим не поддерживается.'):'')});
 
    environment.observeCopy({verified,ready:state.ready,version:state.version});
    document.documentElement.dataset.offlineReady=String(state.ready);
@@ -142,7 +143,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
    const menu=document.querySelector('.more-menu');if(menu?.open&&target&&!menu.contains(target)&&!target.closest('#festival-pwa-menu'))menu.open=false;
    if(target?.closest('[data-pwa-download]')&&accepted())startDownload();
    if(target?.closest('[data-pwa-auto]')&&accepted()&&verified){set(PREF,automatic()?'disabled':'enabled');autoAttempt=null;error='';resolveOffer();checkVersion(true);render();}
-   if(target?.closest('[data-pwa-delete]')&&verified&&!state.progress&&!state.deleting&&confirm('Удалить офлайн-данные?')){error='';set(PREF,'disabled');autoAttempt=null;state.deleting=true;send('OFFLINE_DELETE');render();}
+   if(target?.closest('[data-pwa-delete]')&&verified&&!state.progress&&!state.deleting&&confirm(tr('Удалить офлайн-данные?'))){error='';set(PREF,'disabled');autoAttempt=null;state.deleting=true;send('OFFLINE_DELETE');render();}
    if(target?.closest('#pwa-storage-accept')){set(KEYS.storageNoticeAck,'1');resolveOffer();checkVersion(true);render();}
    if(target?.closest('#pwa-offer-dismiss')){offer=null;render();}
    if(target?.closest('#pwa-offer-action')){
@@ -156,8 +157,8 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
    if(m?.type==='OFFLINE_STATUS'){const wasDeleting=state.deleting;state=m;if(wasDeleting&&!m.deleting)presentation.refreshStorage();verified=m.capability===2;readiness=verified?(m.ready?'ready':'unavailable'):'unknown';if(verified)resolveOffer();}
    if(m?.type==='OFFLINE_PROGRESS')state.progress=m.progress;
    if(m?.type==='OFFLINE_COMPLETE'){error='';presentation.refreshStorage();checkVersion(true);}
-   if(m?.type==='OFFLINE_ERROR')error='Загрузка не завершена: '+m.message;
-   if(m?.type==='OFFLINE_DELETE_ERROR')error='Не удалось удалить данные: '+m.message;
+   if(m?.type==='OFFLINE_ERROR')error=tr('Загрузка не завершена: ')+m.message;
+   if(m?.type==='OFFLINE_DELETE_ERROR')error=tr('Не удалось удалить данные: ')+m.message;
    render();
  });
  function pageLoad(){
