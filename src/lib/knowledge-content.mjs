@@ -13,6 +13,124 @@ export const sources=[
 ];
 const l=(title,href)=>'['+title+']('+href+')';
 export const sourceText=sources.map(s=>'## '+s.name+'\n\n'+[s.author,s.year,s.publication,s.url?l('Открыть источник',s.url):''].filter(Boolean).join(' · ')).join('\n\n')+'\n\nАтрибуция фотографий и записей приведена в [истории](/history/), источники частушек — в [соответствующем разделе](/ditties/). Доступность материалов не означает единую открытую лицензию.';
+// Translated bibliographic descriptions; the Russian source records remain canonical.
+const sourceTranslations={
+  "dubrovsky-1870": {
+    "en": [
+      "Maslyanitsa",
+      "N. Dubrovsky",
+      "Moscow, S. Selivanovsky Printing House"
+    ],
+    "sr": [
+      "Masljanica",
+      "N. Dubrovski",
+      "Moskva, štamparija S. Selivanovskog"
+    ]
+  },
+  "bozheryanov-1894": {
+    "en": [
+      "How the Russian People Celebrated and Celebrate Christmas, New Year, Epiphany and Maslyanitsa",
+      "I. N. Bozheryanov",
+      "Published by M. Lederle & Co."
+    ],
+    "sr": [
+      "Kako je ruski narod proslavljao i proslavlja Božić, Novu godinu, Bogojavljenje i Masljanicu",
+      "I. N. Božerjanov",
+      "Izdanje M. Lederlea i Ko."
+    ]
+  },
+  "pancakes-1854": {
+    "en": [
+      "The Best Moscow Pancakes, or Practical Instructions for Making Blini and Oladyi",
+      "",
+      "Moscow, Alexander Semyon Printing House"
+    ],
+    "sr": [
+      "Najbolje moskovske palačinke, ili praktična uputstva za pripremu blina i oladija",
+      "",
+      "Moskva, štamparija Aleksandra Semjona"
+    ]
+  },
+  "dal": {
+    "en": [
+      "Explanatory Dictionary of the Living Great Russian Language — entry “Butter”",
+      "V. I. Dahl"
+    ],
+    "sr": [
+      "Tumačni rečnik živog velikoruskog jezika — odrednica „Maslo”",
+      "V. I. Dalj"
+    ]
+  },
+  "ushakov": {
+    "en": [
+      "Explanatory Dictionary of the Russian Language — “Maslenitsa”",
+      "D. N. Ushakov (ed.)"
+    ],
+    "sr": [
+      "Tumačni rečnik ruskog jezika — „Maslenica”",
+      "D. N. Ušakov (ur.)"
+    ]
+  },
+  "culture": {
+    "en": [
+      "Russian Maslenitsa: The Soundtrack"
+    ],
+    "sr": [
+      "Ruska Maslenica: muzika praznika"
+    ]
+  },
+  "kirchuk": {
+    "en": [
+      "T. Kirchuk's work on folk tradition"
+    ],
+    "sr": [
+      "Rad T. Kirčuk o narodnoj tradiciji"
+    ]
+  },
+  "name-study": {
+    "en": [
+      "Research paper on the origin of the name Maslenitsa"
+    ],
+    "sr": [
+      "Istraživački rad o poreklu naziva Maslenica"
+    ]
+  },
+  "prlib": {
+    "en": [
+      "Presidential Library materials"
+    ],
+    "sr": [
+      "Materijali Predsedničke biblioteke"
+    ]
+  },
+  "bigenc": {
+    "en": [
+      "Bibliographic entry on Maslyanitsa"
+    ],
+    "sr": [
+      "Bibliografska odrednica o Masljanici"
+    ]
+  }
+};
+export function localizedSources(locale='ru'){
+ if(locale==='ru')return sources;
+ return sources.map(source=>{
+  const copy=sourceTranslations[source.id]?.[locale];
+  if(!copy)throw Error('Missing source translation: '+source.id+' '+locale);
+  const [name,author,publication]=copy;
+  return {...source,name,author:author||undefined,publication:publication||undefined,originalName:source.name};
+ });
+}
+const sourceCopy={
+ en:{open:'Open source',original:'Original title',description:'Historical bibliography of Maslenitsa: Dubrovsky, Bozheryanov, Dahl, Ushakov and historical recipes.',seo:'Sources on the history of Maslenitsa — books and dictionaries',note:'Photographs and recordings are credited in the [history section](/en/history/); sources of chastushki are listed in the [corresponding section](/en/ditties/). Availability of these materials does not imply a common open licence.'},
+ sr:{open:'Otvori izvor',original:'Izvorni naslov',description:'Istorijska bibliografija Maslenice: Dubrovski, Božerjanov, Dalj, Ušakov i stari recepti.',seo:'Izvori o istoriji Maslenice — knjige i rečnici',note:'Podaci o autorstvu fotografija i snimaka navedeni su u [istoriji](/sr/history/), a izvori častuški u [odgovarajućem odeljku](/sr/ditties/). Dostupnost materijala ne znači da svi imaju istu otvorenu licencu.'}
+};
+export function localizedSourcePage(locale){
+ const copy=sourceCopy[locale];
+ if(!copy)throw Error('Unsupported source page locale: '+locale);
+ const body=localizedSources(locale).map(s=>'## '+s.name+'\n\n'+[s.author,s.year,s.publication,s.url?l(copy.open,s.url):''].filter(Boolean).join(' · ')+(s.type==='Book'?'\n\n'+copy.original+': *'+s.originalName+'*':'')).join('\n\n')+'\n\n'+copy.note;
+ return {body,description:copy.description,seoTitle:copy.seo};
+}
 export const terms=[
  ['Масленица','Традиционный праздник проводов зимы и встречи весны; современное общеупотребительное написание. Название нашего фестиваля — Масляница.','/history/name/'],
  ['Сырная неделя','Неделя перед Великим постом, завершающаяся Прощёным воскресеньем.','/history/week/'],

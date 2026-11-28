@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import MarkdownIt from 'markdown-it';
+import {sources,localizedSources,localizedSourcePage} from '../src/lib/knowledge-content.mjs';
+import {pageFor} from '../src/lib/site-content.mjs';
 import {preferredLocale,chooseLocale} from '../public/locale-preference.mjs';
 for(const [primary,saved,expected] of [['sr-Latn-RS',null,'sr'],['sr-Cyrl',null,'sr'],['en-GB',null,'en'],['de-DE',null,'ru'],['en-US','ru','ru'],['ru-RU','sr','sr']])assert.equal(preferredLocale(primary,saved),expected);
 assert.equal(chooseLocale({path:'/games/',primary:'en-US'}),'en');
@@ -37,4 +39,26 @@ assert.match(toggle,/data-language-choice=\{mode\.code\}/);
 assert.match(toggle,/data-astro-reload/);
 assert.match(toggle,/aria-current=\{locale===mode\.code\?/);
 for(const flag of ['ru','gb','sr'])assert.match(readFileSync(new URL('../public/media/flags/'+flag+'.svg',import.meta.url),'utf8'),/<svg/);
+assert.equal(translate('Избушка','en'),'Home');
+for(const locale of ['sr','en']){
+ const records=localizedSources(locale),localized=localizedSourcePage(locale),page=pageFor('/'+locale+'/sources/');
+ assert.equal(records.length,sources.length);
+ assert.equal((localized.body.match(/^## /gm)||[]).length,sources.length);
+ for(const [i,record] of records.entries()){
+  assert.equal(record.id,sources[i].id);
+  assert.equal(record.url,sources[i].url);
+  assert.equal(record.year,sources[i].year);
+  assert.notEqual(record.name,sources[i].name);
+  assert.ok(localized.body.includes(record.name));
+  if(record.url)assert.ok(localized.body.includes(record.url));
+  if(record.type==='Book')assert.ok(localized.body.includes(sources[i].name));
+  if(sources[i].author)assert.ok(record.author);
+  if(sources[i].publication)assert.ok(record.publication);
+ }
+ assert.equal(page.body,localized.body);
+ assert.equal(page.description,localized.description);
+ assert.ok(page.seoTitle.startsWith(localized.seoTitle));
+ assert.ok(page.body.includes('/'+locale+'/history/'));
+ assert.ok(page.body.includes('/'+locale+'/ditties/'));
+}
 console.log('Locale routes and editorial coverage verified.');

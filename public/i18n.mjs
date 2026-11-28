@@ -2,7 +2,7 @@
 export const translations={
  "Избушка": {
   "sr": "Izba",
-  "en": "Festival home"
+  "en": "Home"
  },
  "Песни": {
   "sr": "Pesme",

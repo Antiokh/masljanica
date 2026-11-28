@@ -2,7 +2,7 @@
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {asUTC} from './event-calendar.mjs';
-import {sources,sourceText,terms,glossaryText,questions,faqText,participationText,localizedQuestions} from './knowledge-content.mjs';
+import {sources,sourceText,terms,glossaryText,questions,faqText,participationText,localizedQuestions,localizedSources,localizedSourcePage} from './knowledge-content.mjs';
 import {localizedFestivalPages} from './festival-locales.mjs';
 import {translate,translateDocument,localizedPath,localeOf,stripLocale,languageTag} from './editorial-i18n.mjs';
 export const site='https://masljanica.pages.dev';
@@ -82,7 +82,8 @@ const localizedLabel=(p,locale)=>{
  const section=basePages.find(x=>x.path!=='/'&&p.path.startsWith(x.path)&&x.path.split('/').filter(Boolean).length===1);
  const suffix=locale==='sr'?'Masljanica · Beograd':'Masljanica · Belgrade';
  const description=t(p.description);
- return {...p,path:localizedPath(p.path,locale),basePath:p.path,lang:languageTag(locale),code:locale,locale:locale==='sr'?'sr_RS':'en_US',brand:locale==='sr'?'MASLJANICA · BEOGRAD':'MASLJANICA · BELGRADE',title,seoTitle:title+' · '+suffix,description:description===p.description&&/[А-Яа-яЁё]/u.test(description)?title+' · '+(section?t(section.title)+' · ':'')+suffix:description,body:p.path==='/faq/'?faqText(localizedQuestions({upcoming,date:new Intl.DateTimeFormat(languageTag(locale),{dateStyle:'long',timeZone:'UTC'}).format(new Date(config.date+'T00:00:00Z')),time:ogEvent?.time,location:ogEvent?.location,mapUrl:event.mapUrl},locale)):translateDocument(p.body,locale)};
+ const bibliography=p.path==='/sources/'?localizedSourcePage(locale):null;
+ return {...p,path:localizedPath(p.path,locale),basePath:p.path,lang:languageTag(locale),code:locale,locale:locale==='sr'?'sr_RS':'en_US',brand:locale==='sr'?'MASLJANICA · BEOGRAD':'MASLJANICA · BELGRADE',title,seoTitle:title+' · '+suffix,description:description===p.description&&/[А-Яа-яЁё]/u.test(description)?title+' · '+(section?t(section.title)+' · ':'')+suffix:description,body:p.path==='/sources/'?bibliography.body:p.path==='/faq/'?faqText(localizedQuestions({upcoming,date:new Intl.DateTimeFormat(languageTag(locale),{dateStyle:'long',timeZone:'UTC'}).format(new Date(config.date+'T00:00:00Z')),time:ogEvent?.time,location:ogEvent?.location,mapUrl:event.mapUrl},locale)):translateDocument(p.body,locale),...(bibliography?{description:bibliography.description,seoTitle:bibliography.seoTitle+' · '+suffix}:{})};
 };
 export const localizedPages=localizedHome.map(h=>({...h,basePath:'/',title:translate('Масляница в Белграде',h.code),body:[h.body,translateDocument(basePages[0].body,h.code)].join('\n\n')}));
 const localizedDetails=['sr','en'].flatMap(locale=>basePages.filter(p=>p.path!=='/').map(p=>localizedLabel(p,locale)));
@@ -117,7 +118,7 @@ export function structuredData(p){
  if(p.kind==='CreativeWork')add({'@type':'CreativeWork',description:p.description});
  if(p.kind==='FAQPage'&&!p.lang){page['@type']='FAQPage';page.mainEntity=faq.map(([name,text])=>({'@type':'Question',name,acceptedAnswer:{'@type':'Answer',text:text.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'$1 ($2)')}}));}
  if(p.kind==='DefinedTermSet'&&!p.lang)add({'@type':'DefinedTermSet',hasDefinedTerm:terms.map(([name,description,href])=>({'@type':'DefinedTerm',name,description,url:site+href}))});
- if(p.path==='/sources/')for(const s of sources)graph.push({'@type':s.type||'CreativeWork','@id':pageUrl+'#'+s.id,name:s.name,...(s.author?{author:{'@type':'Person',name:s.author}}:{}),...(s.year?{datePublished:String(s.year)}:{}),...(s.url?{url:s.url}:{})});
+ if((p.basePath||p.path)==='/sources/')for(const s of localizedSources(p.code||'ru'))graph.push({'@type':s.type||'CreativeWork','@id':pageUrl+'#'+s.id,name:s.name,...(s.originalName?{alternateName:s.originalName}:{}),...(s.author?{author:{'@type':'Person',name:s.author}}:{}),...(s.year?{datePublished:String(s.year)}:{}),...(s.url?{url:s.url}:{})});
  const children=pages.filter(x=>x.path!==p.path&&p.path!=='/'&&x.path.startsWith(p.path)&&x.path.split('/').length===p.path.split('/').length+1);
  if(children.length&&p.path!=='/pancakes/')graph.push({'@type':'ItemList',itemListElement:children.map((x,i)=>({'@type':'ListItem',position:i+1,name:x.title,url:url(x.path)}))});
  return {'@context':'https://schema.org','@graph':graph};
