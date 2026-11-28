@@ -1,16 +1,18 @@
 ---
+import {localize,localizedPath} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag,basePath}=localize(Astro.url.pathname);
 const {row}=Astro.props;
 ---
 <li>
   <span class="home-time-range">
     <time>{row.start}</time>
-    {row.showEnd && <time class="home-stage-end" aria-label={'Окончание: '+row.end}>до {row.end}</time>}
+    {row.showEnd && <time class="home-stage-end" aria-label={tx('Окончание: ')+row.end}>{tx('до ')}{row.end}</time>}
   </span>
   <div>
-    <strong>{row.title}</strong>
-    {(row.games || row.classes) && <nav class="home-stage-links" aria-label={'Материалы: '+row.title}>
-      {row.games && <a href="/games/">Игры</a>}
-      {row.classes && <a href="/workshops/">Мастер-классы</a>}
+    <strong>{tx(row.title)}</strong>
+    {(row.games || row.classes) && <nav class="home-stage-links" aria-label={tx('Материалы: ')+row.title}>
+      {row.games && <a href={lp("/games/")}>{tx("Игры")}</a>}
+      {row.classes && <a href={lp("/workshops/")}>{tx("Мастер-классы")}</a>}
     </nav>}
   </div>
 </li>

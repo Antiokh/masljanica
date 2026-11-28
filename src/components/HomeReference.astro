@@ -1,4 +1,6 @@
 ---
+import {localize,localizedPath} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag,basePath}=localize(Astro.url.pathname);
 import GameIcon from './GameIcon.astro';
 import MarkdownIt from 'markdown-it';
 import {questions,terms} from '../lib/knowledge-content.mjs';
@@ -13,21 +15,21 @@ const md=new MarkdownIt({html:false});
 <div class="festival-intro home-reference">
   <section class="story-name" id="glossary" aria-labelledby="home-glossary-title">
     <details class="story-name-details" data-home-glossary>
-      <summary><span id="home-glossary-title">Словарь традиций</span><GameIcon name="chevron"/></summary>
+      <summary><span id="home-glossary-title">{tx("Словарь традиций")}</span><GameIcon name="chevron"/></summary>
       <div class="story-name-content home-reference-content">
-        {terms.map(([name,definition,href])=><div class="home-reference-entry"><h3>{name}</h3><p>{definition} <a href={href}>Подробнее →</a></p></div>)}
+        {terms.map(([name,definition,href])=><div class="home-reference-entry"><h3>{tx(name)}</h3><p>{tx(definition)} <a href={lp(href)}>{tx("Подробнее →")}</a></p></div>)}
       </div>
     </details>
   </section>
   <section class="story-name" id="faq" aria-labelledby="home-faq-title">
     <details class="story-name-details" data-home-faq>
-      <summary><span id="home-faq-title">Вопросы о фестивале</span><GameIcon name="chevron"/></summary>
+      <summary><span id="home-faq-title">{tx("Вопросы о фестивале")}</span><GameIcon name="chevron"/></summary>
       <div class="story-name-content home-reference-content">
         {current.map(([question,answer],i)=><div class="home-reference-entry">
-          <h3>{question}</h3>
-          {answer===timeless[i][1]?<div set:html={md.render(answer)}></div>:<>
-            <div data-home-season="event" data-pagefind-ignore hidden={!state.event} set:html={md.render(answer)}></div>
-            <div data-home-timeless hidden={state.event} set:html={md.render(timeless[i][1])}></div>
+          <h3>{tx(question)}</h3>
+          {answer===timeless[i][1]?<div set:html={md.render(tx(answer))}></div>:<>
+            <div data-home-season="event" data-pagefind-ignore hidden={!state.event} set:html={md.render(tx(answer))}></div>
+            <div data-home-timeless hidden={state.event} set:html={md.render(tx(timeless[i][1]))}></div>
           </>}
         </div>)}
       </div>

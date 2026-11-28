@@ -1,41 +1,43 @@
 ---
+import {localize,localizedPath} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag,basePath}=localize(Astro.url.pathname);
 import { frontmatter } from '../data/home.md';
-const home=Astro.url.pathname==='/';
-const title=home?'Масляница':Astro.locals.starlightRoute.entry.data.title;
+const home=basePath==='/';
+const title=home?tx('Масляница'):Astro.locals.starlightRoute.entry.data.title;
 const event=frontmatter.event;
-const dateLabel=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',timeZone:'UTC'}).format(new Date(event.date+'T00:00:00Z'));
+const dateLabel=new Intl.DateTimeFormat(uiTag,{day:'numeric',month:'long',timeZone:'UTC'}).format(new Date(event.date+'T00:00:00Z'));
 ---
 <div class="festival-brand">
-  <button type="button" class="festival-brand-icon" data-pwa-menu-trigger popovertarget="festival-pwa-menu" aria-label="Состояние приложения" aria-controls="festival-pwa-menu" aria-expanded="false">
+  <button type="button" class="festival-brand-icon" data-pwa-menu-trigger popovertarget="festival-pwa-menu" aria-label={tx("Состояние приложения")} aria-controls="festival-pwa-menu" aria-expanded="false">
     <img src="/media/maslyanica-sun.webp" alt="" width="44" height="44"/>
     <span id="offline-indicator" data-state="unknown" aria-hidden="true"></span>
   </button>
-  <a class="festival-brand-label" href="/" aria-label={home?'Масляница — главная':title+' — на главную'}>
+  <a class="festival-brand-label" href={lp("/")} aria-label={home?tx('Масляница — главная'):title+tx(' — на главную')}>
     <span class="festival-brand-title" title={title}>{title}</span>
-    <span class="festival-brand-subtitle">{home?<><span>Белград</span><span data-header-event-date hidden> · {dateLabel}</span></>:'Масляница'}</span>
+    <span class="festival-brand-subtitle">{home?<><span>{tx("Белград")}</span><span data-header-event-date hidden> · {dateLabel}</span></>:tx('Масляница')}</span>
   </a>
-  <section id="festival-pwa-menu" class="festival-pwa-menu" popover="auto" aria-label="Состояние приложения">
-    <h2>Состояние приложения</h2>
+  <section id="festival-pwa-menu" class="festival-pwa-menu" popover="auto" aria-label={tx("Состояние приложения")}>
+    <h2>{tx("Состояние приложения")}</h2>
     <div class="pwa-status-grid">
-      <span>Подключение</span><strong data-pwa-value="connection">Проверяем…</strong>
-      <span>Запуск</span><strong data-pwa-value="launch">Браузер</strong>
-      <span>Офлайн-копия</span>
+      <span>{tx("Подключение")}</span><strong data-pwa-value="connection">{tx("Проверяем…")}</strong>
+      <span>{tx("Запуск")}</span><strong data-pwa-value="launch">{tx("Браузер")}</strong>
+      <span>{tx("Офлайн-копия")}</span>
       <div class="pwa-status-control">
-        <strong data-pwa-value="copy">Проверяем…</strong>
-        <button type="button" class="pwa-trash" data-pwa-delete title="Удалить офлайн-данные" aria-label="Удалить офлайн-данные" disabled>
+        <strong data-pwa-value="copy">{tx("Проверяем…")}</strong>
+        <button type="button" class="pwa-trash" data-pwa-delete title={tx("Удалить офлайн-данные")} aria-label={tx("Удалить офлайн-данные")} disabled>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5"/></svg>
         </button>
       </div>
-      <span>Автообновление</span>
-      <div class="pwa-status-control"><button type="button" class="pwa-switch" role="switch" aria-label="Автообновление офлайн-копии" aria-checked="false" data-pwa-auto disabled><span></span></button></div>
-      <span>Хранилище</span><strong data-pwa-value="storage">—</strong>
+      <span>{tx("Автообновление")}</span>
+      <div class="pwa-status-control"><button type="button" class="pwa-switch" role="switch" aria-label={tx("Автообновление офлайн-копии")} aria-checked="false" data-pwa-auto disabled><span></span></button></div>
+      <span>{tx("Хранилище")}</span><strong data-pwa-value="storage">—</strong>
     </div>
     <div class="pwa-menu-progress" data-pwa-progress hidden>
-      <div class="pwa-progress-heading"><span>Прогресс · материалы</span><strong data-pwa-value="percent">0%</strong></div>
-      <progress max="100" value="0" data-pwa-bar aria-label="Прогресс офлайн-загрузки"></progress>
+      <div class="pwa-progress-heading"><span>{tx("Прогресс · материалы")}</span><strong data-pwa-value="percent">0%</strong></div>
+      <progress max="100" value="0" data-pwa-bar aria-label={tx("Прогресс офлайн-загрузки")}></progress>
     </div>
     <p class="pwa-menu-error" data-pwa-error hidden></p>
-    <div class="pwa-menu-footer"><button type="button" class="pwa-text-action" data-pwa-download disabled>Скачать</button></div>
-    <details class="telegram-runtime-diagnostics" aria-label="Диагностика Telegram Mini App"><summary>Диагностика Telegram</summary><p class="muted">Клиент Telegram может ограничивать сохранение данных или запуск без сети. Полная копия ускоряет работу, если WebView её сохранил.</p><dl><dt>Среда запуска</dt><dd data-runtime-value="environment">—</dd><dt>Telegram SDK</dt><dd data-runtime-value="bridge">—</dd><dt>Режим темы</dt><dd data-runtime-value="themeMode">—</dd><dt>Тема Telegram</dt><dd data-runtime-value="telegramTheme">—</dd><dt>Источник темы</dt><dd data-runtime-value="themeSource">—</dd><dt>Применённая тема</dt><dd data-runtime-value="appliedTheme">—</dd><dt>Палитра</dt><dd data-runtime-value="palette">—</dd><dt>Фон Telegram</dt><dd data-runtime-value="background">—</dd><dt>Service Worker</dt><dd data-runtime-value="sw">—</dd><dt>Cache Storage</dt><dd data-runtime-value="cache">—</dd><dt>После предыдущего запуска</dt><dd data-runtime-value="retention">—</dd></dl></details>
+    <div class="pwa-menu-footer"><button type="button" class="pwa-text-action" data-pwa-download disabled>{tx("Скачать")}</button></div>
+    <details class="telegram-runtime-diagnostics" aria-label={tx("Диагностика Telegram Mini App")}><summary>{tx("Диагностика Telegram")}</summary><p class="muted">{tx("Клиент Telegram может ограничивать сохранение данных или запуск без сети. Полная копия ускоряет работу, если WebView её сохранил.")}</p><dl><dt>{tx("Среда запуска")}</dt><dd data-runtime-value="environment">—</dd><dt>Telegram SDK</dt><dd data-runtime-value="bridge">—</dd><dt>{tx("Режим темы")}</dt><dd data-runtime-value="themeMode">—</dd><dt>{tx("Тема Telegram")}</dt><dd data-runtime-value="telegramTheme">—</dd><dt>{tx("Источник темы")}</dt><dd data-runtime-value="themeSource">—</dd><dt>{tx("Применённая тема")}</dt><dd data-runtime-value="appliedTheme">—</dd><dt>{tx("Палитра")}</dt><dd data-runtime-value="palette">—</dd><dt>{tx("Фон Telegram")}</dt><dd data-runtime-value="background">—</dd><dt>Service Worker</dt><dd data-runtime-value="sw">—</dd><dt>Cache Storage</dt><dd data-runtime-value="cache">—</dd><dt>{tx("После предыдущего запуска")}</dt><dd data-runtime-value="retention">—</dd></dl></details>
   </section>
 </div>

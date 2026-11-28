@@ -1,17 +1,19 @@
 ---
+import {localize,localizedPath} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag,basePath}=localize(Astro.url.pathname);
 import {participation} from '../lib/knowledge-content.mjs';
 const contact=participation.contact;
 ---
 <section class="home-participation" id="join" aria-labelledby="home-join-title">
-  <h2 id="home-join-title">{participation.title}</h2>
-  <p>{participation.intro}</p>
+  <h2 id="home-join-title">{tx(participation.title)}</h2>
+  <p>{tx(participation.intro)}</p>
   <ul class="participation-roles">
-    {participation.roles.map(([title,description])=><li><strong>{title}</strong><span>{description}</span></li>)}
+    {participation.roles.map(([title,description])=><li><strong>{tx(title)}</strong><span>{tx(description)}</span></li>)}
   </ul>
-  <p>{participation.outro}</p>
-  <nav class="participation-contacts" aria-label="Связь с командой" data-online-only hidden>
+  <p>{tx(participation.outro)}</p>
+  <nav class="participation-contacts" aria-label={tx("Связь с командой")} data-online-only hidden>
     <a href={contact.url} target="_blank" rel="noopener noreferrer">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 9 13m13-11-8 20-5-9-8-4 21-7Z"/></svg><span>{contact.label}</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 9 13m13-11-8 20-5-9-8-4 21-7Z"/></svg><span>{tx(contact.label)}</span>
     </a>
   </nav>
   <p class="participation-offline">Telegram: {contact.handle}</p>

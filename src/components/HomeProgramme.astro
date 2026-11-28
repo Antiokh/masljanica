@@ -1,12 +1,14 @@
 ---
+import {localize,localizedPath} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag,basePath}=localize(Astro.url.pathname);
 import HomeProgrammeRow from './HomeProgrammeRow.astro';
 const {items,eventEnd,dateLabel}=Astro.props;
 const rows=items.map((item,i)=>({...item,showEnd:i<items.length-1 && item.end!==items[i+1].start}));
 ---
 {items.length>0 && <section class="home-program" aria-labelledby="home-program-title" data-home-season="schedule" data-pagefind-ignore hidden>
-  <div class="home-section-heading"><h2 id="home-program-title">Программа праздника</h2><span>{dateLabel}</span></div>
+  <div class="home-section-heading"><h2 id="home-program-title">{tx("Программа праздника")}</h2><span>{dateLabel}</span></div>
   <div class="home-program-body"><ol class="home-timeline">
     {rows.map(row=><HomeProgrammeRow row={row}/>)}
-    <li class="home-timeline-end"><time>{eventEnd}</time><div><strong>Завершение праздника</strong></div></li>
+    <li class="home-timeline-end"><time>{eventEnd}</time><div><strong>{tx("Завершение праздника")}</strong></div></li>
   </ol></div>
 </section>}

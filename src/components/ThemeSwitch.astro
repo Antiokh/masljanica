@@ -1,5 +1,7 @@
 ---
-const themeCopy = { change: 'Цветовая тема', light: 'Светлая тема', auto: 'Системная тема', dark: 'Тёмная тема' };
+import {localize,localizedPath} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag,basePath}=localize(Astro.url.pathname);
+const themeCopy = { change: tx('Цветовая тема'), light: tx('Светлая тема'), auto: tx('Системная тема'), dark: tx('Тёмная тема') };
 ---
 
 <!--

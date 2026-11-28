@@ -1,6 +1,4 @@
 ---
-import LocalizedFestival from '../components/LocalizedFestival.astro';
-import {localizedPages} from '../lib/site-content.mjs';
-const page=localizedPages.find(p=>p.code==='en');
+import FestivalHome from './index.astro';
 ---
-<LocalizedFestival page={page}/>
+<FestivalHome />

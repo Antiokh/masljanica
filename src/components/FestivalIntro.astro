@@ -1,4 +1,6 @@
 ---
+import {localize,localizedPath} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag,basePath}=localize(Astro.url.pathname);
 import GameIcon from './GameIcon.astro';
 import MarkdownIt from 'markdown-it';
 import historySource from '../data/maslyanica-history.md?raw';
@@ -11,15 +13,15 @@ const nameHistory=nameSource.trim();
 <div class="festival-intro">
   <section class="story-history" aria-labelledby="story-history-title">
     <details class="story-history-details">
-      <summary><span id="story-history-title">Что такое Масляница?</span><GameIcon name="chevron"/></summary>
-      {history && <div class="story-history-content"><div set:html={md.render(history)}></div><p><a href="/history/">История Масляницы, песни и обычаи →</a></p>{home && <p><a href="https://rslive.ru/masljanica/" data-online-only hidden target="_blank" rel="noopener noreferrer">Страница в «Инструкции по Сербии» ↗</a></p>}</div>}
-      {!history && <p class="story-history-content">История праздника и народные традиции. Текст готовится.</p>}
+      <summary><span id="story-history-title">{tx("Что такое Масляница?")}</span><GameIcon name="chevron"/></summary>
+      {history && <div class="story-history-content"><div set:html={md.render(tx(history))}></div><p><a href={lp("/history/")}>{tx("История Масляницы, песни и обычаи →")}</a></p>{home && <p><a href="https://rslive.ru/masljanica/" data-online-only hidden target="_blank" rel="noopener noreferrer">{tx("Страница в «Инструкции по Сербии» ↗")}</a></p>}</div>}
+      {!history && <p class="story-history-content">{tx("История праздника и народные традиции. Текст готовится.")}</p>}
     </details>
   </section>
   <section class="story-name" id="why-maslyanica" aria-labelledby="story-name-title">
     <details class="story-name-details">
-      <summary><span id="story-name-title">Почему Масляница через «я»?</span><GameIcon name="chevron"/></summary>
-      <div class="story-name-content"><div set:html={md.render(nameHistory)}></div><p><a href="/history/name/">Отдельная статья о написании →</a></p></div>
+      <summary><span id="story-name-title">{tx("Почему Масляница через «я»?")}</span><GameIcon name="chevron"/></summary>
+      <div class="story-name-content"><div set:html={md.render(tx(nameHistory))}></div><p><a href={lp("/history/name/")}>{tx("Отдельная статья о написании →")}</a></p></div>
     </details>
   </section>
   <slot/>

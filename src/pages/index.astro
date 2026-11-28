@@ -1,4 +1,6 @@
 ---
+import {localize,localizedPath} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag,basePath}=localize(Astro.url.pathname);
 import { existsSync } from 'node:fs';
 const storyArt='/media/all-characters.webp';
 if(!existsSync(process.cwd()+'/public'+storyArt))throw Error('Missing ensemble illustration: '+storyArt);
@@ -14,7 +16,7 @@ import HomeProgramme from '../components/HomeProgramme.astro';
 import FestivalIntro from '../components/FestivalIntro.astro';
 import plotSource from '../data/festival-plot.md?raw';
 import MarkdownIt from 'markdown-it';
-const plotHtml=new MarkdownIt({html:false}).render(plotSource);
+const plotHtml=new MarkdownIt({html:false}).render(tx(plotSource.trim()));
 import GameIcon from '../components/GameIcon.astro';
 import WorkshopPreview from '../components/WorkshopPreview.astro';
 import HomeReference from '../components/HomeReference.astro';
@@ -26,39 +28,39 @@ import { validEventDate, calendarDay } from '../../public/home-season.mjs';
 const config = frontmatter.event;
 if (!config || typeof config.enabled !== 'boolean' || typeof config.schedule !== 'boolean' || !validEventDate(config.date) || typeof config.timezone !== 'string') throw new Error('Invalid event frontmatter in src/data/home.md');
 calendarDay(new Date(), config.timezone); // Validate timezone at build time.
-const dateLabel = new Intl.DateTimeFormat('ru-RU', { day:'numeric', month:'long', timeZone:'UTC' }).format(new Date(config.date+'T00:00:00Z'));
+const dateLabel = new Intl.DateTimeFormat(uiTag, { day:'numeric', month:'long', timeZone:'UTC' }).format(new Date(config.date+'T00:00:00Z'));
 const year = config.date.slice(0,4);
-const items = [...schedule].sort((a,b)=>a.start.localeCompare(b.start));
+const items = schedule.map(x=>({...x,title:tx(x.title)})).sort((a,b)=>a.start.localeCompare(b.start));
 const eventEnd = items.reduce((last,x)=>x.end>last?x.end:last,'');
 const timeLabel = items.length ? items[0].start+'–'+eventEnd : '';
 const googleCalendar = items.length ? googleCalendarUrl(calendarEvent(config,event,items)) : '';
 const sections = [
-  {href:'/songs/',title:'Песни',description:songs.length+' народных песен',icon:'M9 18V5l12-2v13M9 18a3 3 0 1 1-3-3h3m12 1a3 3 0 1 1-3-3h3'},
-  {href:'/games/',title:'Игры',description:games.length+' народная игра',icon:'M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4z M7.5 7.5h.01M16.5 7.5h.01M12 12h.01M7.5 16.5h.01M16.5 16.5h.01'},
-  {href:'/scenario/',title:'Сказ',description:'Сценарий праздника',icon:'M12 7C9 4 5 4 2 5v15c4-1 7-1 10 2 3-3 6-3 10-2V5c-3-1-7-1-10 2zm0 0v15'},
-  {href:'/workshops/',title:'Мастера',description:'Мастер-классы',icon:'M12 3a9 9 0 1 0 0 18h1.5a1.5 1.5 0 0 0 0-3 1.5 1.5 0 0 1 0-3H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8zM7 11h.01M10 7h.01M15 7h.01M18 10h.01'},
-  {href:'/pancakes/',title:'Блины',description:'Печём и угощаем',icon:'M3 8a9 3.5 0 1 0 18 0 9 3.5 0 1 0-18 0 M3 8v4a9 3.5 0 0 0 18 0V8 M3 12v4a9 3.5 0 0 0 18 0v-4 M10 6.5l3-.5 1.5 1.5-3 .7Z'},
-  {href:'/history/',title:'История',description:'Обычаи и традиции',icon:'M4 5h14a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2V5zm0 14a2 2 0 0 1 2-2h14M8 9h8M8 13h5M8 2v3'}
+  {href:'/songs/',title:tx('Песни'),description:songs.length+tx(' народных песен'),icon:'M9 18V5l12-2v13M9 18a3 3 0 1 1-3-3h3m12 1a3 3 0 1 1-3-3h3'},
+  {href:'/games/',title:tx('Игры'),description:games.length+tx(' народная игра'),icon:'M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4z M7.5 7.5h.01M16.5 7.5h.01M12 12h.01M7.5 16.5h.01M16.5 16.5h.01'},
+  {href:'/scenario/',title:tx('Сказ'),description:tx('Сценарий праздника'),icon:'M12 7C9 4 5 4 2 5v15c4-1 7-1 10 2 3-3 6-3 10-2V5c-3-1-7-1-10 2zm0 0v15'},
+  {href:'/workshops/',title:tx('Мастера'),description:tx('Мастер-классы'),icon:'M12 3a9 9 0 1 0 0 18h1.5a1.5 1.5 0 0 0 0-3 1.5 1.5 0 0 1 0-3H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8zM7 11h.01M10 7h.01M15 7h.01M18 10h.01'},
+  {href:'/pancakes/',title:tx('Блины'),description:tx('Печём и угощаем'),icon:'M3 8a9 3.5 0 1 0 18 0 9 3.5 0 1 0-18 0 M3 8v4a9 3.5 0 0 0 18 0V8 M3 12v4a9 3.5 0 0 0 18 0v-4 M10 6.5l3-.5 1.5 1.5-3 .7Z'},
+  {href:'/history/',title:tx('История'),description:tx('Обычаи и традиции'),icon:'M4 5h14a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2V5zm0 14a2 2 0 0 1 2-2h14M8 9h8M8 13h5M8 2v3'}
 ];
 ---
-<StarlightPage frontmatter={{title:frontmatter.title,template:'splash',description:'Масляница в Белграде: программа, песни, игры и народные традиции.'}}>
+<StarlightPage lang={uiTag} frontmatter={{title:tx(frontmatter.title),template:'splash',description:tx('Масляница в Белграде: программа, песни, игры и народные традиции.')}}>
   <div class="home-dashboard" data-home-dashboard data-event-enabled={String(config.enabled)} data-event-date={config.date} data-event-timezone={config.timezone} data-schedule-enabled={String(config.schedule)}>
     <div class="home-column home-column-left">
     <section class="home-hero" aria-labelledby="home-title">
       <div class="home-hero-copy">
         <div class="home-hero-heading">
           <div class="home-hero-title">
-        <p class="home-kicker">Народный праздник в Белграде</p>
-        <h2 id="home-title">Масляница<span data-home-season="event" data-pagefind-ignore hidden> {year}</span></h2>
+        <p class="home-kicker">{tx("Народный праздник в Белграде")}</p>
+        <h2 id="home-title">{tx("Масляница")}<span data-home-season="event" data-pagefind-ignore hidden> {year}</span></h2>
           </div>
       <div class="home-hero-art" aria-hidden="true"><img src={heroLogo} alt="" width="112" height="112"/></div>
         </div>
-        <p class="home-intro" data-home-timeless>Песни, игры, сказ и народные традиции.</p>
+        <p class="home-intro" data-home-timeless>{tx("Песни, игры, сказ и народные традиции.")}</p>
         <div class="home-event-meta" data-home-season="event" data-pagefind-ignore hidden>
           <div class="home-event-group home-event-when">
           {items.length===0 && <p class="home-event-date"><time datetime={config.date}>{dateLabel}</time>{timeLabel && <span> · {timeLabel}</span>}</p>}
           {items.length>0 && <details class="home-calendar-menu" data-calendar-menu>
-            <summary class="home-calendar" aria-controls="home-calendar-providers" aria-label={dateLabel+(timeLabel?' · '+timeLabel:'')+'. Добавить в календарь'}>
+            <summary class="home-calendar" aria-controls="home-calendar-providers" aria-label={dateLabel+(timeLabel?' · '+timeLabel:'')+tx('. Добавить в календарь')}>
               <span class="home-event-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18m-9 3v5m-2.5-2.5h5"/></svg>
               </span>
@@ -67,17 +69,17 @@ const sections = [
             <div class="home-calendar-providers" id="home-calendar-providers">
               <a href="/event.ics" data-astro-reload data-calendar-provider="apple" target="_blank" rel="noopener noreferrer">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18M8 15h2m4 0h2"/></svg>
-                <span>Apple Calendar<small>Открыть событие (.ics)</small></span>
+                <span>Apple Calendar<small>{tx("Открыть событие (.ics)")}</small></span>
               </a>
               <a href={googleCalendar} data-calendar-provider="google" data-online-only hidden target="_blank" rel="noopener noreferrer">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18m5-7h7m0 0v7"/></svg>
-                <span>Google Calendar<small>Открыть календарь Google</small></span>
+                <span>Google Calendar<small>{tx("Открыть календарь Google")}</small></span>
               </a>
             </div>
           </details>}
           </div>
           <div class="home-event-group home-event-where">
-          <a class="home-location" aria-label={event.address+' — открыть карту площадки'} data-online-only hidden href={event.mapUrl || 'https://www.google.com/maps?q='+encodeURIComponent(event.coords)} target="_blank" rel="noopener noreferrer">
+          <a class="home-location" aria-label={event.address+tx(' — открыть карту площадки')} data-online-only hidden href={event.mapUrl || 'https://www.google.com/maps?q='+encodeURIComponent(event.coords)} target="_blank" rel="noopener noreferrer">
             <span class="home-event-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
             <span class="home-event-address">{event.address}</span>
           </a>
@@ -86,10 +88,10 @@ const sections = [
         </div>
       </div>
     </section>
-    <section class="home-sections" aria-label="Материалы праздника">
-        <div class="home-section-heading"><h2>В нашей избушке</h2><a class="home-ditties-link" href="/ditties/" data-astro-prefetch="hover">…частушки?</a></div>
+    <section class="home-sections" aria-label={tx("Материалы праздника")}>
+        <div class="home-section-heading"><h2>{tx("В нашей избушке")}</h2><a class="home-ditties-link" href={lp("/ditties/")} data-astro-prefetch="hover">{tx("…частушки?")}</a></div>
         <div class="home-section-grid">
-          {sections.map(item=><a class="home-section-card" href={item.href} data-astro-prefetch="hover">
+          {sections.map(item=><a class="home-section-card" href={lp(item.href)} data-astro-prefetch="hover">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={item.icon}/></svg>
             <div><strong>{item.title}</strong><small>{item.description}</small></div>
           </a>)}
@@ -97,7 +99,7 @@ const sections = [
       </section>
     </div>
     <div class="home-column home-column-right">
-    <nav class="home-socials" aria-label="Социальные сети Масляницы" data-online-only hidden>
+    <nav class="home-socials" aria-label={tx("Социальные сети Масляницы")} data-online-only hidden>
       {socials.map(social=><a href={social.href} target="_blank" rel="noopener noreferrer" class="home-social-link">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={social.path}/></svg>
         <span>{social.name}</span>
@@ -105,18 +107,18 @@ const sections = [
     </nav>
     <HomeProgramme items={items} eventEnd={eventEnd} dateLabel={dateLabel}/>
     {config.enabled && <section class="home-admission" data-home-season="event" data-pagefind-ignore hidden>
-      <strong>Мероприятие без билетов.</strong>
-      <p>Приветствуется донейшн на <a href="/pancakes/">блины</a> в коробочку у <a href="/scenario/#character-баба-яга">Бабы Яги</a>. Действо проводится на волонтёрских началах. <a href="/#join">Присоединиться к команде</a>.</p>
+      <strong>{tx("Мероприятие без билетов.")}</strong>
+      <p>{tx("Приветствуется донейшн на ")}<a href={lp("/pancakes/")}>{tx("блины")}</a>{tx(" в коробочку у ")}<a href={lp("/scenario/#character-баба-яга")}>{tx("Бабы Яги")}</a>{tx(". Действо проводится на волонтёрских началах. ")}<a href={lp("/#join")}>{tx("Присоединиться к команде")}</a>.</p>
     </section>}
     </div>
     <FestivalIntro home={true}>
       <section class="story-name home-plot" aria-labelledby="home-story-title">
         <details class="story-name-details home-story-details">
-          <summary><span id="home-story-title">Наша масляница</span><GameIcon name="chevron"/></summary>
+          <summary><span id="home-story-title">{tx("Наша масляница")}</span><GameIcon name="chevron"/></summary>
           <div class="story-name-content">
-            <figure class="home-story-figure"><img src={storyArt} alt="Персонажи нашей Масляницы" width="1536" height="1024" loading="lazy" decoding="async"/></figure>
+            <figure class="home-story-figure"><img src={storyArt} alt={tx("Персонажи нашей Масляницы")} width="1536" height="1024" loading="lazy" decoding="async"/></figure>
             <div set:html={plotHtml}></div>
-            <a href="/scenario/">Читать полный сказ →</a>
+            <a href={lp("/scenario/")}>{tx("Читать полный сказ →")}</a>
           </div>
         </details>
       </section>
@@ -125,8 +127,8 @@ const sections = [
     <div class="home-bottom">
       <HomeParticipation />
       <HomeReference config={config} dateLabel={dateLabel+' '+year} timeLabel={timeLabel} location={event.address+', '+event.country} mapUrl={event.mapUrl}/>
-      <nav class="home-footer-links" aria-label="Источники и языки"><a href="/sources/">Источники</a><span aria-hidden="true">·</span><a href="/sr/" data-astro-reload lang="sr-Latn">Srpski</a><span aria-hidden="true">·</span><a href="/en/" data-astro-reload lang="en">English</a></nav>
-      <footer class="home-credit">Разработано <a href="https://t.me/antiokh" target="_blank" rel="noopener noreferrer">Антон Назаров</a></footer>
+      <nav class="home-footer-links" aria-label={tx("Источники и языки")}><a href={lp("/sources/")}>{tx("Источники")}</a><span aria-hidden="true">·</span>{['ru','sr','en'].filter(x=>x!==uiLocale).map((x,i)=><>{i>0&&<span aria-hidden="true">·</span>}<a href={localizedPath('/',x)} data-astro-reload lang={x==='sr'?'sr-Latn':x}>{x==='ru'?'Русский':x==='sr'?'Srpski':'English'}</a></>)}</nav>
+      <footer class="home-credit">{tx("Разработано ")}<a href="https://t.me/antiokh" target="_blank" rel="noopener noreferrer">{tx("Антон Назаров")}</a></footer>
     </div>
   </div>
 </StarlightPage>

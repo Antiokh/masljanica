@@ -7,7 +7,7 @@ export default defineConfig({
   integrations: [starlight({
     title: 'Масляница · Белград',
     defaultLocale: 'root',
-    locales: { root: { label: 'Русский', lang: 'ru' } },
+    locales: { root: { label: 'Русский', lang: 'ru' }, sr: { label: 'Srpski', lang: 'sr-Latn' }, en: { label: 'English', lang: 'en' } },
     favicon: '/favicon-96x96.png',
     customCss: ['./src/styles/app.css','./src/styles/games.css','./src/styles/workshops.css','./src/styles/story.css'],
     components: { Header: './src/components/Header.astro', Head: './src/components/AppHead.astro', Footer: './src/components/AppFooter.astro' },
