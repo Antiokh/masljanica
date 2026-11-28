@@ -1,5 +1,5 @@
 ---
-import {localize,localizedPath} from '../../public/i18n.mjs';
+import {localize,localizedPath} from '../lib/editorial-i18n.mjs';
 const {tx,lp,uiLocale,uiTag,basePath}=localize(Astro.url.pathname);
 import { existsSync } from 'node:fs';
 const storyArt='/media/all-characters.webp';

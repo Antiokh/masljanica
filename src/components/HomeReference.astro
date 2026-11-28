@@ -1,15 +1,15 @@
 ---
-import {localize,localizedPath} from '../../public/i18n.mjs';
+import {localize,localizedPath} from '../lib/editorial-i18n.mjs';
 const {tx,lp,uiLocale,uiTag,basePath}=localize(Astro.url.pathname);
 import GameIcon from './GameIcon.astro';
 import MarkdownIt from 'markdown-it';
-import {questions,terms} from '../lib/knowledge-content.mjs';
+import {localizedQuestions,terms} from '../lib/knowledge-content.mjs';
 import {seasonState} from '../../public/home-season.mjs';
 const {config,dateLabel,timeLabel,location,mapUrl}=Astro.props;
 const state=seasonState(config);
 const args={date:dateLabel,time:config.schedule?timeLabel:'',location,mapUrl};
-const current=questions({...args,upcoming:true});
-const timeless=questions({...args,upcoming:false});
+const current=localizedQuestions({...args,upcoming:true},uiLocale);
+const timeless=localizedQuestions({...args,upcoming:false},uiLocale);
 const md=new MarkdownIt({html:false});
 ---
 <div class="festival-intro home-reference">

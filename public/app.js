@@ -39,7 +39,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
      for(const path of routes){
        if(!navigator.onLine||sw.controller!==controller)return;
        if(location.pathname===currentPath(path))continue;
-       try{const response=await fetch(path,{priority:'low',signal:AbortSignal.timeout(5000),headers:{Accept:'text/html'}});if(response.ok)await response.arrayBuffer();}catch{}
+       try{const response=await fetch(currentPath(path),{priority:'low',signal:AbortSignal.timeout(5000),headers:{Accept:'text/html'}});if(response.ok)await response.arrayBuffer();}catch{}
      }
    };
    if('requestIdleCallback' in window)window.requestIdleCallback(()=>{void run();},{timeout:3000});

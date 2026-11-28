@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync, rmSync, readFileSync, existsSync } from 'node:fs';
 import { read } from './validate-data.mjs';
 import {editorialPages,pageFor,pages} from '../src/lib/site-content.mjs';
-import {translate,localizedPath} from '../public/i18n.mjs';
+import {translate,localizedPath} from '../src/lib/editorial-i18n.mjs';
 const root=new URL('../src/content/docs/generated/',import.meta.url);
 rmSync(root,{recursive:true,force:true});mkdirSync(root,{recursive:true});
 const escape=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
@@ -50,6 +50,6 @@ for(const p of pages.filter(p=>p.lang&&p.basePath!=='/'&&!['/songs/','/games/','
  const front='---\ntitle: '+JSON.stringify(p.title)+'\nslug: '+JSON.stringify(p.path.slice(1,-1).split('/').map(decodeURIComponent).join('/'))+'\ndescription: '+JSON.stringify(p.description)+'\ntemplate: splash\n---\n\n';
  const parent=p.basePath.split('/').filter(Boolean).length>1?'/'+p.basePath.split('/').filter(Boolean)[0]+'/':'/';
  const body=p.body.replace(/\]\((\/[^)]+)\)/g,(_,href)=>']('+localizedPath(href,p.code)+')');
- writeFileSync(new URL(encodeURIComponent(file)+'.md',dir),front+'['+translate('← К списку',p.code)+']('+localizedPath(parent,p.code)+')\n\n'+translate('Оригинал на русском языке',p.code)+'\n\n<div lang="ru">\n\n'+body+'\n\n</div>\n');
+ writeFileSync(new URL(encodeURIComponent(file)+'.md',dir),front+'['+translate('← К списку',p.code)+']('+localizedPath(parent,p.code)+')\n\n'+body+'\n');
 }
 console.log('Generated public content pages.');

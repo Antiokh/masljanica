@@ -2,9 +2,9 @@
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {asUTC} from './event-calendar.mjs';
-import {sources,sourceText,terms,glossaryText,questions,faqText,participationText} from './knowledge-content.mjs';
+import {sources,sourceText,terms,glossaryText,questions,faqText,participationText,localizedQuestions} from './knowledge-content.mjs';
 import {localizedFestivalPages} from './festival-locales.mjs';
-import {translate,localizedPath,localeOf,stripLocale,languageTag} from '../../public/i18n.mjs';
+import {translate,translateDocument,localizedPath,localeOf,stripLocale,languageTag} from './editorial-i18n.mjs';
 export const site='https://masljanica.pages.dev';
 export const brand='Масляница · Белград';
 // Astro bundles server-side modules into dist before prerendering; resolve data from the project root.
@@ -82,7 +82,7 @@ const localizedLabel=(p,locale)=>{
  const section=basePages.find(x=>x.path!=='/'&&p.path.startsWith(x.path)&&x.path.split('/').filter(Boolean).length===1);
  const suffix=locale==='sr'?'Masljanica · Beograd':'Masljanica · Belgrade';
  const description=t(p.description);
- return {...p,path:localizedPath(p.path,locale),basePath:p.path,lang:languageTag(locale),code:locale,locale:locale==='sr'?'sr_RS':'en_US',brand:locale==='sr'?'MASLJANICA · BEOGRAD':'MASLJANICA · BELGRADE',title,seoTitle:title+' · '+suffix,description:description===p.description&&/[А-Яа-яЁё]/u.test(description)?title+' · '+(section?t(section.title)+' · ':'')+suffix:description,body:p.body};
+ return {...p,path:localizedPath(p.path,locale),basePath:p.path,lang:languageTag(locale),code:locale,locale:locale==='sr'?'sr_RS':'en_US',brand:locale==='sr'?'MASLJANICA · BEOGRAD':'MASLJANICA · BELGRADE',title,seoTitle:title+' · '+suffix,description:description===p.description&&/[А-Яа-яЁё]/u.test(description)?title+' · '+(section?t(section.title)+' · ':'')+suffix:description,body:p.path==='/faq/'?faqText(localizedQuestions({upcoming,date:new Intl.DateTimeFormat(languageTag(locale),{dateStyle:'long',timeZone:'UTC'}).format(new Date(config.date+'T00:00:00Z')),time:ogEvent?.time,location:ogEvent?.location,mapUrl:event.mapUrl},locale)):translateDocument(p.body,locale)};
 };
 export const localizedPages=localizedHome.map(h=>({...h,basePath:'/',title:translate('Масляница в Белграде',h.code)}));
 const localizedDetails=['sr','en'].flatMap(locale=>basePages.filter(p=>p.path!=='/').map(p=>localizedLabel(p,locale)));
