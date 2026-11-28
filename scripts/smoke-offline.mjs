@@ -175,7 +175,7 @@ try {
     assert.ok(cards.every(c=>c.left&&c.center&&c.contained&&c.height<=105),'Compact horizontal home cards at '+width);
   }
   await page.setViewportSize({width:1440,height:900});
-  const introDisclosure=page.locator('.festival-intro details').first();
+  const introDisclosure=page.locator('.home-dashboard>.festival-intro details').first();
   const top=selector=>page.locator(selector).evaluate(el=>el.getBoundingClientRect().top);
   const sectionsBefore=await top('.home-sections'),programBefore=await top('.home-program'),admissionBefore=await top('.home-admission'),workshopsBefore=await top('.home-workshops');
   await introDisclosure.evaluate(el=>el.open=true);
@@ -208,9 +208,9 @@ try {
   await page.waitForURL(url=>url.pathname==='/'&&!url.hash);
   await home.evaluate(el=>{el.dataset.eventEnabled='true';el.dataset.eventDate='2099-12-31';el.dataset.scheduleEnabled='true';window.dispatchEvent(new Event('pageshow'));});
   await page.locator('.home-program').waitFor({state:'visible'});
-  assert.equal(await page.locator('.festival-intro details').count(),3);
-  for(const [selector,pattern] of [['.story-history-details',/Сырную неделю/],['.home-dashboard>.festival-intro .story-name-details:not(.home-story-details)',/Дубровский/],['.home-story-details',/Краткая суть сюжета/]]){
-    const detail=page.locator('.festival-intro '+selector);
+  assert.equal(await page.locator('.home-dashboard>.festival-intro details').count(),3);
+  for(const [selector,pattern] of [['.story-history-details',/Сырную неделю/],['.story-name-details:not(.home-story-details)',/Дубровский/],['.home-story-details',/Краткая суть сюжета/]]){
+    const detail=page.locator('.home-dashboard>.festival-intro '+selector);
     await detail.locator('summary').click();
     assert.match(await detail.innerText(),pattern);
     if(selector==='.home-story-details'){

@@ -881,7 +881,7 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
   .home-dashboard{reading-flow:grid-rows}
   .home-dashboard .home-hero{order:1}
   .home-dashboard .home-socials{order:2}
-  .home-dashboard .festival-intro{order:3}
+  .home-dashboard>.festival-intro{order:3}
   .home-dashboard .home-program{order:4}
   .home-dashboard .home-admission{order:5}
   .home-dashboard .home-sections{order:6}
