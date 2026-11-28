@@ -1,5 +1,11 @@
 import assert from 'node:assert/strict';
 import MarkdownIt from 'markdown-it';
+import {resolveBuildCommit} from '../src/lib/build-info.mjs';
+const commitA='a'.repeat(40),commitB='b'.repeat(40);
+assert.equal(resolveBuildCommit({CF_PAGES_COMMIT_SHA:commitA,GITHUB_SHA:commitB},()=>{throw Error('Unexpected git');}),commitA);
+assert.equal(resolveBuildCommit({GITHUB_SHA:commitB},()=>commitA),commitB);
+assert.equal(resolveBuildCommit({CF_PAGES_COMMIT_SHA:'invalid'},()=>commitA+'\n'),commitA);
+assert.equal(resolveBuildCommit({},()=>{throw Error('No git');}),null);
 import {sources,localizedSources,localizedSourcePage} from '../src/lib/knowledge-content.mjs';
 import {pageFor} from '../src/lib/site-content.mjs';
 import {preferredLocale,chooseLocale} from '../public/locale-preference.mjs';

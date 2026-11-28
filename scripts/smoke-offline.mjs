@@ -90,7 +90,13 @@ try {
   assert.equal(await page.locator('.home-section-card[href="/history/"]').count(),1);
   assert.equal(await page.locator('.home-credit a').getAttribute('href'),'https://t.me/antiokh');
   assert.equal(await page.locator('.home-credit a').innerText(),'Антон Назаров');
-  assert.deepEqual(await page.locator('.home-footer-links a').evaluateAll(els=>els.map(el=>el.getAttribute('href'))),['/sources/']);
+  assert.deepEqual(await page.locator('.home-footer-links a').evaluateAll(els=>els.map(el=>el.getAttribute('href'))),['https://t.me/antiokh','/sources/']);
+  assert.equal(await page.locator('.home-footer-links').count(),1);
+  assert.equal(await page.locator('.home-credit').evaluate(el=>el.parentElement.classList.contains('home-footer-links')),true);
+  const footerBuild=page.locator('.home-build-version');
+  assert.match(await footerBuild.innerText(),/^(?:[a-f0-9]{7}|dev)$/);
+  const fullBuild=await footerBuild.getAttribute('title');
+  if(fullBuild!=='Local development')assert.equal(await footerBuild.innerText(),fullBuild.slice(0,7));
   for(const [selector,pattern] of [['[data-home-glossary]',/Скоморох/],['[data-home-faq]',/Когда проходит Масляница в Белграде/]]){
     const block=page.locator(selector);
     assert.equal(await block.evaluate(el=>el.open),false,'Reference accordion starts closed');

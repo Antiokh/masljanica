@@ -21,6 +21,7 @@ import GameIcon from '../components/GameIcon.astro';
 import WorkshopPreview from '../components/WorkshopPreview.astro';
 import HomeReference from '../components/HomeReference.astro';
 import HomeParticipation from '../components/HomeParticipation.astro';
+import {buildCommit,shortBuild} from '../lib/build-info.mjs';
 import LanguageToggle from '../components/LanguageToggle.astro';
 import songs from '../data/songs.json';
 import games from '../data/games.json';
@@ -129,8 +130,13 @@ const sections = [
     <div class="home-bottom">
       <HomeParticipation />
       <HomeReference config={config} dateLabel={dateLabel+' '+year} timeLabel={timeLabel} location={event.address+', '+event.country} mapUrl={event.mapUrl}/>
-      <nav class="home-footer-links" aria-label={tx("Источники")}><a href={lp("/sources/")}>{tx("Источники")}</a></nav>
-      <footer class="home-credit">{tx("Разработано ")}<a href="https://t.me/antiokh" target="_blank" rel="noopener noreferrer">{tx("Антон Назаров")}</a></footer>
+      <footer class="home-footer-links" data-pagefind-ignore>
+        <span class="home-credit">{tx("Разработано ")}<a href="https://t.me/antiokh" target="_blank" rel="noopener noreferrer">{tx("Антон Назаров")}</a></span>
+        <span aria-hidden="true">·</span>
+        <a class="home-footer-sources" href={lp("/sources/")}>{tx("Источники")}</a>
+        <span aria-hidden="true">·</span>
+        <span class="home-build-version" title={buildCommit||'Local development'}>{shortBuild}</span>
+      </footer>
     </div>
   </div>
 </StarlightPage>
