@@ -191,7 +191,7 @@ try {
     assert.equal(workshopColumns,width>=960?4:2,'Workshop preview columns at '+width);
     assert.ok(layout.iconGap>=-1&&layout.iconGap<=8,'Compact date/location spacing at '+width);
     assert.ok(layout.sunWidth>=63,'Larger sun at '+width);
-    assert.ok(await page.locator('.home-hero').evaluate(hero=>{const toggle=hero.querySelector('.hero-language-toggle').getBoundingClientRect(),address=hero.querySelector('.home-location .home-event-address').getBoundingClientRect(),box=hero.getBoundingClientRect();return toggle.right<=box.right&&toggle.bottom<=box.bottom&&toggle.left>=box.left&&(toggle.top>=address.bottom-1||toggle.left>=address.right-1);}), 'Language toggle fits without overlapping address at '+width);
+    assert.ok(await page.locator('.home-hero').evaluate(hero=>{const rect=s=>hero.querySelector(s).getBoundingClientRect();const toggle=rect('.hero-language-toggle'),kicker=rect('.home-kicker'),title=rect('#home-title'),sun=rect('.home-hero-art'),box=hero.getBoundingClientRect();const separate=(a,b)=>a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1;return toggle.left>=box.left&&toggle.right<=box.right&&toggle.bottom<=title.top+1&&separate(toggle,kicker)&&separate(toggle,sun);}), 'Language toggle fits beside kicker above title without overlapping artwork at '+width);
     assert.equal(await page.locator('.home-program>.home-section-heading').isVisible(),true,'Programme heading visible on mobile and desktop');
     assert.ok(await page.locator('.home-hero').evaluate(el=>{
       const sun=el.querySelector('.home-hero-art');
