@@ -64,9 +64,13 @@ try {
     assert.match(await block.innerText(),pattern);
     await block.locator('summary').click();
   }
+  const join=page.locator('#join');
+  assert.match(await join.innerText(),/Стать частью Масляницы/);
+  assert.equal(await join.locator('.participation-roles li').count(),5);
+  assert.deepEqual(await join.locator('.participation-contacts a').evaluateAll(els=>els.map(el=>el.getAttribute('href'))),['https://t.me/masljanica','https://www.facebook.com/masljanica','https://instagram.com/masljanica']);
   const bottomOrder=await page.locator('[data-home-dashboard]').evaluate(root=>{
     const rect=s=>root.querySelector(s).getBoundingClientRect();
-    return rect('.home-workshops').bottom<=rect('[data-home-glossary]').top+1&&rect('[data-home-glossary]').bottom<=rect('[data-home-faq]').top+1&&rect('[data-home-faq]').bottom<=rect('.home-footer-links').top+1;
+    return rect('.home-workshops').bottom<=rect('#join').top+1&&rect('#join').bottom<=rect('[data-home-glossary]').top+1&&rect('[data-home-glossary]').bottom<=rect('[data-home-faq]').top+1&&rect('[data-home-faq]').bottom<=rect('.home-footer-links').top+1;
   });
   assert.ok(bottomOrder,'References follow workshops and precede footer links');
   assert.equal(await page.locator('.home-section-card[href="/scenario/"]').count(),1,'Story tile is not duplicated');

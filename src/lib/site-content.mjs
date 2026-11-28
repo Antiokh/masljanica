@@ -2,7 +2,7 @@
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {asUTC} from './event-calendar.mjs';
-import {sources,sourceText,terms,glossaryText,questions,faqText} from './knowledge-content.mjs';
+import {sources,sourceText,terms,glossaryText,questions,faqText,participationText} from './knowledge-content.mjs';
 import {localizedFestivalPages} from './festival-locales.mjs';
 export const site='https://masljanica.pages.dev';
 export const brand='Масляница · Белград';
@@ -45,7 +45,7 @@ const partBody=p=>scenario.filter(x=>x.part===p.number).sort((a,b)=>a.order-b.or
 const chapterBody=c=>[...c.paragraphs,...(c.images||[]).map(id=>{const m=historyMedia.find(x=>x.id===id);return m?m.caption+' · '+m.source+' · '+m.rights:'';}),...(c.songs||[]).map(slug=>link(songs.find(s=>s.slug===slug)?.title||slug,anchor('/songs/',slug))),...(c.games||[]).map(slug=>link(games.find(g=>g.slug===slug)?.title||slug,anchor('/games/',slug))),...(c.links||[]).map(x=>link(x.title,x.href)),'По источникам: '+c.source].join('\n\n');
 const historyBody=chapters.map(c=>block(c.title,url('/history/'+c.id+'/'),chapterBody(c))).join('\n\n');
 export const sections=[
- section('/','Масляница в Белграде',eventMeta,[eventDescription,scheduleText,'Социальные сети: '+socials.map(s=>link(s.name,s.href)).join(' · '),link('Карта площадки',event.mapUrl),md('maslyanica-history'),md('maslyanica-name'),plot].filter(Boolean).join('\n\n'),{seoTitle:eventTitle}),
+ section('/','Масляница в Белграде',eventMeta,[eventDescription,scheduleText,'Социальные сети: '+socials.map(s=>link(s.name,s.href)).join(' · '),link('Карта площадки',event.mapUrl),md('maslyanica-history'),md('maslyanica-name'),plot,participationText(socials)].filter(Boolean).join('\n\n'),{seoTitle:eventTitle}),
  section('/songs/','Песни','Народные песни, тексты и локальные аудиозаписи.',songs.map(x=>block(x.title,url('/songs/'+x.slug+'/'),songBody(x))).join('\n\n')),
  section('/games/','Игры','Народные игры и забавы: правила, аудитория, расстановка и музыка.',games.map(x=>block(x.title,url('/games/'+x.slug+'/'),gameBody(x))).join('\n\n')),
  section('/scenario/','Сказ','Герои, сценарий праздника и музыкальное сопровождение.',[md('maslyanica-history'),md('maslyanica-name'),plot,...actors.map(a=>block(a.title,anchor('/scenario/','character-'+a.slug),a.description)),...parts.map(p=>block(p.title,url('/scenario/'+p.number+'/'),partBody(p)))].join('\n\n')),
