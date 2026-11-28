@@ -4,7 +4,10 @@ import { createHash } from 'node:crypto';
 const root='dist';
 const excluded=new Set(['sw.js','_headers','_redirects','_routes.json','404.html','offline-manifest.json','offline-version.json']);
 function walk(dir){return readdirSync(dir,{withFileTypes:true}).flatMap(x=>x.isDirectory()?walk(join(dir,x.name)):[join(dir,x.name)]);}
-const entries=walk(root).filter(p=>{const path=relative(root,p).split('\\').join('/');return !excluded.has(path)&&!path.startsWith('og/')&&!path.startsWith('og-square/')&&!path.startsWith('_llms-txt/')&&!['llms.txt','llms-small.txt','llms-full.txt','robots.txt','festival.json','knowledge.jsonld'].includes(path)&&!(path.startsWith('sitemap')&&path.endsWith('.xml'));}).sort().map(p=>{
+const assetPath=p=>relative(root,p).split('\\').join('/');
+const exclusionReason=path=>excluded.has(path)?'internal':/^(?:(?:sr|en)\/)?(?:og|og-square)\//.test(path)?'og':/^(?:(?:sr|en)\/)?_llms-txt\//.test(path)||['llms.txt','llms-small.txt','llms-full.txt','robots.txt','festival.json','knowledge.jsonld'].includes(path)||/^sitemap.*\.xml$/.test(path)?'discovery':null;
+const excludedBreakdown={};
+const entries=walk(root).filter(p=>{const reason=exclusionReason(assetPath(p));if(!reason)return true;const group=excludedBreakdown[reason]??={count:0,bytes:0};group.count++;group.bytes+=readFileSync(p).length;return false;}).sort().map(p=>{
   const content=readFileSync(p);
   let url='/'+relative(root,p).split('/').map(encodeURIComponent).join('/');
   if(url.endsWith('/index.html'))url=url.slice(0,-10);
@@ -21,6 +24,8 @@ for(const entry of entries){
  const same=groups.get(entry.revision)??{count:0,bytes:entry.bytes};same.count++;groups.set(entry.revision,same);
 }
 console.log('Offline breakdown: '+JSON.stringify(breakdown));
+console.log('Offline exclusions: '+JSON.stringify(excludedBreakdown));
+if(entries.some(e=>exclusionReason(decodeURIComponent(e.url.slice(1)))))throw Error('Excluded discovery asset in offline pack');
 console.log('Byte-identical entries (potential duplicate payload): '+[...groups.values()].reduce((n,x)=>n+(x.count-1)*x.bytes,0)+' bytes');
 const version=createHash('sha256').update(JSON.stringify(entries)).digest('hex').slice(0,20);
 const summary={schema:1,version,bytes:entries.reduce((n,x)=>n+x.bytes,0),count:entries.length};

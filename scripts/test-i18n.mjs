@@ -15,6 +15,8 @@ for(const l of ['sr','en']){
  for(const [name,field] of [['games','description'],['scenario','text'],['workshops','description']]){
   for(const row of read(name)){const source=row[field];if(source?.trim())assert.notEqual(translate(source,l),source,name+' '+(row.slug??row.order)+' '+l);}
  }
+ const source=read('games')[0].description.trim();
+ assert.equal(translate(' '+source+'  ',l),' '+translate(source,l)+'  ','Editorial translation preserves surrounding whitespace');
  for(const song of read('songs'))assert.ok(read('song-meanings')[song.slug]?.[l],song.slug+' '+l);
 }
 console.log('Locale routes and editorial coverage verified.');

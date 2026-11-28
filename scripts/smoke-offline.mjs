@@ -43,7 +43,7 @@ try {
   assert.equal(await page.locator('.telegram-menu-tools').isVisible(),false,'Telegram menu is hidden outside Mini App');
   async function assertGlobalSearch(){
     assert.equal(await page.locator('#festival-search-dialog').count(),1);
-    await page.locator('[data-search-open]').click();
+    await page.locator('.festival-search-trigger[data-search-open]').click();
     const dialog=page.locator('#festival-search-dialog');
     const input=dialog.locator('input');
     await input.waitFor({state:'visible'});
@@ -54,7 +54,7 @@ try {
     await page.waitForFunction(()=>document.querySelector('#festival-search-status')?.textContent==='Ничего не найдено.');
     await page.keyboard.press('Escape');
     await dialog.waitFor({state:'hidden'});
-    assert.equal(await page.locator('[data-search-open]').evaluate(el=>document.activeElement===el),true,'Search restores focus');
+    assert.equal(await page.locator('.festival-search-trigger[data-search-open]').evaluate(el=>document.activeElement===el),true,'Search restores focus');
   }
   await assertGlobalSearch();
   await page.locator('[data-home-dashboard]').waitFor();
@@ -65,6 +65,8 @@ try {
     assert.ok(await image.evaluate(el=>el.naturalWidth>0&&el.naturalWidth===el.naturalHeight),'Festival sun loads as a square local image');
   }
   const sunManifest=await (await page.request.get('/offline-manifest.json')).json();
+  assert.ok(!sunManifest.entries.some(e=>/^\/(?:og|og-square|_llms-txt)(?:\/|$)/.test(e.url)),'Crawler-only assets must stay outside the offline pack');
+  assert.equal(sunManifest.bytes,sunManifest.entries.reduce((sum,e)=>sum+e.bytes,0),'Manifest reports decoded payload bytes');
   assert.ok(sunManifest.entries.some(e=>e.url==='/media/maslyanica-sun.webp'),'Festival sun is included in offline copy');
   assert.equal(await page.locator('.festival-brand-title').innerText(),'Масляница');
   assert.match(await page.locator('.festival-brand-subtitle').innerText(),/^Белград/);

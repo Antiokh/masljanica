@@ -5,7 +5,9 @@ const content=JSON.parse(readFileSync(process.cwd()+'/src/data/editorial-transla
 export {localizedPath,localeOf,languageTag,stripLocale};
 export function translate(text,locale='ru'){
  if(locale==='ru'||typeof text!=='string')return text;
- return content[text.trim()]?.[locale]??uiTranslate(text,locale);
+ const copy=content[text.trim()]?.[locale];
+ if(copy===undefined)return uiTranslate(text,locale);
+ return text.slice(0,text.length-text.trimStart().length)+copy+text.slice(text.trimEnd().length);
 }
 export function localize(path){const uiLocale=localeOf(path);return {tx:s=>translate(s,uiLocale),lp:s=>localizedPath(s,uiLocale),uiLocale,uiTag:languageTag(uiLocale),basePath:stripLocale(path)};}
 export function translateDocument(text,locale){
