@@ -1,6 +1,8 @@
 ---
+import {localize} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag}=localize(Astro.url.pathname);
 const {formation,role}=Astro.props;
-const labels:Record<string,string>={'circle':'Круг','circle-center':'Хоровод с ведущим в центре','circle-two':'Круг с двумя водящими','circle-outside':'Круг, ведущий снаружи','double-circle':'Два круга','lines':'Две шеренги','shuttle':'Челноки между шеренгами','chain':'Цепочка','gates':'Ворота и вереница','triples':'Тройки по кругу','pairs':'Пары'};
+const labels:Record<string,string>={'circle':tx('Круг'),'circle-center':tx('Хоровод с ведущим в центре'),'circle-two':tx('Круг с двумя водящими'),'circle-outside':tx('Круг, ведущий снаружи'),'double-circle':tx('Два круга'),'lines':tx('Две шеренги'),'shuttle':tx('Челноки между шеренгами'),'chain':tx('Цепочка'),'gates':tx('Ворота и вереница'),'triples':tx('Тройки по кругу'),'pairs':tx('Пары')};
 const points:Array<{x:number;y:number;lead?:boolean}>=[];
 const ring=(cx:number,cy:number,rx:number,ry:number,n:number)=>{for(let i=0;i<n;i++){const a=i*2*Math.PI/n;points.push({x:cx+rx*Math.sin(a),y:cy+ry*Math.cos(a)});}};
 if(formation.startsWith('circle')){ring(120,72,53,51,10);if(formation==='circle-center')points.push({x:120,y:72,lead:true});if(formation==='circle-two')points.push({x:108,y:72,lead:true},{x:132,y:72,lead:true});if(formation==='circle-outside')points.push({x:194,y:72,lead:true});}
@@ -11,7 +13,7 @@ if(formation==='triples'){for(let i=0;i<6;i++){const a=i*Math.PI/3;for(const off
 if(formation==='pairs'){for(let i=0;i<5;i++)points.push({x:40+i*40,y:61},{x:40+i*40,y:82});}
 ---
 <figure class="game-formation">
- <svg viewBox="0 0 240 144" role="img" aria-label={labels[formation]||'Расстановка участников'}>
+ <svg viewBox="0 0 240 144" role="img" aria-label={labels[formation]||tx('Расстановка участников')}>
   {formation.startsWith('circle')&&<ellipse cx="120" cy="72" rx="53" ry="51" class="formation-guide"/>}
   {formation==='double-circle'&&<><ellipse cx="120" cy="72" rx="56" ry="54" class="formation-guide"/><ellipse cx="120" cy="72" rx="31" ry="29" class="formation-guide"/></>}
   {(formation==='lines'||formation==='shuttle')&&<path d="M45 38H195M45 105H195" class="formation-guide"/>}
@@ -19,5 +21,5 @@ if(formation==='pairs'){for(let i=0;i<5;i++)points.push({x:40+i*40,y:61},{x:40+i
   {formation==='shuttle'&&<g class="formation-shuttle" fill="none" stroke="var(--festival-action)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 61H108m-9-5 9 5-9 5M225 83H132m9-5-9 5 9 5"/><circle cx="15" cy="61" r="6.5" class="formation-person formation-lead"/><circle cx="225" cy="83" r="6.5" class="formation-person formation-lead"/></g>}
   {points.map(p=><circle cx={p.x} cy={p.y} r={p.lead?6.5:5.5} class:list={['formation-person',{'formation-lead':p.lead}]}/>)}
  </svg>
- <figcaption><strong>{labels[formation]}</strong>{role&&<span>{role}</span>}<small>Условная схема, число точек не задаёт количество игроков.</small></figcaption>
+ <figcaption><strong>{labels[formation]}</strong>{role&&<span>{tx(role)}</span>}<small>{tx("Условная схема, число точек не задаёт количество игроков.")}</small></figcaption>
 </figure>

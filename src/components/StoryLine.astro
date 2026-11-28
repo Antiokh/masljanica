@@ -1,13 +1,15 @@
 ---
+import {localize} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag}=localize(Astro.url.pathname);
 import GameIcon from './GameIcon.astro';
 import StoryMusic from './StoryMusic.astro';
 const {row,actor,song,tracks,stage,segments}=Astro.props;
 ---
 <article id={'replica-'+row.order} data-story-line={row.order} data-role={actor.slug} class:list={['story-line',{'story-stage':stage,'story-song':!!song}]}>
-  {stage && <div class="story-stage-label"><GameIcon name="balalaika" class="story-stage-instrument"/><span>Ремарка · {actor.title}</span></div>}
+  {stage && <div class="story-stage-label"><GameIcon name="balalaika" class="story-stage-instrument"/><span>{tx('Ремарка · ')}{actor.title}</span></div>}
   {stage && <p class="story-original">{row.text}</p>}
   {!stage && <div class="story-portrait">
-    <button type="button" class="story-portrait-button" data-character-open={actor.slug} aria-haspopup="dialog" aria-controls={'character-'+actor.slug} aria-label={'О персонаже: '+actor.title}>
+    <button type="button" class="story-portrait-button" data-character-open={actor.slug} aria-haspopup="dialog" aria-controls={'character-'+actor.slug} aria-label={tx('О персонаже: ')+actor.title}>
       {actor.src ? <img src={actor.src} width="64" height="64" alt="" loading="lazy" decoding="async"/> : <span>{actor.title.slice(0,1)}</span>}
     </button>
   </div>}

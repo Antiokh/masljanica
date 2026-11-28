@@ -1,10 +1,12 @@
 ---
+import {localize} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag}=localize(Astro.url.pathname);
 import GameIcon from './GameIcon.astro';
 const {recipe}=Astro.props;
 ---
 <details class="recipe-card" id={recipe.id}>
-  <summary><span class="recipe-number">{recipe.number}</span><strong>{recipe.title}</strong><GameIcon name="chevron"/></summary>
-  <div class="recipe-method"><p>{recipe.method}</p><small>Издание 1854 г., с. {recipe.pages} · <a href={'/pancakes/'+recipe.id+'/'}>Отдельный рецепт</a></small></div>
+  <summary><span class="recipe-number">{recipe.number}</span><strong>{tx(recipe.title)}</strong><GameIcon name="chevron"/></summary>
+  <div class="recipe-method">{uiLocale!=='ru'&&tx(recipe.method)===recipe.method&&<small>{tx('Оригинал на русском языке')}</small>}<p lang={uiLocale!=='ru'&&tx(recipe.method)===recipe.method?'ru':uiTag}>{tx(recipe.method)}</p><small>{tx('Издание 1854 г., с. ')}{recipe.pages} · <a href={lp('/pancakes/'+recipe.id+'/')}>{tx("Отдельный рецепт")}</a></small></div>
 </details>
 <style>
 .recipe-card{margin:0!important;border:1px solid var(--sl-color-gray-5);border-radius:.7rem;background:var(--festival-surface)}

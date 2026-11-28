@@ -1,30 +1,32 @@
 ---
+import {localize} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag}=localize(Astro.url.pathname);
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import DittyCard from '../components/DittyCard.astro';
 import ditties from '../data/ditties.json';
 import folklore from '../data/ditties-folk.json';
 const sources=folklore.sources as Record<string,{title:string;collection:string;short:string;url:string}>;
-const own=ditties.map(item=>({...item,category:'own',credit:'Антон Назаров · Белград'}));
-const folk=folklore.items.map(item=>({...item,credit:[item.author||'Автор неизвестен',item.performer?'исп. '+item.performer:'',sources[item.source].short].filter(Boolean).join(' · '),source:sources[item.source]}));
+const own=ditties.map(item=>({...item,category:'own',credit:tx('Антон Назаров · Белград')}));
+const folk=folklore.items.map(item=>({...item,credit:[item.author||tx('Автор неизвестен'),item.performer?tx('исп. ')+item.performer:'',sources[item.source].short].filter(Boolean).join(' · '),source:sources[item.source]}));
 const items=[...own,...folk];
-const filters=[{id:'',label:'Все'},{id:'own',label:'Наши'},{id:'folk',label:'Народные'},{id:'bawdy',label:'Заветные'},{id:'political',label:'Политические'}];
+const filters=[{id:'',label:tx('Все')},{id:'own',label:tx('Наши')},{id:'folk',label:tx('Народные')},{id:'bawdy',label:tx('Заветные')},{id:'political',label:tx('Политические')}];
 ---
-<StarlightPage frontmatter={{title:'Частушки',template:'splash',description:'Авторские и народные частушки, с указанием источников.'}}>
+<StarlightPage lang={uiTag} frontmatter={{title:tx('Частушки'),template:'splash',description:tx('Авторские и народные частушки, с указанием источников.')}}>
   <div class="ditties-page">
-    <p class="ditties-intro">Ну какая же Масляница без частушек? Местами — крепкое словцо.</p>
-    <div class="catalog-tools"><input id="catalog-search" type="search" placeholder="Найти частушку…" aria-label="Поиск частушек"/></div>
-    <div class="ditty-filters" role="group" aria-label="Виды частушек">
+    <p class="ditties-intro">{tx("Ну какая же Масляница без частушек? Местами — крепкое словцо.")}</p>
+    <div class="catalog-tools"><input id="catalog-search" type="search" placeholder={tx("Найти частушку…")} aria-label={tx("Поиск частушек")}/></div>
+    <div class="ditty-filters" role="group" aria-label={tx("Виды частушек")}>
       {filters.map(f=><button type="button" data-ditty-filter data-value={f.id} aria-pressed={f.id===''?'true':'false'}>{f.label}</button>)}
     </div>
-    <p class="ditty-count" id="ditty-count" aria-live="polite">Найдено: {items.length}</p>
-    <p id="catalog-empty" hidden>Ничего не найдено.</p>
+    <p class="ditty-count" id="ditty-count" aria-live="polite">{tx('Найдено: ')}{items.length}</p>
+    <p id="catalog-empty" hidden>{tx("Ничего не найдено.")}</p>
     <div class="ditties-grid">
       {items.map(item=><DittyCard item={item}/>)}
     </div>
     <details class="ditty-sources">
-      <summary>О сборниках и источниках</summary>
-      <p>Народные тексты приводятся по фольклорным подборкам. Номера относятся к соответствующим публикациям. Автор, исполнитель и собиратель — разные роли. Даты отдельных записей из собрания Волкова не установлены.</p>
-      {Object.values(sources).map(source=><div class="ditty-source"><strong>{source.title}</strong><p>{source.collection}</p><a href={source.url} data-online-only hidden target="_blank" rel="noopener noreferrer">Открыть источник ↗</a></div>)}
+      <summary>{tx("О сборниках и источниках")}</summary>
+      <p>{tx("Народные тексты приводятся по фольклорным подборкам. Номера относятся к соответствующим публикациям. Автор, исполнитель и собиратель — разные роли. Даты отдельных записей из собрания Волкова не установлены.")}</p>
+      {Object.values(sources).map(source=><div class="ditty-source"><strong>{source.title}</strong><p>{source.collection}</p><a href={source.url} data-online-only hidden target="_blank" rel="noopener noreferrer">{tx("Открыть источник ↗")}</a></div>)}
     </details>
   </div>
 </StarlightPage>

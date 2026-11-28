@@ -1,15 +1,17 @@
 ---
+import {localize} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag}=localize(Astro.url.pathname);
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import HistoryChapter from '../components/HistoryChapter.astro';
 import chapters from '../data/history-chapters.json';
-const headings=[...chapters.map(chapter=>({depth:2,slug:chapter.id,text:chapter.title})),{depth:2,slug:'sources',text:'Источники'}];
+const headings=[...chapters.map(chapter=>({depth:2,slug:chapter.id,text:tx(chapter.title)})),{depth:2,slug:'sources',text:tx('Источники')}];
 ---
-<StarlightPage hasSidebar={false} headings={headings} frontmatter={{title:'История',template:'doc',tableOfContents:{minHeadingLevel:2,maxHeadingLevel:2},description:'Масляница в старинных книгах, фотографиях, песнях и играх.'}}>
+<StarlightPage lang={uiTag} hasSidebar={false} headings={headings} frontmatter={{title:tx('История'),template:'doc',tableOfContents:{minHeadingLevel:2,maxHeadingLevel:2},description:tx('Масляница в старинных книгах, фотографиях, песнях и играх.')}}>
   <div class="history-book story-book" data-story-book>
-    <p class="history-lead">Как встречали и провожали Масляницу? Листаем старинные книги, слушаем песни, смотрим на народные гулянья и знакомимся с обычаями.</p>
+    <p class="history-lead">{tx("Как встречали и провожали Масляницу? Листаем старинные книги, слушаем песни, смотрим на народные гулянья и знакомимся с обычаями.")}</p>
     <audio id="story-audio" hidden preload="none"></audio>
     {chapters.map(chapter=><HistoryChapter chapter={chapter}/>)}
-    <section class="history-bibliography"><h2 id="sources">Источники</h2><p>Н. Дубровский. «Масляница». Москва, типография С. Селивановского, 1870.</p><p>И. Н. Божерянов. «Как праздновал и празднует народ русский Рождество Христово, Новый год, Крещение и Масляницу». Издание М. Ледерле и Ко, 1894.</p><p>«Лучшие московские блины, или Практические наставления, как печь блины и оладьи». Москва, типография Александра Семена, 1854.</p><p>Словарь В. И. Даля, статья «Масло». Современные аудиозаписи и игры — материалы нашего фестиваля.</p></section>
+    <section class="history-bibliography"><h2 id="sources">{tx("Источники")}</h2><p>Н. Дубровский. «Масляница». Москва, типография С. Селивановского, 1870.</p><p>И. Н. Божерянов. «Как праздновал и празднует народ русский Рождество Христово, Новый год, Крещение и Масляницу». Издание М. Ледерле и Ко, 1894.</p><p>«Лучшие московские блины, или Практические наставления, как печь блины и оладьи». Москва, типография Александра Семена, 1854.</p><p>Словарь В. И. Даля, статья «Масло». Современные аудиозаписи и игры — материалы нашего фестиваля.</p></section>
   </div>
 </StarlightPage>
 <style>

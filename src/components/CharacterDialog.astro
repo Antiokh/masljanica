@@ -1,11 +1,13 @@
 ---
+import {localize} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag}=localize(Astro.url.pathname);
 const {person}=Astro.props;
 ---
 <dialog class="character-dialog" id={'character-'+person.slug} aria-labelledby={'character-title-'+person.slug} data-character-dialog>
   <div class="character-dialog-inner">
-    <button type="button" class="character-dialog-close" data-character-close aria-label="Закрыть" autofocus><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+    <button type="button" class="character-dialog-close" data-character-close aria-label={tx("Закрыть")} autofocus><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
     {person.src && <img class="character-dialog-art" src={person.src} alt="" loading="lazy" decoding="async"/>}
-    <h2 id={'character-title-'+person.slug}>{person.title}</h2>
+    <h2 id={'character-title-'+person.slug}>{tx(person.title)}</h2>
     {person.description.split(/\n\s*\n/).map((text:string)=><p>{text}</p>)}
   </div>
 </dialog>

@@ -1,10 +1,12 @@
 ---
+import {localize} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag}=localize(Astro.url.pathname);
 const {item}=Astro.props;
 ---
 <article class="ditty-card" data-entry data-category={item.category} data-political={item.political?'true':undefined} data-search={[item.text,item.credit,item.source?.title,item.source?.collection].filter(Boolean).join(' ')}>
   <p class="ditty-text">{item.text}</p>
   <footer class="ditty-credit">
     <span>{item.credit}{item.number?' · № '+item.number:''}</span>
-    {item.source && <a href={item.source.url} data-online-only hidden target="_blank" rel="noopener noreferrer" title={item.source.collection} aria-label={'Источник: '+item.source.title+', № '+item.number}>Источник ↗</a>}
+    {item.source && <a href={item.source.url} data-online-only hidden target="_blank" rel="noopener noreferrer" title={item.source.collection} aria-label={tx('Источник: ')+item.source.title+', № '+item.number}>{tx("Источник ↗")}</a>}
   </footer>
 </article>

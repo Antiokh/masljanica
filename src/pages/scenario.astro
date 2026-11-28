@@ -1,4 +1,6 @@
 ---
+import {localize} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag}=localize(Astro.url.pathname);
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import StoryLine from '../components/StoryLine.astro';
 import CharacterGallery from '../components/CharacterGallery.astro';
@@ -14,28 +16,28 @@ import FestivalIntro from '../components/FestivalIntro.astro';
 import {existsSync} from 'node:fs';
 const portraits=characterArchive.files as Record<string,{path:string;width:number;height:number}>;
 const files=audioArchive.files as Record<string,{path:string;duration:number}>;
-const people=characters.map(x=>{const p=portraits[x.image];return {...x,src:p?.path&&/^\/media\/characters\/[a-f0-9]+\.webp$/.test(p.path)&&existsSync(process.cwd()+'/public'+p.path)?p.path:''};});
+const people=characters.map(x=>{const p=portraits[x.image];return {...x,title:tx(x.title),description:tx(x.description),src:p?.path&&/^\/media\/characters\/[a-f0-9]+\.webp$/.test(p.path)&&existsSync(process.cwd()+'/public'+p.path)?p.path:''};});
 const actors=new Map(people.map(p=>[p.id,p]));
-const linked=new Map(songs.map(s=>[s.id,s]));
+const linked=new Map(songs.map(s=>[s.id,{...s,title:tx(s.title)}]));
 const localTrack=(url:string)=>{const t=files[url];if(!t||!/^\/media\/audio\/[a-z0-9_-]+\.mp3$/.test(t.path)||!existsSync(process.cwd()+'/public'+t.path))throw Error('Missing scenario audio '+url);return {src:t.path,duration:t.duration};};
 const ordered=[...scenario].sort((a,b)=>a.order-b.order);
-const labels:Record<number,string>={1:'Часть первая',2:'Часть вторая',3:'Завершение'};
+const labels:Record<number,string>={1:tx('Часть первая'),2:tx('Часть вторая'),3:tx('Завершение')};
 const numeral:Record<number,string>={1:'I',2:'II',3:'III'};
 const stageOrders=new Set([3,26,38,45,49]);
 // Only explicitly identified directions are italicized. Quiz answers in brackets remain spoken text.
 const annotatedOrders=new Set([4,19,21]);
 const segments=(order:number,text:string)=>annotatedOrders.has(order)?text.split(/(\([^()]*\))/g).filter(Boolean).map(t=>({text:t,stage:t.startsWith('(')&&t.endsWith(')')})):[{text,stage:false}];
-const prepared=ordered.map(row=>{const actor=actors.get(row.actor),song=row.song?linked.get(row.song):undefined;if(!actor)throw Error('Missing scenario actor '+row.order);return {row,actor,song,tracks:song?song.audio.map(localTrack):[],stage:stageOrders.has(row.order),segments:segments(row.order,row.text)};});
+const prepared=ordered.map(row=>{const actor=actors.get(row.actor),song=row.song?linked.get(row.song):undefined;if(!actor)throw Error('Missing scenario actor '+row.order);return {row,actor,song,tracks:song?song.audio.map(localTrack):[],stage:stageOrders.has(row.order),segments:segments(row.order,tx(row.text))};});
 ---
-<StarlightPage frontmatter={{title:'Сказ',template:'splash',description:'История Масляницы и театральный сказ нашего праздника.'}}>
+<StarlightPage lang={uiTag} frontmatter={{title:tx('Сказ'),template:'splash',description:tx('История Масляницы и театральный сказ нашего праздника.')}}>
  <div class="story-book" data-character-gallery data-story-book>
   <FestivalIntro />
   <section id="story-characters" class="story-characters" aria-labelledby="story-characters-title">
-    <h2 id="story-characters-title">Герои нашего сказа</h2>
+    <h2 id="story-characters-title">{tx("Герои нашего сказа")}</h2>
     <CharacterGallery />
   </section>
   <section class="story-scenario" aria-labelledby="story-scenario-title">
-    <h2 id="story-scenario-title">Наш масляничный сказ</h2>
+    <h2 id="story-scenario-title">{tx("Наш масляничный сказ")}</h2>
     <audio id="story-audio" hidden preload="none"></audio>
     <div class="story-parts">
       {[...parts].sort((a,b)=>a.number-b.number).map(part=><details class="story-part" id={'part-'+part.number} open={part.number===1}>

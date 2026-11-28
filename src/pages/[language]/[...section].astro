@@ -1,0 +1,13 @@
+---
+import Songs from '../songs.astro';
+import Games from '../games.astro';
+import Scenario from '../scenario.astro';
+import Workshops from '../workshops.astro';
+import Pancakes from '../pancakes.astro';
+import History from '../history.astro';
+import Ditties from '../ditties.astro';
+const components={songs:Songs,games:Games,scenario:Scenario,workshops:Workshops,pancakes:Pancakes,history:History,ditties:Ditties};
+export function getStaticPaths(){return ['sr','en'].flatMap(language=>['songs','games','scenario','workshops','pancakes','history','ditties'].map(section=>({params:{language,section}})));}
+const Page=components[Astro.params.section];
+---
+<Page />

@@ -1,4 +1,6 @@
 ---
+import {localize} from '../../public/i18n.mjs';
+const {tx,lp,uiLocale,uiTag}=localize(Astro.url.pathname);
 import StoryMusic from './StoryMusic.astro';
 import HistoryFigure from './HistoryFigure.astro';
 import songs from '../data/songs.json';
@@ -17,15 +19,15 @@ const playful=(chapter.games||[]).map((slug:string)=>{const game=games.find(x=>x
 const pictures=(chapter.images||[]).map((id:string)=>{const img=media.find(x=>x.id===id);if(!img)throw Error('Unknown history image '+id);return img;});
 ---
 <section class="history-chapter" aria-labelledby={chapter.id}>
-  <h2 id={chapter.id} class="history-chapter-title">{chapter.title}</h2>
+  <h2 id={chapter.id} class="history-chapter-title">{tx(chapter.title)}</h2>
   <div class="history-chapter-body">
-    {chapter.paragraphs.map((paragraph:string)=><p>{paragraph}</p>)}
+    {chapter.paragraphs.map((paragraph:string)=><p lang={uiLocale!=='ru'&&tx(paragraph)===paragraph?'ru':uiTag}>{tx(paragraph)}</p>)}
     {pictures.map(item=><HistoryFigure item={item}/>)}
     {musical.map(item=><StoryMusic {...item}/>)}
-    {playful.length>0 && <div class="history-links"><span>Попробуйте на нашем празднике</span>{playful.map(game=><a class="history-game-link" href={'/games/#'+game.slug}>{game.title} →</a>)}</div>}
-    {(chapter.links||[]).map((link:{href:string;title:string})=><a class="history-related" href={link.href}>{link.title} →</a>)}
-    <p><a href={'/history/'+chapter.id+'/'}>Читать отдельную статью →</a> · <a href="/sources/">Источники</a></p>
-    <small class="history-source">По источникам: {chapter.source}.</small>
+    {playful.length>0 && <div class="history-links"><span>{tx("Попробуйте на нашем празднике")}</span>{playful.map(game=><a class="history-game-link" href={lp('/games/#'+game.slug)}>{tx(game.title)} →</a>)}</div>}
+    {(chapter.links||[]).map((link:{href:string;title:string})=><a class="history-related" href={lp(link.href)}>{tx(link.title)} →</a>)}
+    <p><a href={lp('/history/'+chapter.id+'/')}>{tx("Читать отдельную статью →")}</a> · <a href={lp("/sources/")}>{tx("Источники")}</a></p>
+    <small class="history-source">{tx('По источникам: ')}{chapter.source}.</small>
   </div>
 </section>
 <style>
