@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import sharp from 'sharp';
-import {pages,site,url,ogPath,ogEvent,festivalData,languageAlternates} from '../src/lib/site-content.mjs';
+import {pages,site,url,ogPath,ogEvent,festivalData,languageAlternates,alternatesFor} from '../src/lib/site-content.mjs';
 import {renderOgSvg,ogFormats} from './og-layout.mjs';
 for(const [format,layout] of Object.entries(ogFormats)){
  const sample=renderOgSvg('Сказ',{date:'14 марта 2027',time:'11:30–16:00',location:'Roštilj zona, Ada Ciganlija, Beograd'},'Герои, сценарий праздника и музыкальное сопровождение.',format);
@@ -28,8 +28,17 @@ for(const p of pages){
  for(const marker of ['og:image','twitter:card','masljanica-schema','rel="canonical"',site+ogPath(p.path)])assert.ok(html.includes(marker),p.path+' missing '+marker);
  if(p.seoTitle)assert.ok(html.includes(p.seoTitle.replaceAll('&','&amp;')),p.path+' SEO title');
  {
-  for(const a of languageAlternates)assert.ok(html.includes('hreflang="'+a.lang+'"'),p.path+' hreflang '+a.lang);
-  if(p.lang)assert.ok(/<html\b[^>]*\blang="([^"]+)"/.exec(html)?.[1]===p.lang,p.path+' HTML language');
+  const alternates=alternatesFor(p.path);
+  assert.equal(alternates.length,languageAlternates.length,p.path+' alternate route coverage');
+  const attrs=tag=>Object.fromEntries([...tag.matchAll(/([\w:-]+)="([^"]*)"/g)].map(m=>[m[1],m[2]]));
+  const links=[...html.matchAll(/<link\b[^>]*>/g)].map(m=>attrs(m[0]));
+  assert.deepEqual(links.filter(x=>x.rel==='canonical').map(x=>x.href),[url(p.path)],p.path+' self canonical');
+  const actual=links.filter(x=>x.rel==='alternate'&&x.hreflang).map(x=>[x.hreflang,x.href]).sort();
+  assert.deepEqual(actual,alternates.map(a=>[a.lang,url(a.path)]).sort(),p.path+' exact alternate URLs');
+  for(const a of alternates)assert.ok(alternatesFor(a.path).some(b=>b.lang===(p.lang||'ru')&&b.path===p.path),p.path+' reciprocal '+a.lang);
+  assert.equal(/<html\b[^>]*\blang="([^"]+)"/.exec(html)?.[1],p.lang||'ru',p.path+' HTML language');
+  const locales=[...html.matchAll(/<meta\b[^>]*>/g)].map(m=>attrs(m[0])).filter(x=>x.property==='og:locale:alternate').map(x=>x.content).sort();
+  assert.deepEqual(locales,['ru_RU','sr_RS','en_US'].filter(x=>x!==(p.locale||'ru_RU')).sort(),p.path+' OG alternate locales');
  }
  const images=[...html.matchAll(/<meta\b[^>]*property="og:image"[^>]*content="([^"]+)"/g)].map(m=>m[1]);
  assert.deepEqual(images,[site+ogPath(p.path),site+ogPath(p.path,'square')],p.path+' ordered OG alternatives');

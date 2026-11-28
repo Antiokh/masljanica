@@ -87,7 +87,7 @@ const localizedLabel=(p,locale)=>{
 export const localizedPages=localizedHome.map(h=>({...h,basePath:'/',title:translate('Масляница в Белграде',h.code),body:[h.body,translateDocument(basePages[0].body,h.code)].join('\n\n')}));
 const localizedDetails=['sr','en'].flatMap(locale=>basePages.filter(p=>p.path!=='/').map(p=>localizedLabel(p,locale)));
 export const languageAlternates=[{lang:'ru',path:'/'},{lang:'sr-Latn',path:'/sr/'},{lang:'en',path:'/en/'},{lang:'x-default',path:'/'}];
-export const alternatesFor=path=>languageAlternates.map(a=>({lang:a.lang,path:localizedPath(stripLocale(path),a.lang==='sr-Latn'?'sr':a.lang==='en'?'en':'ru')}));
+export const alternatesFor=path=>languageAlternates.map(a=>({lang:a.lang,path:canonicalPath(localizedPath(stripLocale(canonicalPath(path)),a.lang==='sr-Latn'?'sr':a.lang==='en'?'en':'ru'))})).filter(a=>pages.some(p=>p.path===a.path));
 sections.push(...localizedPages,...localizedDetails.filter(p=>p.basePath.split('/').filter(Boolean).length===1));
 export const pages=[...basePages,...localizedPages,...localizedDetails];
 export const pageFor=path=>pages.find(p=>p.path===canonicalPath(path));

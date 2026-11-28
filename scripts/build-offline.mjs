@@ -11,6 +11,17 @@ const entries=walk(root).filter(p=>{const path=relative(root,p).split('\\').join
   return {url,bytes:content.length,revision:createHash('sha256').update(content).digest('hex')};
 });
 if(!entries.some(e=>e.url==='/pagefind/pagefind.js')||!entries.some(e=>e.url==='/pagefind/pagefind-entry.json'))throw Error('Pagefind output missing from offline corpus');
+// Make the actual decoded payload and locale growth visible on every build.
+const breakdown={};const groups=new Map();
+for(const entry of entries){
+ const path=entry.url,locale=/^\/(sr|en)(?:\/|$)/.exec(path)?.[1]||'ru';
+ const kind=path.startsWith('/media/audio/')?'audio':path.startsWith('/media/')?'media':path.startsWith('/pagefind/')?'search':path.endsWith('/')?'html:'+locale:'shared assets';
+ const group=breakdown[kind]??={count:0,bytes:0};group.count++;group.bytes+=entry.bytes;
+ if(/^\/(sr|en)\/(?:media|_astro|pagefind)\//.test(path))throw Error('Localized duplicate shared asset: '+path);
+ const same=groups.get(entry.revision)??{count:0,bytes:entry.bytes};same.count++;groups.set(entry.revision,same);
+}
+console.log('Offline breakdown: '+JSON.stringify(breakdown));
+console.log('Byte-identical entries (potential duplicate payload): '+[...groups.values()].reduce((n,x)=>n+(x.count-1)*x.bytes,0)+' bytes');
 const version=createHash('sha256').update(JSON.stringify(entries)).digest('hex').slice(0,20);
 const summary={schema:1,version,bytes:entries.reduce((n,x)=>n+x.bytes,0),count:entries.length};
 writeFileSync(join(root,'offline-manifest.json'),JSON.stringify({...summary,entries}));

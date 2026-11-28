@@ -17,7 +17,24 @@ try {
     await new Promise(r=>setTimeout(r,500));
   }
   browser=await chromium.launch({headless:true});
-  const context=await browser.newContext({viewport:{width:390,height:844}});
+  for(const [locale,language] of [['en-GB','en'],['sr-RS','sr']]){
+   const ctx=await browser.newContext({locale,viewport:{width:390,height:844}});
+   try{
+    const localized=await ctx.newPage();
+    await localized.goto(origin+'/games/?test=locale#test-hash');
+    await localized.waitForURL(origin+'/'+language+'/games/?test=locale#test-hash');
+    assert.equal(await localized.locator('html').getAttribute('lang'),language==='sr'?'sr-Latn':language);
+    await localized.locator('.more-menu > summary').click();
+    await localized.locator('a[data-language-choice="ru"]').first().click();
+    await localized.waitForURL(origin+'/games/?test=locale#test-hash');
+    await localized.goto(origin);
+    await localized.waitForLoadState('load');
+    assert.equal(new URL(localized.url()).pathname,'/','Explicit Russian selection overrides browser locale');
+    await localized.goto(origin+'/en/games/');
+    assert.equal(new URL(localized.url()).pathname,'/en/games/','Explicit prefixed locale respected');
+   }finally{await ctx.close();}
+  }
+  const context=await browser.newContext({locale:'ru-RU',viewport:{width:390,height:844}});
   let providerRequests=0;
   await context.route('https://www.youtube-nocookie.com/**',route=>{providerRequests++;return route.fulfill({contentType:'text/html',body:'<html><body>Video fixture</body></html>'});});
   const page=await context.newPage();
@@ -736,7 +753,7 @@ try {
     return {status:response.status,bytes:(await response.arrayBuffer()).byteLength,range:response.headers.get('content-range')};
   },audio);
   assert.equal(range.status,206);assert.equal(range.bytes,128);assert.match(range.range,/^bytes 0-127\//);
-  const tgContext=await browser.newContext({viewport:{width:390,height:844},colorScheme:'light'});
+  const tgContext=await browser.newContext({locale:'ru-RU',viewport:{width:390,height:844},colorScheme:'light'});
   try{
     await tgContext.addInitScript(()=>{
       const handlers=new Map();window.__tgReady=0;window.__tgBackVisible=false;window.__tgClosed=0;

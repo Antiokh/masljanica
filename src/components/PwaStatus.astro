@@ -30,7 +30,8 @@ const dateLabel=new Intl.DateTimeFormat(uiTag,{day:'numeric',month:'long',timeZo
       </div>
       <span>{tx("Автообновление")}</span>
       <div class="pwa-status-control"><button type="button" class="pwa-switch" role="switch" aria-label={tx("Автообновление офлайн-копии")} aria-checked="false" data-pwa-auto disabled><span></span></button></div>
-      <span>{tx("Хранилище")}</span><strong data-pwa-value="storage">—</strong>
+      <span>{tx("Размер офлайн-копии")}</span><strong data-pwa-value="pack-size">—</strong>
+      <span>{tx("Всего в хранилище")}</span><strong data-pwa-value="storage">—</strong>
     </div>
     <div class="pwa-menu-progress" data-pwa-progress hidden>
       <div class="pwa-progress-heading"><span>{tx("Прогресс · материалы")}</span><strong data-pwa-value="percent">0%</strong></div>

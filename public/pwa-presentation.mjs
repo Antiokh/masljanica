@@ -53,11 +53,11 @@ export function installPwaPresentation({onOpen}={}){
   window.addEventListener('resize',position);
   document.addEventListener('astro:before-swap',close);
   return {render(model){
-    const {online,standalone,launchLabel,readiness,ready,stale,busy,deleting,progress,automatic,canChange,canDelete,canDownload,error}=model;
+    const {online,standalone,launchLabel,readiness,ready,packBytes,availableBytes,stale,busy,deleting,progress,automatic,canChange,canDelete,canDownload,error}=model;
     const percent=progress?.total?Math.min(100,Math.floor(100*progress.done/progress.total)):0;
     const copy=deleting?tr('Удаление…'):busy?(ready?tr('Обновление '):tr('Загрузка '))+(progress?.total?percent+'%':'…'):readiness==='unknown'?tr('Проверяем…'):stale?tr('Устарела'):ready?tr('Готова'):tr('Не скачана');
     setValue('connection',online?tr('Онлайн'):ready?tr('Офлайн · копия доступна'):readiness==='unknown'?tr('Офлайн · проверяем'):tr('Офлайн · копии нет'));
-    setValue('launch',launchLabel||(standalone?tr('Приложение'):tr('Браузер')));setValue('copy',copy);setValue('compact',tr('Офлайн-копия · ')+copy);setValue('storage',estimate||'—');setValue('percent',progress?.total?percent+'%':'…');
+    setValue('launch',launchLabel||(standalone?tr('Приложение'):tr('Браузер')));setValue('copy',copy);setValue('compact',tr('Офлайн-копия · ')+copy);setValue('pack-size',ready?fmt(packBytes):availableBytes?fmt(availableBytes)+' ('+tr('Не скачана')+')':'—');setValue('storage',estimate||'—');setValue('percent',progress?.total?percent+'%':'…');
     const dot=document.querySelector('#offline-indicator');if(dot)dot.dataset.state=busy||deleting?'busy':online?'online':readiness==='unknown'?'unknown':ready?'ready':'unavailable';
     document.querySelectorAll('[data-pwa-auto]').forEach(el=>{el.setAttribute('aria-checked',String(automatic));el.disabled=!canChange;});
     document.querySelectorAll('[data-pwa-delete]').forEach(el=>el.disabled=!canDelete);

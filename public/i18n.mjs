@@ -1753,6 +1753,7 @@ export const translations={
   "en": "Two leaders"
  }
 };
+Object.assign(translations,{"Размер офлайн-копии":{sr:"Veličina oflajn kopije",en:"Offline copy size"},"Всего в хранилище":{sr:"Ukupno u skladištu",en:"Total storage"}});
 export const localeOf=(path='/')=>/^\/(sr|en)(?:\/|$)/.exec(String(path))?.[1]||'ru';
 export const languageTag=locale=>locale==='sr'?'sr-Latn':locale;
 export const stripLocale=path=>String(path||'/').replace(/^\/(?:sr|en)(?=\/|$)/,'')||'/';

@@ -13,10 +13,15 @@ if(page){
     for(let i=head.length-1;i>=0;i--){const t=head[i];if(t.tag==='link'&&t.attrs?.rel==='alternate'&&'hreflang' in (t.attrs||{}))head.splice(i,1);}
     for(const a of alternatesFor(page.path))head.push({tag:'link',attrs:{rel:'alternate',hreflang:a.lang,href:url(a.path)}});
   }
+  // Explicit self-canonical and matching alternate targets for all public content routes.
+  for(let i=head.length-1;i>=0;i--){const t=head[i];if(t.tag==='link'&&t.attrs?.rel==='canonical')head.splice(i,1);}
+  head.push({tag:'link',attrs:{rel:'canonical',href:url(page.path)}});
   const image=site+ogPath(page.path),title=page.lang?page.title+' · '+(page.code==='sr'?'Masljanica · Beograd':'Masljanica · Belgrade'):page.path==='/'?page.title:page.title+' · '+brand;
   const titleTag=head.find(t=>t.tag==='title');if(titleTag)titleTag.content=page.seoTitle||title;
   setMeta('name','description',page.description);
   for(const [key,value] of Object.entries({'og:title':title,'og:description':page.description,'og:url':url(page.path),'og:site_name':brand,'og:type':'website','og:locale':page.locale||'ru_RU','og:image':image,'og:image:type':'image/png','og:image:width':'1200','og:image:height':'630','og:image:alt':page.title+' — '+(page.lang?'Masljanica':'Масляница в Белграде')}))setMeta('property',key,value);
+  for(let i=head.length-1;i>=0;i--){if(head[i].tag==='meta'&&head[i].attrs?.property==='og:locale:alternate')head.splice(i,1);}
+  for(const locale of ['ru_RU','sr_RS','en_US'])if(locale!==(page.locale||'ru_RU'))head.push({tag:'meta',attrs:{property:'og:locale:alternate',content:locale}});
   // Ordered alternatives: landscape first, square second, each with its own dimensions.
   for(const [property,content] of Object.entries({'og:image':site+ogPath(page.path,'square'),'og:image:type':'image/png','og:image:width':'1080','og:image:height':'1080','og:image:alt':page.title+' — '+(page.lang?'Masljanica':'Масляница в Белграде')}))head.push({tag:'meta',attrs:{property,content}});
   for(const [key,value] of Object.entries({'twitter:card':'summary_large_image','twitter:title':title,'twitter:description':page.description,'twitter:image':image,'twitter:image:alt':page.title}))setMeta('name',key,value);

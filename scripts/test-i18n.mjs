@@ -1,4 +1,10 @@
 import assert from 'node:assert/strict';
+import {preferredLocale,chooseLocale} from '../public/locale-preference.mjs';
+for(const [primary,saved,expected] of [['sr-Latn-RS',null,'sr'],['sr-Cyrl',null,'sr'],['en-GB',null,'en'],['de-DE',null,'ru'],['en-US','ru','ru'],['ru-RU','sr','sr']])assert.equal(preferredLocale(primary,saved),expected);
+assert.equal(chooseLocale({path:'/games/',primary:'en-US'}),'en');
+assert.equal(chooseLocale({path:'/en/games/',primary:'sr-RS'}),null);
+assert.equal(chooseLocale({path:'/games/',primary:'en-US',saved:'ru'}),null);
+assert.equal(chooseLocale({path:'/',primary:'sr-RS',explicit:'ru'}),null);
 import {readFileSync} from 'node:fs';
 import {translate,localizedPath,localeOf} from '../src/lib/editorial-i18n.mjs';
 const read=name=>JSON.parse(readFileSync(new URL('../src/data/'+name+'.json',import.meta.url),'utf8'));

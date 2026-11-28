@@ -97,6 +97,7 @@ async function download(){
   if(manifest.schema!==1||!Array.isArray(manifest.entries)||!manifest.entries.length||!/^[a-f0-9]{20}$/.test(manifest.version)||manifest.count!==manifest.entries.length||new Set(manifest.entries.map(x=>x.url)).size!==manifest.count||manifest.entries.some(x=>typeof x.url!=='string'||!x.url.startsWith('/')||x.url.startsWith('//')||new URL(x.url,self.location.origin).origin!==self.location.origin||!/^[a-f0-9]{64}$/.test(x.revision)||!Number.isSafeInteger(x.bytes)||x.bytes<0))throw Error('Некорректный список файлов.');
   const old=await active();
   if(old?.version===manifest.version)return;
+  const runtime=await runtimeCache();
   const previous=old?await old.cache.match(absolute('/__offline_manifest__')):null;
   const revisions=new Map(previous?(await previous.json()).entries.map(x=>[x.url,x.revision]):[]);
   const name=STAGING+manifest.version, stage=await caches.open(name);
@@ -119,6 +120,8 @@ async function download(){
     let file=await stage.match(absolute(entry.url));
     if(file&&!(await valid(file,entry))){await stage.delete(absolute(entry.url));file=null;}
     if(!file&&revisions.get(entry.url)===entry.revision)file=await old.cache.match(absolute(entry.url));
+    // A warm navigation response is reusable only after verifying the exact manifest digest.
+    if(!file){const warm=await runtime.match(absolute(entry.url));if(await valid(warm,entry))file=warm;}
     if(!file){
       let last;
       for(let attempt=0;attempt<3;attempt++){
@@ -160,6 +163,9 @@ async function download(){
   // Activate only a complete, checked staging cache; the old pointer survives every failure.
   await (await caches.open(META)).put(absolute(MARKER),json({cache:name,version:manifest.version,bytes,count:done}));
   activePromise=undefined;
+  // The active pack now serves every current entry. Drop redundant navigation copies.
+  // If a deployment changed during download, keep the current runtime cache.
+  if(manifest.version===BUILD){runtimePromise=undefined;await caches.delete(RUNTIME).catch(()=>{});}
   for(const cacheName of await caches.keys())if(cacheName!==name&&(cacheName.startsWith(PREFIX)||cacheName.startsWith(STAGING)||/^masljanica-[a-f0-9]{16}$/.test(cacheName)))await caches.delete(cacheName).catch(()=>{});
 
 }

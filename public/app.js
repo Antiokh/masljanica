@@ -1,4 +1,5 @@
 import {tr,currentPath,stripLocale,localeOf} from './i18n.mjs';
+import {installLocalePreference} from './locale-preference.mjs';
 import { installCalendarMenu } from './calendar-menu.mjs';
 import { installStoryBook } from './story-book.mjs';
 import { installWorkshopGallery } from './workshop-gallery.mjs';
@@ -15,6 +16,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
 // One global runtime. Astro swaps page DOM, not the document listeners.
 (() => {
  if(window.__masljanicaRuntime)return;window.__masljanicaRuntime=true;
+ installLocalePreference();
  const environment=createRuntimeEnvironment();
  installSongList();
  installGameList();
@@ -127,7 +129,7 @@ import { PWA_DAILY_STORAGE_KEYS as KEYS, localDayKey, serializeDailyOffer, resol
    if(prompt)prompt.hidden=!accepted()||!offer||busy||deleting;
    if(message&&offer)message.textContent=offer==='install'?tr('Установите Масляницу на устройство.'):(offer==='offline-download'?tr('Скачайте материалы праздника'):tr('Доступна новая версия материалов'))+(latest?' · '+fmt(latest.bytes):'')+'.';
    if(action&&offer)action.textContent=offer==='install'?tr('Установить'):offer==='offline-download'?tr('Скачать'):tr('Обновить');
-   presentation.render({online:navigator.onLine,standalone:standalone(),launchLabel:environment.launchLabel(),readiness,ready:state.ready,stale:!!stale,busy,deleting,checking,progress:state.progress,automatic:automatic(),canChange:accepted()&&verified&&!deleting,canDelete:verified&&!busy&&!deleting&&(state.ready||state.staging),canDownload:accepted()&&verified&&!busy&&!deleting&&!checking&&navigator.onLine,error:error||(registrationFailed?tr('Не удалось запустить Service Worker.'):!sw?tr('Офлайн-режим не поддерживается.'):'')});
+   presentation.render({online:navigator.onLine,standalone:standalone(),launchLabel:environment.launchLabel(),readiness,ready:state.ready,packBytes:state.bytes||0,availableBytes:latest?.bytes||0,stale:!!stale,busy,deleting,checking,progress:state.progress,automatic:automatic(),canChange:accepted()&&verified&&!deleting,canDelete:verified&&!busy&&!deleting&&(state.ready||state.staging),canDownload:accepted()&&verified&&!busy&&!deleting&&!checking&&navigator.onLine,error:error||(registrationFailed?tr('Не удалось запустить Service Worker.'):!sw?tr('Офлайн-режим не поддерживается.'):'')});
 
    environment.observeCopy({verified,ready:state.ready,version:state.version});
    document.documentElement.dataset.offlineReady=String(state.ready);
