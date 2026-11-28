@@ -31,7 +31,7 @@ try {
     await localized.waitForLoadState('load');
     assert.equal(new URL(localized.url()).pathname,'/','Explicit Russian selection overrides browser locale');
     await localized.goto(origin);
-    const togglePosition=()=>localized.locator('.hero-language-toggle').evaluate(el=>{const r=el.getBoundingClientRect(),hero=el.closest('.home-hero').getBoundingClientRect();return {right:hero.right-r.right,top:r.top-hero.top};});
+    const togglePosition=()=>localized.locator('.hero-language-toggle').evaluate(el=>{const r=el.getBoundingClientRect(),hero=el.closest('.home-hero').getBoundingClientRect();return {right:hero.right-r.right,bottom:hero.bottom-r.bottom};});
     const ruToggle=await togglePosition();
     await localized.locator('.hero-language-toggle a[data-language-choice="sr"]').click();
     await localized.waitForURL(origin+'/sr/');
@@ -196,7 +196,7 @@ try {
     assert.ok(layout.iconGap>=-1&&layout.iconGap<=8,'Compact date/location spacing at '+width);
     assert.ok(layout.sunWidth>=63,'Larger sun at '+width);
     assert.ok(await page.locator('.hero-language-toggle').evaluate(el=>[...el.querySelectorAll('a, img')].every(node=>{const r=node.getBoundingClientRect();return r.width>0&&Math.abs(r.width-r.height)<.5&&getComputedStyle(node).borderTopLeftRadius==='50%';})&&el.getBoundingClientRect().width<88), 'Compact circular flags and controls at '+width);
-    assert.ok(await page.locator('.home-hero').evaluate(hero=>{const rect=s=>hero.querySelector(s).getBoundingClientRect();const toggle=rect('.hero-language-toggle'),kicker=rect('.home-kicker'),title=rect('#home-title'),sun=rect('.home-hero-art'),row=rect('.home-kicker-row'),box=hero.getBoundingClientRect();const separate=(a,b)=>a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1;return toggle.left>=box.left&&toggle.right<=box.right&&Math.abs(toggle.right-row.right)<1&&Math.abs(toggle.top-row.top)<1&&toggle.bottom<=title.top+1&&separate(toggle,kicker)&&separate(toggle,sun);}), 'Language toggle stays anchored to the top-right of its row without overlapping artwork at '+width);
+    assert.ok(await page.locator('.home-hero').evaluate(hero=>{const rect=s=>hero.querySelector(s).getBoundingClientRect();const toggle=rect('.hero-language-toggle'),copy=rect('.home-hero-copy'),sun=rect('.home-hero-art'),address=rect('.home-location .home-event-address'),box=hero.getBoundingClientRect();const separate=(a,b)=>a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1;return toggle.left>=box.left&&toggle.bottom<=box.bottom&&Math.abs(toggle.right-copy.right)<1&&Math.abs(toggle.bottom-copy.bottom)<1&&toggle.top>=sun.bottom-1&&separate(toggle,address);}), 'Language toggle is anchored below sun at bottom right without overlapping address at '+width);
     assert.equal(await page.locator('.home-program>.home-section-heading').isVisible(),true,'Programme heading visible on mobile and desktop');
     assert.ok(await page.locator('.home-hero').evaluate(el=>{
       const sun=el.querySelector('.home-hero-art');
