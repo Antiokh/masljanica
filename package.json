@@ -12,7 +12,7 @@
     "prebuild": "node scripts/generate-content.mjs && node scripts/build-workshop-art.mjs && node scripts/build-discovery.mjs",
     "build": "astro build && node scripts/check-discovery.mjs && node scripts/build-offline.mjs",
     "preview": "astro preview",
-    "test": "node scripts/validate-data.mjs && node scripts/test-pwa-daily.mjs && node scripts/test-navigation-cache.mjs && node scripts/test-offline-transaction.mjs && node scripts/test-home-season.mjs && node scripts/test-runtime-environment.mjs && node scripts/test-telegram-back.mjs && node scripts/test-games-data.mjs && node scripts/test-workshops-data.mjs && node scripts/test-story-data.mjs && node scripts/test-calendar.mjs && node scripts/test-ditties-data.mjs && node scripts/test-i18n.mjs"
+    "test": "node scripts/validate-data.mjs && node scripts/test-pwa-daily.mjs && node scripts/test-navigation-cache.mjs && node scripts/test-offline-transaction.mjs && node scripts/test-home-season.mjs && node scripts/test-runtime-environment.mjs && node scripts/test-telegram-back.mjs && node scripts/test-games-data.mjs && node scripts/test-workshops-data.mjs && node scripts/test-story-data.mjs && node scripts/test-calendar.mjs && node scripts/test-ditties-data.mjs && node scripts/test-i18n.mjs && node scripts/test-offline-inventory.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.35.0",

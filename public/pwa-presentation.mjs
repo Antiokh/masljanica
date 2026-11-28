@@ -1,4 +1,5 @@
 import {tr,currentPath,stripLocale,localeOf} from './i18n.mjs';
+import {installOfflineInventory} from './offline-inventory-view.mjs';
 // Presentation only. All state and commands belong to the PWA controller.
 export function installPwaPresentation({onOpen}={}){
   let closeTimer,anchor,returningFocus,pinned=false,estimate=null,estimatePending=false,lastEstimate=0;
@@ -50,6 +51,8 @@ export function installPwaPresentation({onOpen}={}){
   document.addEventListener('toggle',e=>{if(e.target===panel()&&e.newState==='closed'){document.querySelectorAll('[data-pwa-menu-trigger]').forEach(el=>el.setAttribute('aria-expanded','false'));anchor=null;pinned=false;}},true);
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&panel()?.matches(':popover-open')){const trigger=anchor;close();returningFocus=trigger;trigger?.focus({preventScroll:true});returningFocus=null;}},true);
   document.addEventListener('toggle',e=>{if(e.target?.matches?.('.telegram-runtime-diagnostics'))position();},true);
+  installOfflineInventory({onResize:position});
+  document.addEventListener('toggle',e=>{if(e.target?.closest?.('[data-pwa-inventory]'))position();},true);
   window.addEventListener('resize',position);
   document.addEventListener('astro:before-swap',close);
   return {render(model){

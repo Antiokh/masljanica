@@ -965,3 +965,16 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
  .catalog-master[data-master-active] .catalog-master-content [data-master-selected]{margin:0!important;min-width:0}
  .catalog-master[data-master-active]:not(:has([data-master-selected])){display:none}
 }
+
+/* On-demand inventory inside the existing status popover. */
+.pwa-inventory{margin:.65rem 0 0;padding:.5rem 0 0;border-top:1px solid var(--sl-color-gray-5);font-size:.75rem}
+.pwa-inventory summary{cursor:pointer;color:var(--sl-color-gray-2);overflow-wrap:anywhere}
+.pwa-inventory p{margin:.4rem 0!important;color:var(--sl-color-gray-2);overflow-wrap:anywhere}
+.pwa-inventory-source,.pwa-inventory-cache{margin:.65rem 0;padding-top:.45rem;border-top:1px solid var(--sl-color-gray-5)}
+.pwa-inventory-source h3{font-size:.8rem;margin:0 0 .35rem;overflow-wrap:anywhere}
+.pwa-inventory-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.35rem;align-items:start;margin:.2rem 0}
+.pwa-inventory-row>span{overflow-wrap:anywhere;min-width:0}
+.pwa-inventory-row>strong{text-align:right;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pwa-inventory-files{margin:.35rem 0}
+.pwa-inventory-file-list{max-height:14rem;overflow:auto;padding:.25rem 0;font-size:.7rem}
+.pwa-inventory-cache-name{font-size:.7rem}
