@@ -195,6 +195,7 @@ try {
     assert.equal(workshopColumns,width>=960?4:2,'Workshop preview columns at '+width);
     assert.ok(layout.iconGap>=-1&&layout.iconGap<=8,'Compact date/location spacing at '+width);
     assert.ok(layout.sunWidth>=63,'Larger sun at '+width);
+    assert.ok(await page.locator('.hero-language-toggle').evaluate(el=>[...el.querySelectorAll('a, img')].every(node=>{const r=node.getBoundingClientRect();return r.width>0&&Math.abs(r.width-r.height)<.5&&getComputedStyle(node).borderTopLeftRadius==='50%';})&&el.getBoundingClientRect().width<88), 'Compact circular flags and controls at '+width);
     assert.ok(await page.locator('.home-hero').evaluate(hero=>{const rect=s=>hero.querySelector(s).getBoundingClientRect();const toggle=rect('.hero-language-toggle'),kicker=rect('.home-kicker'),title=rect('#home-title'),sun=rect('.home-hero-art'),row=rect('.home-kicker-row'),box=hero.getBoundingClientRect();const separate=(a,b)=>a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1;return toggle.left>=box.left&&toggle.right<=box.right&&Math.abs(toggle.right-row.right)<1&&Math.abs(toggle.top-row.top)<1&&toggle.bottom<=title.top+1&&separate(toggle,kicker)&&separate(toggle,sun);}), 'Language toggle stays anchored to the top-right of its row without overlapping artwork at '+width);
     assert.equal(await page.locator('.home-program>.home-section-heading').isVisible(),true,'Programme heading visible on mobile and desktop');
     assert.ok(await page.locator('.home-hero').evaluate(el=>{
