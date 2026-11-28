@@ -21,7 +21,10 @@ for(const l of ['sr','en']){
   const original=game.description.trim(),copy=translate(original,l);
   const html=md.render(copy);
   assert.ok(copy.includes('\n\n'), 'Game must not be flattened: '+game.slug+' '+l);
-  if(/^#{1,6} /m.test(original))assert.match(html,/<h4>/,game.slug+' '+l+' needs rule sections');
+  if(/^#{1,6} /m.test(original)){
+   assert.match(html,/<h4>/,game.slug+' '+l+' needs rule sections');
+   assert.equal(copy.split('\n')[0],'### **'+translate(game.title,l)+'**',game.slug+' '+l+' localized rule title');
+  }
   if(/^\|.*\|$/m.test(original))assert.match(html,/<table>/,game.slug+' '+l+' must retain tables');
   if(/^👫|^🏃|^🎶|^🎭 Ведущий|^🔄 Участники|^👑/u.test(original))assert.equal(copy.split('\n\n').length,original.split('\n\n').length,game.slug+' '+l+' must retain instruction blocks');
  }
