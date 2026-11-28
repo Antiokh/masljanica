@@ -1,0 +1,43 @@
+---
+import GameIcon from './GameIcon.astro';
+import MarkdownIt from 'markdown-it';
+import {questions,terms} from '../lib/knowledge-content.mjs';
+import {seasonState} from '../../public/home-season.mjs';
+const {config,dateLabel,timeLabel,location,mapUrl}=Astro.props;
+const state=seasonState(config);
+const args={date:dateLabel,time:config.schedule?timeLabel:'',location,mapUrl};
+const current=questions({...args,upcoming:true});
+const timeless=questions({...args,upcoming:false});
+const md=new MarkdownIt({html:false});
+---
+<div class="festival-intro home-reference">
+  <section class="story-name" id="glossary" aria-labelledby="home-glossary-title">
+    <details class="story-name-details" data-home-glossary>
+      <summary><span id="home-glossary-title">Словарь традиций</span><GameIcon name="chevron"/></summary>
+      <div class="story-name-content home-reference-content">
+        {terms.map(([name,definition,href])=><div class="home-reference-entry"><h3>{name}</h3><p>{definition} <a href={href}>Подробнее →</a></p></div>)}
+      </div>
+    </details>
+  </section>
+  <section class="story-name" id="faq" aria-labelledby="home-faq-title">
+    <details class="story-name-details" data-home-faq>
+      <summary><span id="home-faq-title">Вопросы о фестивале</span><GameIcon name="chevron"/></summary>
+      <div class="story-name-content home-reference-content">
+        {current.map(([question,answer],i)=><div class="home-reference-entry">
+          <h3>{question}</h3>
+          {answer===timeless[i][1]?<div set:html={md.render(answer)}></div>:<>
+            <div data-home-season="event" data-pagefind-ignore hidden={!state.event} set:html={md.render(answer)}></div>
+            <div data-home-timeless hidden={state.event} set:html={md.render(timeless[i][1])}></div>
+          </>}
+        </div>)}
+      </div>
+    </details>
+  </section>
+</div>
+<style>
+ .home-reference-content .home-reference-entry{min-width:0;margin:0!important;padding:.65rem 0}
+ .home-reference-content .home-reference-entry+.home-reference-entry{border-top:1px solid var(--sl-color-gray-5)}
+ .home-reference-content .home-reference-entry h3{margin:0 0 .25rem!important;font-size:.95rem;color:var(--sl-color-text)}
+ .home-reference-content .home-reference-entry :global(p){margin:0!important}
+ .home-reference-content .home-reference-entry :global(a){color:var(--sl-color-text-accent)}
+</style>

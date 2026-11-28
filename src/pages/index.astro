@@ -17,6 +17,7 @@ import MarkdownIt from 'markdown-it';
 const plotHtml=new MarkdownIt({html:false}).render(plotSource);
 import GameIcon from '../components/GameIcon.astro';
 import WorkshopPreview from '../components/WorkshopPreview.astro';
+import HomeReference from '../components/HomeReference.astro';
 import songs from '../data/songs.json';
 import games from '../data/games.json';
 import { validEventDate, calendarDay } from '../../public/home-season.mjs';
@@ -120,7 +121,10 @@ const sections = [
       </section>
     </FestivalIntro>
     <WorkshopPreview />
-    <div class="home-credit"><a href="/faq/">Вопросы о фестивале</a> · <a href="/sources/">Источники</a> · <a href="/glossary/">Словарь традиций</a> · <a href="/sr/" data-astro-reload lang="sr-Latn">Srpski</a> · <a href="/en/" data-astro-reload lang="en">English</a></div>
-    <footer class="home-credit">Разработано <a href="https://t.me/antiokh" target="_blank" rel="noopener noreferrer">Антон Назаров</a></footer>
+    <div class="home-bottom">
+      <HomeReference config={config} dateLabel={dateLabel+' '+year} timeLabel={timeLabel} location={event.address+', '+event.country} mapUrl={event.mapUrl}/>
+      <nav class="home-footer-links" aria-label="Источники и языки"><a href="/sources/">Источники</a><span aria-hidden="true">·</span><a href="/sr/" data-astro-reload lang="sr-Latn">Srpski</a><span aria-hidden="true">·</span><a href="/en/" data-astro-reload lang="en">English</a></nav>
+      <footer class="home-credit">Разработано <a href="https://t.me/antiokh" target="_blank" rel="noopener noreferrer">Антон Назаров</a></footer>
+    </div>
   </div>
 </StarlightPage>

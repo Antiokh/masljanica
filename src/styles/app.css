@@ -872,6 +872,11 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 .home-dashboard .home-social-link svg{width:1.3rem;height:1.3rem;flex:none;color:var(--sl-color-text-accent);margin:0!important}
 .home-dashboard .home-social-link:hover{border-color:var(--sl-color-accent);color:var(--sl-color-text-accent)}
 @media(max-width:420px){.home-dashboard .home-social-link{flex-direction:column;gap:.3rem;font-size:.78rem}}
+.home-bottom{display:grid;gap:.85rem;min-width:0;margin:0!important}
+.home-bottom>*{min-width:0;margin:0!important}
+.home-footer-links{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.35rem .5rem;color:var(--sl-color-gray-3);font-size:.85rem;text-align:center}
+.home-footer-links a{color:inherit;text-decoration:underline;text-underline-offset:.15em}
+.home-footer-links a:hover{color:var(--sl-color-text-accent)}
 @media(max-width:59.999rem){
   .home-dashboard{reading-flow:grid-rows}
   .home-dashboard .home-hero{order:1}
@@ -881,7 +886,7 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
   .home-dashboard .home-admission{order:5}
   .home-dashboard .home-sections{order:6}
   .home-dashboard .home-workshops{order:7}
-  .home-dashboard .home-credit{order:8}
+  .home-dashboard>.home-bottom{order:8}
 }
 @media(min-width:60rem){
   .home-dashboard{
@@ -914,7 +919,7 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
   .home-dashboard .home-hero-copy{--home-sun-size:clamp(4rem,8vw,6.25rem)}
   .home-dashboard>.festival-intro{grid-area:intro}
   .home-dashboard>.home-workshops{grid-area:workshops}
-  .home-dashboard>.home-credit{grid-area:credit}
+  .home-dashboard>.home-bottom{grid-area:credit}
   .home-dashboard #home-title{font-size:clamp(1.65rem,2.5vw,2.5rem)}
   .home-dashboard .home-section-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .home-dashboard .home-workshop-grid{grid-template-columns:repeat(4,minmax(0,1fr))}

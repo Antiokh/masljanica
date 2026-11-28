@@ -56,6 +56,19 @@ try {
   assert.equal(await page.locator('.home-section-card[href="/history/"]').count(),1);
   assert.equal(await page.locator('.home-credit a').getAttribute('href'),'https://t.me/antiokh');
   assert.equal(await page.locator('.home-credit a').innerText(),'Антон Назаров');
+  assert.deepEqual(await page.locator('.home-footer-links a').evaluateAll(els=>els.map(el=>el.getAttribute('href'))),['/sources/','/sr/','/en/']);
+  for(const [selector,pattern] of [['[data-home-glossary]',/Скоморох/],['[data-home-faq]',/Когда проходит Масляница в Белграде/]]){
+    const block=page.locator(selector);
+    assert.equal(await block.evaluate(el=>el.open),false,'Reference accordion starts closed');
+    await block.locator('summary').click();
+    assert.match(await block.innerText(),pattern);
+    await block.locator('summary').click();
+  }
+  const bottomOrder=await page.locator('[data-home-dashboard]').evaluate(root=>{
+    const rect=s=>root.querySelector(s).getBoundingClientRect();
+    return rect('.home-workshops').bottom<=rect('[data-home-glossary]').top+1&&rect('[data-home-glossary]').bottom<=rect('[data-home-faq]').top+1&&rect('[data-home-faq]').bottom<=rect('.home-footer-links').top+1;
+  });
+  assert.ok(bottomOrder,'References follow workshops and precede footer links');
   assert.equal(await page.locator('.home-section-card[href="/scenario/"]').count(),1,'Story tile is not duplicated');
   assert.equal(await page.locator('.home-section-card[href="/pancakes/"]').count(),1);
   assert.equal(await page.locator('.home-character-card').count(),0);
@@ -64,6 +77,8 @@ try {
   await home.evaluate(el=>{el.dataset.eventDate='2000-01-01';window.dispatchEvent(new Event('pageshow'));});
   await page.locator('.home-program').waitFor({state:'hidden'});
   await page.locator('[data-header-event-date]').waitFor({state:'hidden'});
+  assert.equal(await page.locator('[data-home-faq] [data-home-season="event"]').first().getAttribute('hidden'),'');
+  assert.equal(await page.locator('[data-home-faq] [data-home-timeless]').first().getAttribute('hidden'),null);
   await page.locator('.home-section-card').first().waitFor({state:'visible'});
   const legacy=await context.newPage();
   try {
@@ -194,7 +209,7 @@ try {
   await home.evaluate(el=>{el.dataset.eventEnabled='true';el.dataset.eventDate='2099-12-31';el.dataset.scheduleEnabled='true';window.dispatchEvent(new Event('pageshow'));});
   await page.locator('.home-program').waitFor({state:'visible'});
   assert.equal(await page.locator('.festival-intro details').count(),3);
-  for(const [selector,pattern] of [['.story-history-details',/Сырную неделю/],['.story-name-details:not(.home-story-details)',/Дубровский/],['.home-story-details',/Краткая суть сюжета/]]){
+  for(const [selector,pattern] of [['.story-history-details',/Сырную неделю/],['.home-dashboard>.festival-intro .story-name-details:not(.home-story-details)',/Дубровский/],['.home-story-details',/Краткая суть сюжета/]]){
     const detail=page.locator('.festival-intro '+selector);
     await detail.locator('summary').click();
     assert.match(await detail.innerText(),pattern);
