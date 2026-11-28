@@ -778,7 +778,7 @@ html[data-telegram-palette="active"] .pwa-switch[aria-checked=true] > span {back
 .home-dashboard .home-hero{display:block}
 .home-dashboard .home-hero-copy{width:100%}
 .home-dashboard .home-hero-heading{display:block;margin:0!important}
-.home-dashboard .home-hero-copy{--home-sun-size:clamp(4rem,13vw,6.25rem)}
+.home-dashboard .home-hero-copy{--home-sun-size:clamp(4rem,15vw,6.25rem)}
 .home-dashboard .home-hero-title{min-width:0;margin:0!important;padding-inline-end:calc(var(--home-sun-size) + .65rem)}
 .home-dashboard .home-hero-copy>.home-intro{padding-inline-end:calc(var(--home-sun-size) + .65rem)}
 .home-dashboard .home-hero-art{position:absolute;inset-block-start:0;inset-inline-end:0;width:var(--home-sun-size);max-height:100%;margin:0!important;pointer-events:none}
